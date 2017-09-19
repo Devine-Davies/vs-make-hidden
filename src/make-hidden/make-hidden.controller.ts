@@ -1,0 +1,94 @@
+// Imports
+import * as vscode from 'vscode';
+
+import MakeHiddenProvider from './make-hidden.provider';
+
+export default class MakeHiddenController extends MakeHiddenProvider {
+
+    constructor(
+        public context: vscode.ExtensionContext
+    ) 
+    {
+        super( context );
+        this.config_type = this.config_list[ 'files' ];
+    }
+
+    /* --------------------
+     * Hide item
+     * dec: Appends the dir/file name into vs code user settings file.excludes
+    */
+    hide_item( relative_location_to_item : string = null ) : boolean
+    {
+        if ( relative_location_to_item )
+        {
+            // Get workspace and append item
+            let workspace_config  : any = this.get_workspace_configuration();
+                workspace_config[ relative_location_to_item ] = true;
+
+            return this.save_configuration( workspace_config );
+        }
+    }
+
+    /* --------------------
+     * Hide all extension types
+     * dec: Appends the dir/file name into vs code user settings file.excludes
+    */
+    hide_all_extension_types( item_path : string = null, from_root : boolean = true ) : boolean
+    {
+        if ( item_path )
+        {
+            let extension_type : string = this.get_file_extension_from_path( item_path );
+            let file_name : string = item_path.substring( item_path.lastIndexOf('/') + 1 );
+
+            if( extension_type !== '' )
+            {
+                let exclude_snippet   : string = '';
+                let workspace_config  : any = this.get_workspace_configuration();
+
+                if( from_root )
+                {
+                    exclude_snippet = `*/**/**.${extension_type}`;
+                }
+                else
+                {
+                    // Get the item full path
+                    var item_path   = item_path.replace( file_name , "");
+                    exclude_snippet = `${item_path}*.${extension_type}`;
+                }
+
+                // Append our newly selected item
+                workspace_config[ exclude_snippet ] = true;
+                return this.save_configuration( workspace_config );
+            }
+        }
+    }
+
+    /* --------------------
+     * Remove regex from config list : Remove item
+     * dec: Removes an item from the config list
+    */
+    remove_regex_from_config_list( item_key : string = null ) : boolean
+    {
+        if( item_key )
+        {
+            let workspace_config  : any = this.get_workspace_configuration();
+            delete workspace_config[ item_key ];
+
+            let save_successfully : boolean = this.save_configuration( workspace_config );
+            return save_successfully;
+        }
+    }
+
+    /* --------------------
+     * Remove all regex item's from config list
+     * dec: removes all items in get_workspace_configuration(files.exclude)
+    */
+    remove_all_regex_items_from_config_list() : boolean
+    {
+        /* -- TODO: have this return the feed back message from writeFileSync for errors and successes -- */
+        let save_successfully : boolean = this.save_configuration( {} );
+
+        return save_successfully;
+    }
+
+}

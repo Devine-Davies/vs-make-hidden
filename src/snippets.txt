@@ -1,0 +1,63 @@
+
+// this method is called when your extension is activated
+// your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+    
+        // const rootPath = vscode.workspace.rootPath;
+    
+        // Use the console to output diagnostic information (console.log) and errors (console.error)
+        // This line of code will only be executed once when your extension is activated
+        console.log('Congratulations, your extension "hidethisfile" is now active!');
+    
+        const jsonOutlineProvider = new JsonOutlineProvider(context);
+        vscode.window.registerTreeDataProvider('projectHiddenFiles', jsonOutlineProvider);
+    
+        // Update status bar item based on events for multi root folder changes
+        // context.subscriptions.push(workspace.onDidChangeWorkspaceFolders(
+        //     e => onDidChangeActiveTextEditor_handler( 'onDidChangeWorkspaceFolders' ) )
+        // );
+    
+        // context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(
+        //     e => onDidChangeActiveTextEditor_handler( 'onDidChangeActiveTextEditor' ) )
+        // );
+    
+        // const tree = context.viewer;
+    
+        // tree-view
+        // const projectProvider = new ProjectProvider(vscode.workspace.rootPath, context);
+        // vscode.window.registerTreeDataProvider("project-hidden-files", projectProvider);
+    
+        // The command has been defined in the package.json file
+        // Now provide the implementation of the command with  registerCommand
+        // The commandId parameter must match the command field in package.json
+        let disposable = vscode.commands.registerCommand('extension.sayHello', (e: vscode.Uri) => {
+    
+            // console.log( JSON.stringify( jsonOutlineProvider.getChildren() )  );
+             
+            // // The code you place here will be executed every time your command is executed
+    
+            // let uri = vscode.Uri.parse('/Users/rhysdevine-davies/Desktop/Development/_clients/reelhost-app/');
+            // let success = vscode.commands.executeCommand('vscode.openFolder', uri);
+            // console.log( success );
+    
+            // settings = readSettings();
+            // console.log( settings );
+    
+            // vscode.workspace
+    
+            // var editor = vscode.window.activeTextEditor;
+            // if (!editor) { return; // No open text editor }
+            // var selection = editor.selection;
+            // var text = editor.document.getText(selection);
+            // vscode.window.showInformationMessage('Selected characters: ' + text.length);
+    
+            // Display a message box to the user
+            // vscode.window.showInformationMessage( vscode.env.appName );
+            // console.log( e );
+            // var file_name = e.fsPath.substring( e.fsPath.lastIndexOf('/') + 1 );
+            // console.log( file_name );
+            // update_workspace_config_test( file_name );
+        });
+    
+        context.subscriptions.push(disposable);
+    }

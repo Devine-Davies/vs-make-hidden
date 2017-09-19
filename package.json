@@ -1,0 +1,82 @@
+{
+    "name": "make-hidden",
+    "displayName": "Make Hidden",
+    "description": "",
+    "version": "0.0.1",
+    "publisher": "Rhys Devine Davies",
+    "icon": "resources/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Devine-Davies"
+    },
+    "engines": {
+        "vscode": "^1.16.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*", "onView:extension"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [{
+            "command": "makeHidden.hideItem",
+            "title"  : "Make Hidden"
+        },{
+            "command": "makeHidden.hideExtensionFromRoot",
+            "title"  : "Make Hidden: All extensions from root"
+        },{
+            "command": "makeHidden.hideExtensionFromDirectory",
+            "title"  : "Make Hidden: All extensions from path"
+        }, {
+            "command": "makeHidden.removeRegexFromList",
+            "title"  : "Make Hidden: Remove item"
+        }, {
+            "command": "makeHidden.emptyItemsInConfig",
+            "title"  : "Make Hidden: Empty items"
+        }, {
+            "command": "makeHidden.refreshHiddenList",
+            "title"  : "Make Hidden: Refresh list"
+        }],
+
+        "views": {
+            "explorer": [{
+                "id"   : "makeHiddenViewPane",
+                "name" : "Hidden in Directory"
+            }]
+        },
+
+        "menus": {
+            "explorer/context": [ {
+                "command" : "makeHidden.hideItem"
+            },{
+                "command" : "makeHidden.hideExtensionFromRoot"
+            },{
+                "command" : "makeHidden.hideExtensionFromDirectory"
+            }],
+
+            "view/title": [{
+                "command" : "makeHidden.refreshHiddenList",
+                "when"    : "view == makeHiddenViewPane"
+            },{
+                "command" : "makeHidden.emptyItemsInConfig",
+                "when"    : "view == makeHiddenViewPane"
+            }]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.5.2",
+        "vscode": "^1.1.5",
+        "mocha": "^3.5.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
