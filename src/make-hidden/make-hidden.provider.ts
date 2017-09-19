@@ -97,50 +97,61 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
     }
 
     /* --------------------
+     * Refresh list
+     * dec: Refresh the tree view
+    */
+    refresh_list_view() : void
+    {
+        // Create a link to our hidden list model
+        this.parse_tree();
+
+        // let success = await vscode.commands.executeCommand('vscode.previewHtml', uri);
+        // workbench.files.action.refreshFilesExplorer
+        
+        // Fire the Callback func 
+        this._onDidChangeTreeData.fire();
+    }
+
+    /* --------------------
      * Save configuration
      * dec: Save files.exclude to configuration_file_path
     */
     protected save_configuration( config_data : any ): boolean 
     {
-        /* -- Get the config type -- */
-        var config_type = {};
-        config_type[ this.get_configuration_type() ] = config_data;
-
-        /* -- Make string and JSON valid -- */
-        let formatted_config_type : any  = JSON.stringify( config_type , null, 2).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
-
-        try
-        {
-            console.log( formatted_config_type );
-
-            /* -- SYNC data -- */
-            fs.writeFileSync( this.get_user_configuration_file_path(), 
-                formatted_config_type, { encoding: 'utf8' }
-            );
-
-            /* -- Refresh out tree for view -- */
-            this.refresh_list();
-
-            return true;
-        } 
-        catch ( err )
+        /* -- check to see if there's a workspace available-- */
+        if( ! this.work_space_file_exists() )
         {
             /* -- If we fail to save, we shell try and create vs settings.json dir -- */
             this.create_vs_setting_directory();
 
             /* -- Quick timeout :( ) -- */
             setTimeout( () => {
-                if ( fs.existsSync( this.get_user_configuration_file_path() ) ) 
-                {
+                if ( this.work_space_file_exists() )  {
                     this.save_configuration( config_data );
-                    return true;
                 }
-                else 
-                {
+                else  {
                     vscode.window.showInformationMessage('The file could not be excluded, verify you have access');
-                    return false;
                 }
-             }, 750);
+            }, 750);
+        }
+        else
+        {
+            fs.readFile( this.get_user_configuration_file_path(), 'utf8' , (err, data ) => {
+    
+                /* -- Append the new config data to the main setting doc -- */
+                var settings_file_data = JSON.parse( data )
+                    settings_file_data[ this.get_configuration_type() ] = config_data;
+
+                /* -- Make string and JSON valid -- */
+                let formatted_data : any  = JSON.stringify( settings_file_data , null, 2).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
+            
+                fs.writeFile( this.get_user_configuration_file_path() , formatted_data )
+
+                /* -- Refresh out tree for view -- */
+                this.refresh_list_view();
+        
+                return true;
+            })
         }
     }
 
@@ -235,19 +246,12 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
     }
 
     /* --------------------
-     * Refresh list
-     * dec: Refresh the tree view
+     * Get file extension from path
+     * dec: It will return the file extension if one has been found.
     */
-    refresh_list() : void
+    private work_space_file_exists()
     {
-        // Create a link to our hidden list model
-        this.parse_tree();
-
-        // let success = await vscode.commands.executeCommand('vscode.previewHtml', uri);
-        // workbench.files.action.refreshFilesExplorer
-        
-        // Fire the Callback func 
-        this._onDidChangeTreeData.fire();
+        return fs.existsSync( this.get_user_configuration_file_path() )
     }
 
 }
