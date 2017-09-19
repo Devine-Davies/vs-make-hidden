@@ -17,7 +17,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
      * Hide item
      * dec: Appends the dir/file name into vs code user settings file.excludes
     */
-    hide_item( relative_location_to_item : string = null ) : boolean
+    hide_item( relative_location_to_item : string = null ) : void
     {
         if ( relative_location_to_item )
         {
@@ -25,7 +25,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
             let workspace_config  : any = this.get_workspace_configuration();
                 workspace_config[ relative_location_to_item ] = true;
 
-            return this.save_configuration( workspace_config );
+            this.save_configuration( workspace_config );
         }
     }
 
@@ -33,7 +33,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
      * Hide all extension types
      * dec: Appends the dir/file name into vs code user settings file.excludes
     */
-    hide_all_extension_types( item_path : string = null, from_root : boolean = true ) : boolean
+    hide_all_extension_types( item_path : string = null, from_root : boolean = true ) : void
     {
         if ( item_path )
         {
@@ -58,7 +58,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
 
                 // Append our newly selected item
                 workspace_config[ exclude_snippet ] = true;
-                return this.save_configuration( workspace_config );
+                this.save_configuration( workspace_config );
             }
         }
     }
@@ -67,15 +67,14 @@ export default class MakeHiddenController extends MakeHiddenProvider {
      * Remove regex from config list : Remove item
      * dec: Removes an item from the config list
     */
-    remove_regex_from_config_list( item_key : string = null ) : boolean
+    remove_regex_from_config_list( item_key : string = null ) : void
     {
         if( item_key )
         {
             let workspace_config  : any = this.get_workspace_configuration();
-            delete workspace_config[ item_key ];
+                delete workspace_config[ item_key ];
 
-            let save_successfully : boolean = this.save_configuration( workspace_config );
-            return save_successfully;
+            this.save_configuration( workspace_config )
         }
     }
 
@@ -83,12 +82,10 @@ export default class MakeHiddenController extends MakeHiddenProvider {
      * Remove all regex item's from config list
      * dec: removes all items in get_workspace_configuration(files.exclude)
     */
-    remove_all_regex_items_from_config_list() : boolean
+    remove_all_regex_items_from_config_list() : void
     {
         /* -- TODO: have this return the feed back message from writeFileSync for errors and successes -- */
-        let save_successfully : boolean = this.save_configuration( {} );
-
-        return save_successfully;
+        this.save_configuration( {} );
     }
 
 }

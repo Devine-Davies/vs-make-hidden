@@ -116,7 +116,7 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
      * Save configuration
      * dec: Save files.exclude to configuration_file_path
     */
-    protected save_configuration( config_data : any ): boolean 
+    protected save_configuration( config_data : any ) 
     {
         /* -- check to see if there's a workspace available-- */
         if( ! this.work_space_file_exists() )
