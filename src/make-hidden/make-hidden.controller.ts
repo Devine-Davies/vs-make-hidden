@@ -1,5 +1,6 @@
 // Imports
 import * as vscode from 'vscode';
+import * as ChildProcess from 'child_process';
 
 import MakeHiddenProvider from './make-hidden.provider';
 
@@ -58,7 +59,12 @@ export default class MakeHiddenController extends MakeHiddenProvider {
 
                 // Append our newly selected item
                 workspace_config[ exclude_snippet ] = true;
+
+                /* -- Save the new work space -- */
                 this.save_configuration( workspace_config );
+
+                /* -- Run a count on all effected files -- */
+                this.count_all_affected_files( exclude_snippet );
             }
         }
     }
@@ -86,6 +92,23 @@ export default class MakeHiddenController extends MakeHiddenProvider {
     {
         /* -- TODO: have this return the feed back message from writeFileSync for errors and successes -- */
         this.save_configuration( {} );
+    }
+
+    /* --------------------
+     * Effected files counter
+     * dec: info windows displays a count of all affected files
+    */
+    count_all_affected_files( exclude_snippet : string = null )
+    {
+        ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            }
+    
+            vscode.window.showInformationMessage(`Affected files: ${stdout}`);
+            // console.log(`stdout: ${stdout}`);
+        });
     }
 
 }

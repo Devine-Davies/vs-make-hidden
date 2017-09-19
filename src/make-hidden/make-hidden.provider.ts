@@ -3,6 +3,7 @@ import * as json from 'jsonc-parser';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as ChildProcess from 'child_process';
 
 export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.Node>  {
 
@@ -145,12 +146,12 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
                 /* -- Make string and JSON valid -- */
                 let formatted_data : any  = JSON.stringify( settings_file_data , null, 2).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
             
-                fs.writeFile( this.get_user_configuration_file_path() , formatted_data )
+                fs.writeFile( this.get_user_configuration_file_path() , formatted_data , () => {
 
-                /* -- Refresh out tree for view -- */
-                this.refresh_list_view();
-        
-                return true;
+                    /* -- Refresh out tree for view -- */
+                    this.refresh_list_view();
+
+                } )
             })
         }
     }

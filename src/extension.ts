@@ -17,11 +17,10 @@
 // visual Studio Code
 import * as vscode from 'vscode';
 
-// Node processes
-// import * as cp from 'child_process';
-// import ChildProcess = cp.ChildProcess;
-
 import MakeHiddenController from './make-hidden/make-hidden.controller';
+
+
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -189,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
     let refresh_item_list = vscode.commands.registerCommand('makeHidden.refreshHiddenList', ( item_key : string ) => 
     {
         //TODO: Find a way to refresh this.
-        MH.refresh_list();
+        MH.refresh_list_view();
     });
 
     /* --------------------
