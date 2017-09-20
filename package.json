@@ -1,13 +1,13 @@
 {
     "name": "make-hidden",
     "displayName": "Make Hidden",
-    "description": "",
-    "version": "0.0.1",
-    "publisher": "Rhys Devine Davies",
+    "description": "Need project description.",
+    "version": "0.15.0",
+    "publisher": "devine-davies",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Devine-Davies"
+        "url": "https://github.com/Devine-Davies/vs-make-hidden"
     },
     "engines": {
         "vscode": "^1.16.0"
@@ -16,53 +16,72 @@
         "Other"
     ],
     "activationEvents": [
-        "*", "onView:extension"
+        "*",
+        "onCommand:make-hidden.hideItem",
+        "onCommand:make-hidden.hideExtensionFromRoot",
+        "onCommand:make-hidden.hideExtensionFromDirectory",
+        "onCommand:make-hidden.removeRegexFromList",
+        "onCommand:make-hidden.emptyItemsInConfig",
+        "onCommand:make-hidden.refreshHiddenList"
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
-            "command": "makeHidden.hideItem",
-            "title"  : "Make Hidden"
-        },{
-            "command": "makeHidden.hideExtensionFromRoot",
-            "title"  : "Make Hidden: All extensions from root"
-        },{
-            "command": "makeHidden.hideExtensionFromDirectory",
-            "title"  : "Make Hidden: All extensions from path"
-        }, {
-            "command": "makeHidden.removeRegexFromList",
-            "title"  : "Make Hidden: Remove item"
-        }, {
-            "command": "makeHidden.emptyItemsInConfig",
-            "title"  : "Make Hidden: Empty items"
-        }, {
-            "command": "makeHidden.refreshHiddenList",
-            "title"  : "Make Hidden: Refresh list"
-        }],
-
         "views": {
-            "explorer": [{
-                "id"   : "makeHiddenViewPane",
-                "name" : "Hidden in Directory"
-            }]
+            "explorer": [
+                {
+                    "id": "makeHiddenViewPane",
+                    "name": "Hidden in Directory"
+                }
+            ]
         },
-
+        "commands": [
+            {
+                "command": "make-hidden.hideItem",
+                "title": "Make Hidden"
+            },
+            {
+                "command": "make-hidden.hideExtensionFromRoot",
+                "title": "Make Hidden: All extensions from root"
+            },
+            {
+                "command": "make-hidden.hideExtensionFromDirectory",
+                "title": "Make Hidden: All extensions from path"
+            },
+            {
+                "command": "make-hidden.removeRegexFromList",
+                "title": "Make Hidden: Remove item"
+            },
+            {
+                "command": "make-hidden.emptyItemsInConfig",
+                "title": "Make Hidden: Empty items"
+            },
+            {
+                "command": "make-hidden.refreshHiddenList",
+                "title": "Make Hidden: Refresh list"
+            }
+        ],
         "menus": {
-            "explorer/context": [ {
-                "command" : "makeHidden.hideItem"
-            },{
-                "command" : "makeHidden.hideExtensionFromRoot"
-            },{
-                "command" : "makeHidden.hideExtensionFromDirectory"
-            }],
-
-            "view/title": [{
-                "command" : "makeHidden.refreshHiddenList",
-                "when"    : "view == makeHiddenViewPane"
-            },{
-                "command" : "makeHidden.emptyItemsInConfig",
-                "when"    : "view == makeHiddenViewPane"
-            }]
+            "explorer/context": [
+                {
+                    "command": "make-hidden.hideItem"
+                },
+                {
+                    "command": "make-hidden.hideExtensionFromRoot"
+                },
+                {
+                    "command": "make-hidden.hideExtensionFromDirectory"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "makeHidden.refreshHiddenList",
+                    "when": "view == makeHiddenViewPane"
+                },
+                {
+                    "command": "makeHidden.emptyItemsInConfig",
+                    "when": "view == makeHiddenViewPane"
+                }
+            ]
         }
     },
     "scripts": {

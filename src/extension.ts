@@ -1,11 +1,8 @@
 // https://code.visualstudio.com/docs/extensionAPI/vscode-api
 // https://code.visualstudio.com/docs/extensionAPI/vscode-api-commands
-
-
 // TODO Terminal lynx count all find json
 // Count all from root
 // $ find */**/**.json  -type f | wc -l
-
 // Count all in folder
 // $ find src/**/**.ts  -type f | wc -l
 // Add to node child process.
@@ -13,14 +10,9 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-
-// visual Studio Code
 import * as vscode from 'vscode';
-
 import MakeHiddenController from './make-hidden/make-hidden.controller';
-
-
-
+import * as console from 'console';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -44,13 +36,17 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, Context menu
     */
-    let hide_item = vscode.commands.registerCommand('makeHidden.hideItem', ( e : any ) => 
+    let hide_item = vscode.commands.registerCommand('make-hidden.hideItem', ( e : any ) => 
     {
+        vscode.window.showInformationMessage(`1`);
+
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
         {
+            vscode.window.showInformationMessage(`2`);
             let file_name : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
             MH.hide_item( file_name );
+            vscode.window.showInformationMessage(`3`);
         }
 
         /* -- Executed from vs-code command pallet -- */
@@ -62,11 +58,15 @@ export function activate(context: vscode.ExtensionContext) {
                 value       : null
             };
 
+            vscode.window.showInformationMessage(`4`);
+
             vscode.window.showInputBox(ibo).then( ( file_name : string ) => 
             {
                 MH.hide_item( file_name );
             });
         }
+
+        vscode.window.showInformationMessage(`5`);
     });
 
     /* --------------------
@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, Context menu
     */
-    let hide_extension_from_root = vscode.commands.registerCommand('makeHidden.hideExtensionFromRoot', ( e : any ) => 
+    let hide_extension_from_root = vscode.commands.registerCommand('make-hidden.hideExtensionFromRoot', ( e : any ) => 
     {
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
@@ -110,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, Context menu
     */
-    let hide_extension_from_path = vscode.commands.registerCommand('makeHidden.hideExtensionFromDirectory', ( e : any ) => // e : vscode.Uri
+    let hide_extension_from_path = vscode.commands.registerCommand('make-hidden.hideExtensionFromDirectory', ( e : any ) => // e : vscode.Uri
     {
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
@@ -143,7 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, explorer view item click
     */
-    let remove_hidden_regex_from_list = vscode.commands.registerCommand('makeHidden.removeRegexFromList', ( item_key : string ) => 
+    let remove_hidden_regex_from_list = vscode.commands.registerCommand('make-hidden.removeRegexFromList', ( item_key : string ) => 
     {
         /* -- Executed from vs-code command pallet -- */
         if( item_key == undefined )
@@ -172,7 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, explorer view menu
     */
-    let empty_config = vscode.commands.registerCommand('makeHidden.emptyItemsInConfig', ( item_key : string ) => 
+    let empty_config = vscode.commands.registerCommand('make-hidden.emptyItemsInConfig', ( item_key : string ) => 
     {
         //TODO: Find a way to refresh this.
         MH.remove_all_regex_items_from_config_list();
@@ -185,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, explorer view menu
     */
-    let refresh_item_list = vscode.commands.registerCommand('makeHidden.refreshHiddenList', ( item_key : string ) => 
+    let refresh_item_list = vscode.commands.registerCommand('make-hidden.refreshHiddenList', ( item_key : string ) => 
     {
         //TODO: Find a way to refresh this.
         MH.refresh_list_view();

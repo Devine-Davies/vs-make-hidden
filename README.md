@@ -1,6 +1,10 @@
+# In Development (Testing)
+
 ## Features
 
 Allows you to choose how the projects are sorted in **List Projects** commands. You can choose:
+
+--
 
 * **Saved**: The order that you saved the projects
 * **Name**: The name that you typed for the project

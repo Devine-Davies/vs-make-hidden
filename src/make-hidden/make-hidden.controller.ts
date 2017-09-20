@@ -64,7 +64,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
                 this.save_configuration( workspace_config );
 
                 /* -- Run a count on all effected files -- */
-                this.count_all_affected_files( exclude_snippet );
+                // this.count_all_affected_files( exclude_snippet );
             }
         }
     }
@@ -106,7 +106,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
                 return;
             }
     
-            vscode.window.showInformationMessage(`Affected files: ${stdout}`);
+            // vscode.window.showInformationMessage(`Affected files: ${stdout}`);
             // console.log(`stdout: ${stdout}`);
         });
     }

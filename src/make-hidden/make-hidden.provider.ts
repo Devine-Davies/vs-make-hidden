@@ -88,7 +88,7 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
         treeItem.iconPath     = this.context.asAbsolutePath(path.join('resources', 'light', 'view.svg'));
         treeItem.contextValue = item_title;
         treeItem.command      = {
-            command   : 'makeHidden.removeRegexFromList',
+            command   : 'make-hidden.removeRegexFromList',
             title     : item_title,
             arguments : [ item_title ],
             tooltip   : item_title
