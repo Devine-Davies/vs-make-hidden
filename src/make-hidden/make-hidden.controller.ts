@@ -1,7 +1,5 @@
-// Imports
 import * as vscode from 'vscode';
-import * as ChildProcess from 'child_process';
-
+// import * as ChildProcess from 'child_process';
 import MakeHiddenProvider from './make-hidden.provider';
 
 export default class MakeHiddenController extends MakeHiddenProvider {
@@ -100,15 +98,15 @@ export default class MakeHiddenController extends MakeHiddenProvider {
     */
     count_all_affected_files( exclude_snippet : string = null )
     {
-        ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`exec error: ${error}`);
-                return;
-            }
+        // ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
+        //     if (error) {
+        //         console.error(`exec error: ${error}`);
+        //         return;
+        //     }
     
-            // vscode.window.showInformationMessage(`Affected files: ${stdout}`);
-            // console.log(`stdout: ${stdout}`);
-        });
+        //     // vscode.window.showInformationMessage(`Affected files: ${stdout}`);
+        //     // console.log(`stdout: ${stdout}`);
+        // });
     }
 
 }

@@ -3,6 +3,7 @@
 		"module": "commonjs",
 		"target": "ES6",
 		"outDir": "out",
+		"removeComments": true,
 		"lib": [
             "es6"
         ],

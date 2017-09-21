@@ -1,9 +1,7 @@
-// File system
 import * as json from 'jsonc-parser';
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
-import * as ChildProcess from 'child_process';
+import * as path from 'path';
 
 export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.Node>  {
 
@@ -85,8 +83,12 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
             item_title, hasCollapsibleState
         );
 
-        treeItem.iconPath     = this.context.asAbsolutePath(path.join('resources', 'light', 'view.svg'));
+        treeItem.iconPath     = this.context.asAbsolutePath( path.join(
+            'resources', 'light', 'view.svg'
+        ) );
+
         treeItem.contextValue = item_title;
+
         treeItem.command      = {
             command   : 'make-hidden.removeRegexFromList',
             title     : item_title,
@@ -138,6 +140,8 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
         else
         {
             fs.readFile( this.get_user_configuration_file_path(), 'utf8' , (err, data ) => {
+
+                // vscode.window.showInformationMessage(`Read file..`);
     
                 /* -- Append the new config data to the main setting doc -- */
                 var settings_file_data = JSON.parse( data )
@@ -146,13 +150,14 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
                 /* -- Make string and JSON valid -- */
                 let formatted_data : any  = JSON.stringify( settings_file_data , null, 2).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
             
-                fs.writeFile( this.get_user_configuration_file_path() , formatted_data , () => {
+                fs.writeFile( this.get_user_configuration_file_path() , formatted_data , ( err ) => {
+
+                    // vscode.window.showInformationMessage(`writeFile file..`);
 
                     /* -- Refresh out tree for view -- */
                     this.refresh_list_view();
-
-                } )
-            })
+                } );
+            });
         }
     }
 

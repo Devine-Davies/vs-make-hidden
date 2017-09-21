@@ -20,8 +20,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     const rootPath = vscode.workspace.rootPath;
 
-    /* -- Create a new instance of make hidden -- */
-    const MH = new MakeHiddenController(context);
+    /* -- Create a new instance o
+    f make hidden -- */
+    const MH = new MakeHiddenController(
+        context
+    );
 
     // Assign our MH to VS window tree provider
     vscode.window.registerTreeDataProvider('makeHiddenViewPane', MH);
@@ -38,15 +41,11 @@ export function activate(context: vscode.ExtensionContext) {
     */
     let hide_item = vscode.commands.registerCommand('make-hidden.hideItem', ( e : any ) => 
     {
-        vscode.window.showInformationMessage(`1`);
-
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
         {
-            vscode.window.showInformationMessage(`2`);
             let file_name : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
             MH.hide_item( file_name );
-            vscode.window.showInformationMessage(`3`);
         }
 
         /* -- Executed from vs-code command pallet -- */
@@ -58,15 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
                 value       : null
             };
 
-            vscode.window.showInformationMessage(`4`);
-
             vscode.window.showInputBox(ibo).then( ( file_name : string ) => 
             {
                 MH.hide_item( file_name );
             });
         }
-
-        vscode.window.showInformationMessage(`5`);
     });
 
     /* --------------------

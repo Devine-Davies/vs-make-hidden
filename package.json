@@ -2,12 +2,17 @@
     "name": "make-hidden",
     "displayName": "Make Hidden",
     "description": "Need project description.",
-    "version": "0.15.0",
+    "version": "0.28.0",
     "publisher": "devine-davies",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/Devine-Davies/vs-make-hidden"
+    },
+    "private": false,
+    "bugs": {
+        "email": "rhysdevine@gmail.com",
+        "url": "https://github.com/Devine-Davies/vs-make-hidden/issues"
     },
     "engines": {
         "vscode": "^1.16.0"
@@ -16,7 +21,6 @@
         "Other"
     ],
     "activationEvents": [
-        "*",
         "onCommand:make-hidden.hideItem",
         "onCommand:make-hidden.hideExtensionFromRoot",
         "onCommand:make-hidden.hideExtensionFromDirectory",
@@ -74,11 +78,11 @@
             ],
             "view/title": [
                 {
-                    "command": "makeHidden.refreshHiddenList",
+                    "command": "make-hidden.refreshHiddenList",
                     "when": "view == makeHiddenViewPane"
                 },
                 {
-                    "command": "makeHidden.emptyItemsInConfig",
+                    "command": "make-hidden.emptyItemsInConfig",
                     "when": "view == makeHiddenViewPane"
                 }
             ]
@@ -97,5 +101,8 @@
         "mocha": "^3.5.0",
         "@types/node": "^7.0.43",
         "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "jsonc-parser": "^0.4.2"
     }
 }
