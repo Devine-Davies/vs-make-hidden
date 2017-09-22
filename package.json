@@ -2,7 +2,7 @@
     "name": "make-hidden",
     "displayName": "Make Hidden",
     "description": "Make Hidden enhances the built-in functionality of `files.exclude`. It provides an explorer interface to allow for a quick and easy overview of the hidden/exclude files from the projects directory. Context menus options are also added to perform multiply hidden/exclude options quickly.",
-    "version": "0.28.0",
+    "version": "0.29.0",
     "publisher": "devine-davies",
     "icon": "resources/icon.png",
     "repository": {
@@ -21,6 +21,8 @@
         "Other"
     ],
     "activationEvents": [
+        "*", 
+        "onView:extension",
         "onCommand:make-hidden.hideItem",
         "onCommand:make-hidden.hideExtensionFromRoot",
         "onCommand:make-hidden.hideExtensionFromDirectory",
