@@ -49,7 +49,7 @@
             },
             {
                 "command": "make-hidden.hideExtensionFromDirectory",
-                "title": "Make Hidden: All extensions from path"
+                "title": "Make Hidden: All extensions from here"
             },
             {
                 "command": "make-hidden.removeRegexFromList",
