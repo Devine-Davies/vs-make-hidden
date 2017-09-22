@@ -1,6 +1,6 @@
 import { CONNREFUSED } from 'dns';
 import * as vscode from 'vscode';
-// import * as ChildProcess from 'child_process';
+import * as ChildProcess from 'child_process';
 import MakeHiddenProvider from './make-hidden.provider';
 import * as console from 'console';
 
@@ -63,7 +63,7 @@ export default class MakeHiddenController extends MakeHiddenProvider {
             this.save_configuration( workspace_config );
 
             /* -- Run a count on all effected files -- */
-            // this.count_all_affected_files( exclude_snippet );
+            this.count_all_affected_files( exclude_snippet );
         }
     }
 
@@ -98,15 +98,21 @@ export default class MakeHiddenController extends MakeHiddenProvider {
     */
     count_all_affected_files( exclude_snippet : string = null )
     {
-        // ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
-        //     if (error) {
-        //         console.error(`exec error: ${error}`);
-        //         return;
-        //     }
-    
-        //     // vscode.window.showInformationMessage(`Affected files: ${stdout}`);
-        //     // console.log(`stdout: ${stdout}`);
-        // });
+        let os_type : string = process.platform;
+        let all_os_types : string[]     = ['darwin', 'freebsd', 'linux', 'sunos', 'win32'];
+        let allowed_os_types : string[] = [ 'darwin', 'linux' ];
+
+        if( allowed_os_types.indexOf( os_type ) > -1 )
+        {
+            ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
+                
+                if (error) {
+                    console.error(`exec error: ${error}`); return;
+                }
+        
+                vscode.window.showInformationMessage(`Affected files: ${stdout}`);
+            });
+        }
     }
 
 }

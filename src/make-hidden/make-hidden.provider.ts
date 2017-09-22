@@ -141,8 +141,6 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
         {
             fs.readFile( this.get_user_configuration_file_path(), 'utf8' , (err, data ) => {
 
-                // vscode.window.showInformationMessage(`Read file..`);
-    
                 /* -- Append the new config data to the main setting doc -- */
                 var settings_file_data = JSON.parse( data )
                     settings_file_data[ this.get_configuration_type() ] = config_data;
@@ -151,9 +149,6 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
                 let formatted_data : any  = JSON.stringify( settings_file_data , null, 2).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
             
                 fs.writeFile( this.get_user_configuration_file_path() , formatted_data , ( err ) => {
-
-                    // vscode.window.showInformationMessage(`writeFile file..`);
-
                     /* -- Refresh out tree for view -- */
                     this.refresh_list_view();
                 } );
