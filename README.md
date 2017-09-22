@@ -1,24 +1,17 @@
-# In Development (Testing)
+# VS Code Make Hidden
 
-## Features
+Make Hidden enhances the built-in functionality of "files.exclude". It provides an explorer interface to allow for a quick and easy overview of the hidden/exclude files from the projects directory. 
 
-Allows you to choose how the projects are sorted in **List Projects** commands. You can choose:
+![Preview](resources/views-explorer-makeHiddenViewPane.png)
 
---
+Context menus options are also added to perform multiply hidden/exclude options quickly.
 
-* **Saved**: The order that you saved the projects
-* **Name**: The name that you typed for the project
-* **Path**: The full path of the project
-* **Recent**: The recently used projects
-
-For example if there is an image subfolder under your extension project workspace:
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Preview](resources/menus-explorer-context-menu.png)
 
 ## Known Issues
 
--- 
-
 ## Release Notes
 
---
+## License
+
+[MIT](LICENSE.md)
