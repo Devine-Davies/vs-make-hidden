@@ -1,6 +1,8 @@
+import { CONNREFUSED } from 'dns';
 import * as vscode from 'vscode';
 // import * as ChildProcess from 'child_process';
 import MakeHiddenProvider from './make-hidden.provider';
+import * as console from 'console';
 
 export default class MakeHiddenController extends MakeHiddenProvider {
 
@@ -36,34 +38,32 @@ export default class MakeHiddenController extends MakeHiddenProvider {
     {
         if ( item_path )
         {
-            let extension_type : string = this.get_file_extension_from_path( item_path );
-            let file_name : string = item_path.substring( item_path.lastIndexOf('/') + 1 );
+            let exclude_snippet : string = '';
+            let item_info : any = {
+                'extension' : this.get_item_dir_info( item_path, 'extension' ),
+                'file_name' : this.get_item_dir_info( item_path, 'filename'  ),
+                'path'      : this.get_item_dir_info( item_path, 'path'      ),
+            };
 
-            if( extension_type !== '' )
-            {
-                let exclude_snippet   : string = '';
-                let workspace_config  : any = this.get_workspace_configuration();
+            if( item_info['extension'] === '' ) {
+                /* -- Folder -- */
+                exclude_snippet = ( from_root )? `*/**/${item_info['file_name']}` : `${ item_info['path'] }${ item_info['file_name'] }`;
+            } else {
+                /* -- File -- */
+                exclude_snippet = ( from_root )? `*/**/**.${ item_info['extension'] }` : `${ item_info['path'] }*.${ item_info['extension'] }`;
+            }
 
-                if( from_root )
-                {
-                    exclude_snippet = `*/**/**.${extension_type}`;
-                }
-                else
-                {
-                    // Get the item full path
-                    var item_path   = item_path.replace( file_name , "");
-                    exclude_snippet = `${item_path}*.${extension_type}`;
-                }
+            console.log( exclude_snippet );
 
-                // Append our newly selected item
+            /* -- Append our newly selected item -- */
+            let workspace_config : any = this.get_workspace_configuration();
                 workspace_config[ exclude_snippet ] = true;
 
-                /* -- Save the new work space -- */
-                this.save_configuration( workspace_config );
+            /* -- Save the new work space -- */
+            this.save_configuration( workspace_config );
 
-                /* -- Run a count on all effected files -- */
-                // this.count_all_affected_files( exclude_snippet );
-            }
+            /* -- Run a count on all effected files -- */
+            // this.count_all_affected_files( exclude_snippet );
         }
     }
 

@@ -129,7 +129,7 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
 
             /* -- Quick timeout :( ) -- */
             setTimeout( () => {
-                if ( this.work_space_file_exists() )  {
+                if ( this.work_space_file_exists() ) {
                     this.save_configuration( config_data );
                 }
                 else  {
@@ -238,14 +238,28 @@ export default class MakeHiddenProvider implements vscode.TreeDataProvider<json.
     }
 
     /* --------------------
-     * Get file extension from path
+     * Get file folder info
      * dec: It will return the file extension if one has been found.
     */
-    get_file_extension_from_path( filename : string = null ) : string
+    get_item_dir_info( 
+        full_path : string = null,
+        requested_info_type : string = 'filename'
+    ) : string
     {
-        if( filename )
+        if( full_path )
         {
-            return filename.substring( filename.lastIndexOf('.') + 1, filename.length ) || '';
+            if( requested_info_type == 'extension' ) {
+                return full_path.slice( ( full_path.lastIndexOf(".") - 1 >>> 0 ) + 2 );
+                // return filename.substring( filename.lastIndexOf('.') + 1, filename.length ) || '';
+            }
+
+            if( requested_info_type == 'filename' ) {
+                return full_path.substring( full_path.lastIndexOf('/') + 1 );
+            }
+
+            if( requested_info_type == 'path' ) {
+                return full_path.replace( this.get_item_dir_info( full_path, 'filename' ) , "")
+            }
         }
 
         return '';
