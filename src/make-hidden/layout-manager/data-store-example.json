@@ -1,0 +1,11 @@
+{
+    "excludedFileStack" : {
+        "/**/wp-plugins": true,
+        "/**/wp-content": true,
+        "/**/wp-media": true
+    },
+    "layout" : {
+        "layout_name" : [0],
+        "layout_name two" : [1, 2]
+    }
+}

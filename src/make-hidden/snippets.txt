@@ -1,7 +1,88 @@
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+-------------------
+-- 00. Helpfull and Handy -- 
+-----
+
+    // let success = await vscode.commands.executeCommand('vscode.previewHtml', uri);
+    // workbench.files.action.refreshFilesExplorer
+
+----
+
+-------------------
+-- 01. Messaging -- 
+-----
+    https://tstringer.github.io/nodejs/javascript/vscode/2015/12/14/input-and-output-vscode-ext.html
+
+    vscode.window.showInputBox({prompt: 'What is your favorite fruit?'})
+    .then(val => vscode.window.showInformationMessage('Your input was ' + val));
+
+    ----
+
+    vscode.window.showInputBox({prompt: 'What is your favorite fruit?'})
+    .then(val => vscode.window.showInformationMessage('Your input was ' + val));
+
+    ----
+
+    vscode.window.showQuickPick(['option 1', 'option 2', 'option 3'])
+    .then(val => vscode.window.showInformationMessage('You picked ' + val));
+    
+    ----
+
+    let options = <vscode.QuickPickOptions>{  
+        placeHolder: 'Type a line number or a piece of code to navigate to',
+        // matchOnDescription: true,
+        onDidSelectItem: item => {
+            if( item === 'Allow' ){
+                console.log( item );
+            }
+        }
+    };
+    vscode.window.showQuickPick(['Yes, Create', 'Not now, continue without'], options).then(selection => {
+        console.log( 'selection' );
+        console.log( selection );
+    });
+
+    ----
+
+    vscode.window.showInformationMessage(
+        'Our JavaScript support has been enhanced, would you like to view the Release Notes?',
+        '',
+        'Yes'
+    ).then(selection => {
+        console.log( 'selection' );
+        console.log( selection );
+    });
+
+    ----
+
+    var myOutputChannel = vscode.window.createOutputChannel('MyChannelName');
+    myOutputChannel.show();
+    myOutputChannel.append('Visual Studio Code is awesome!');
+
+----
+
+-------------------
+-- 02. Terminal cmd's -- 
+-----
+
+    // https://code.visualstudio.com/docs/extensionAPI/vscode-api
+    // https://code.visualstudio.com/docs/extensionAPI/vscode-api-commands
+    // TODO Terminal lynx count all find json
+    // Count all from root
+    // $ find */**/**.json  -type f | wc -l
+    // Count all in folder
+    // $ find src/**/**.ts  -type f | wc -l
+    // Add to node child process.
+
+-----
+
+-------------------
+-- 03. Somthing -- 
+-----
+
+    // this method is called when your extension is activated
+    // your extension is activated the very first time the command is executed
+    export function activate(context: vscode.ExtensionContext) {
     
         // const rootPath = vscode.workspace.rootPath;
     
@@ -61,3 +142,5 @@ export function activate(context: vscode.ExtensionContext) {
     
         context.subscriptions.push(disposable);
     }
+
+-----

@@ -1,8 +1,8 @@
 {
     "name": "make-hidden",
     "displayName": "Make Hidden",
-    "description": "Make Hidden enhances the built-in functionality of `files.exclude`. It provides an explorer interface to allow for a quick and easy overview of the hidden/exclude files from the projects directory. Context menus options are also added to perform multiply hidden/exclude options quickly.",
-    "version": "0.30.0",
+    "description": "Make Hidden enhances the built-in functionality of `files.exclude` by proving an explorer view Pane interface for a quick overview of the hidden/exclude files/folders from the projects directory. Context menus options are also added to perform multiply hidden/exclude options quickly and effortlessly.",
+    "version": "0.32.0",
     "publisher": "devine-davies",
     "icon": "resources/icon.png",
     "repository": {
@@ -24,67 +24,42 @@
         "*",
         "onView:extension",
         "onCommand:make-hidden.hideItem",
-        "onCommand:make-hidden.hideExtensionFromRoot",
-        "onCommand:make-hidden.hideExtensionFromDirectory",
-        "onCommand:make-hidden.removeRegexFromList",
-        "onCommand:make-hidden.emptyItemsInConfig",
-        "onCommand:make-hidden.refreshHiddenList"
+        "onCommand:make-hidden.superHide",
+        "onCommand:make-hidden.removeItem",
+        "onCommand:make-hidden.removeAllItems"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "views": {
-            "explorer": [
-                {
+            "explorer": [ {
                     "id": "makeHiddenViewPane",
                     "name": "Hidden in Directory"
                 }
             ]
         },
-        "commands": [
-            {
+        "commands": [ {
                 "command": "make-hidden.hideItem",
-                "title": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.hideExtensionFromRoot",
-                "title": "Make Hidden: All extensions from root"
-            },
-            {
-                "command": "make-hidden.hideExtensionFromDirectory",
-                "title": "Make Hidden: All extensions from here"
-            },
-            {
-                "command": "make-hidden.removeRegexFromList",
-                "title": "Make Hidden: Remove item"
-            },
-            {
-                "command": "make-hidden.emptyItemsInConfig",
-                "title": "Make Hidden: Empty items"
-            },
-            {
-                "command": "make-hidden.refreshHiddenList",
-                "title": "Make Hidden: Refresh list"
+                "title": "MH: Hide Item"
+            }, {
+                "command": "make-hidden.superHide",
+                "title": "MH: Super Hide"
+            }, {
+                "command": "make-hidden.removeItem",
+                "title": "MH: Remove item"
+            }, {
+                "command": "make-hidden.removeAllItems",
+                "title": "MH: Remove all items"
             }
         ],
         "menus": {
-            "explorer/context": [
-                {
+            "explorer/context": [ {
                     "command": "make-hidden.hideItem"
-                },
-                {
-                    "command": "make-hidden.hideExtensionFromRoot"
-                },
-                {
-                    "command": "make-hidden.hideExtensionFromDirectory"
+                }, {
+                    "command": "make-hidden.superHide"
                 }
             ],
-            "view/title": [
-                {
-                    "command": "make-hidden.refreshHiddenList",
-                    "when": "view == makeHiddenViewPane"
-                },
-                {
-                    "command": "make-hidden.emptyItemsInConfig",
+            "view/title": [ {
+                    "command": "make-hidden.removeAllItems",
                     "when": "view == makeHiddenViewPane"
                 }
             ]

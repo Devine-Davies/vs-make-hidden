@@ -1,36 +1,28 @@
-// https://code.visualstudio.com/docs/extensionAPI/vscode-api
-// https://code.visualstudio.com/docs/extensionAPI/vscode-api-commands
-// TODO Terminal lynx count all find json
-// Count all from root
-// $ find */**/**.json  -type f | wc -l
-// Count all in folder
-// $ find src/**/**.ts  -type f | wc -l
-// Add to node child process.
-
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import MakeHiddenController from './make-hidden/make-hidden.controller';
-import * as console from 'console';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+/* -- Third party import's -- */
+import * as vscode from 'vscode';
+import * as console from 'console';
+import * as path from 'path';
+
+/* -- Make hidden lib's -- */
+import Utilities from './make-hidden/utilities';
+import ExcludeItemsController from './make-hidden/exclude-items/exclude-items.controller';
+// import MakeHiddenLayoutManager from './layout-manager/layout-manager.controller';
+
+
+/* --------------------
+ * Extension activated methord
+ * ---------------------------------------------------------------
+ * Command is executed and extension is activated the very first time the 
+*/
+export function activate( context : vscode.ExtensionContext ) {
 
     const rootPath = vscode.workspace.rootPath;
 
-    /* -- Create a new instance o
-    f make hidden -- */
-    const MH = new MakeHiddenController(
-        context
-    );
-
-    // Assign our MH to VS window tree provider
-    vscode.window.registerTreeDataProvider('makeHiddenViewPane', MH);
-
-    MH.onDidChangeTreeData( e => {
-    } )
+    /* -- Make Hidden Classes -- */
+    const utilities = new Utilities( context );
+    const excludeItemsController = new ExcludeItemsController( utilities );
 
     /* --------------------
      * Hide item cmd
@@ -39,13 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, Context menu
     */
-    let hide_item = vscode.commands.registerCommand('make-hidden.hideItem', ( e : any ) => 
-    {
+    let hideItem = vscode.commands.registerCommand('make-hidden.hideItem', ( e : any ) =>  {
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
         {
             let file_name : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
-            MH.hide_item( file_name );
+            excludeItemsController.hideItem( file_name );
         }
 
         /* -- Executed from vs-code command pallet -- */
@@ -57,106 +48,71 @@ export function activate(context: vscode.ExtensionContext) {
                 value       : null
             };
 
-            vscode.window.showInputBox(ibo).then( ( file_name : string ) => 
-            {
-                MH.hide_item( file_name );
+            vscode.window.showInputBox(ibo).then( ( file_name : string ) =>  {
+                excludeItemsController.hideItem( file_name );
             });
         }
     });
 
     /* --------------------
-     * Hide extension from root
+     * --
      * ---------------------------------------------------------------
-     * Invoke MH.hide_all_item_with_extension to hide items with the same extension from the
-     * projects 'ROOT' directory 
+     * --
      * ---------------------------------------------------------------
-     * Executed from: Command pallet, Context menu
+     * --
     */
-    let hide_extension_from_root = vscode.commands.registerCommand('make-hidden.hideExtensionFromRoot', ( e : any ) => 
-    {
+    let superHide = vscode.commands.registerCommand('make-hidden.superHide', ( e : any ) =>   {
+
+        let hideByOptions: string[] = [
+            `By Name`, `By Extension`,
+        ];
+
+        let hideLevelOptions: string[] = [
+            `Globally: Hide from root dir`,
+            `Current: Hide from current dir`,
+            `Current & Below: Hide from current dir & lower`,
+            `Below: Hide all from below here`
+        ];
+
         /* -- Executed from context menu -- */
         if( is_vs_file_object( e ) )
         {
-            let item_path : string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
-            MH.hide_all_extension_types( item_path, true );
-        }
+            vscode.window.showQuickPick( hideByOptions )
+            .then( ( hideBySelection : string ) => {
+                
+                let hideByType: boolean = ( hideByOptions.indexOf( hideBySelection ) > 0 )? true : false;
 
-        /* -- Executed from vs-code command pallet -- */
-        if( e == undefined )
-        {
-            let ibo = <vscode.InputBoxOptions> {
-                prompt      : `This will hide all file that have the same extension from the projects directory.`,
-                placeHolder : `Enter extension type`,
-                value       : null
-            };
-
-            vscode.window.showInputBox(ibo).then( ( item_path : string ) => 
-            {
-                MH.hide_all_extension_types( item_path, true );
-            });
+                vscode.window.showQuickPick( hideLevelOptions )
+                .then( ( val : string ) => {
+                    let itemPath: string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
+                    let hideLevel: number = hideLevelOptions.indexOf( val );
+                    excludeItemsController.hideItems( itemPath, hideByType, hideLevel );
+                } );
+            } );
         }
     });
 
     /* --------------------
-     * Hide extension from path
+     * Remove Item
      * ---------------------------------------------------------------
-     * Invokes MH.hide_all_item_with_extension with tue to hide all items with the same extension from the
-     * projects 'ROOT' directory 
-     * ---------------------------------------------------------------
-     * Executed from: Command pallet, Context menu
+     * Executed from: Explorer view item click
     */
-    let hide_extension_from_path = vscode.commands.registerCommand('make-hidden.hideExtensionFromDirectory', ( e : any ) => // e : vscode.Uri
-    {
-        /* -- Executed from context menu -- */
-        if( is_vs_file_object( e ) )
-        {
-            let item_path : string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
-            MH.hide_all_extension_types( item_path, false );
-        }
-
+    let removeItem = vscode.commands.registerCommand('make-hidden.removeItem', ( exludeString : string ) =>  {
         /* -- Executed from vs-code command pallet -- */
-        if( e == undefined )
-        {
-            let ibo = <vscode.InputBoxOptions> {
-                prompt      : `Type the out the 'Path' and 'filename' to hide all items with that extension in that directory.`,
-                placeHolder : `Enter 'Path' along with item 'filename' and 'extension type'`,
-                value       : null
-            };
-
-            vscode.window.showInputBox(ibo).then( ( item_path : string ) => 
-            {
-                MH.hide_all_extension_types( item_path, false );
-            });
-        }
-    });
-
-    /* --------------------
-     * Remove regex from list
-     * ---------------------------------------------------------------
-     * Invokes MH.hide_all_item_with_extension with tue to hide all items with the same extension from the
-     * projects 'ROOT' directory 
-     * ---------------------------------------------------------------
-     * Executed from: Command pallet, explorer view item click
-    */
-    let remove_hidden_regex_from_list = vscode.commands.registerCommand('make-hidden.removeRegexFromList', ( item_key : string ) => 
-    {
-        /* -- Executed from vs-code command pallet -- */
-        if( item_key == undefined )
-        {
+        if( exludeString == undefined ) {
             let ibo = <vscode.InputBoxOptions> {
                 prompt      : `Removes an item from the config list`,
                 placeHolder : `Type the name of the item you want to remove.`,
                 value       : null
             };
 
-            vscode.window.showInputBox(ibo).then( ( string_input : string ) => 
-            {
-                MH.remove_regex_from_config_list( string_input );
+            vscode.window.showInputBox(ibo).then( ( exludeStringInput : string ) => {
+                excludeItemsController.removeItem( exludeStringInput );
             });
         }
-        else
-        {
-            MH.remove_regex_from_config_list( item_key );
+
+        else {
+            excludeItemsController.removeItem( exludeString );
         }
     });
 
@@ -167,37 +123,20 @@ export function activate(context: vscode.ExtensionContext) {
      * ---------------------------------------------------------------
      * Executed from: Command pallet, explorer view menu
     */
-    let empty_config = vscode.commands.registerCommand('make-hidden.emptyItemsInConfig', ( item_key : string ) => 
-    {
+    let emptyConfig = vscode.commands.registerCommand('make-hidden.removeAllItems', ( item_key : string ) => {
         //TODO: Find a way to refresh this.
-        MH.remove_all_regex_items_from_config_list();
-    });
-
-    /* --------------------
-     * Refresh item list
-     * ---------------------------------------------------------------
-     * Invokes MH.remove_all_regex_items_from_config_list to empty the list out on the current config setting
-     * ---------------------------------------------------------------
-     * Executed from: Command pallet, explorer view menu
-    */
-    let refresh_item_list = vscode.commands.registerCommand('make-hidden.refreshHiddenList', ( item_key : string ) => 
-    {
-        //TODO: Find a way to refresh this.
-        MH.refresh_list_view();
+        excludeItemsController.removeAllItems();
     });
 
     /* --------------------
      * Subscribe commands
     */
     // -- hide
-    context.subscriptions.push( hide_item );
-    context.subscriptions.push( hide_extension_from_root );
-    context.subscriptions.push( hide_extension_from_path );
+    context.subscriptions.push( hideItem );
+    context.subscriptions.push( superHide );
     // -- Show
-    context.subscriptions.push( remove_hidden_regex_from_list );
-    context.subscriptions.push( empty_config );
-    // -- refresh
-    context.subscriptions.push( refresh_item_list );
+    context.subscriptions.push( removeItem );
+    context.subscriptions.push( emptyConfig );
 }
 
 // this method is called when your extension is deactivated
