@@ -5,25 +5,13 @@ import * as path from 'path';
 
 export default class ExcludeItemsProvider implements vscode.TreeDataProvider<json.Node>  {
 
-    public vsSettingsJsonPathInfo : any = {
-        'absolute' : '',
-        'relative' : `/.vscode/settings.json`,
-        'path'     : `/.vscode/`,
-        'filename' : `settings.json`,
-    };
-
     private _onDidChangeTreeData: vscode.EventEmitter<json.Node | null> = new vscode.EventEmitter<json.Node | null>();
     readonly onDidChangeTreeData: vscode.Event<json.Node | null> = this._onDidChangeTreeData.event;
-
-    // Object Tree
     private tree : json.Node;
 
     constructor(
         public mhUtilities: any = null,
     ) {
-        /* -- Create link to main path -- */
-        this.vsSettingsJsonPathInfo['absolute'] = vscode.workspace.rootPath + this.vsSettingsJsonPathInfo['relative'];
-
         /* -- Render our tree DOM -- */
         this.parseTree();
     }
@@ -32,7 +20,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * vs code func : getChildren
      * dec: pass our tree object nodes to vs code
     */
-    getChildren(node?: json.Node): Thenable<json.Node[]>  {
+    public getChildren(node?: json.Node): Thenable<json.Node[]>  {
         return Promise.resolve( 
             this.tree ? this.tree.children : [] 
         );
@@ -42,7 +30,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * vs code func : getTreeItem
      * dec : pass our tree node item object to vs code
     */
-    getTreeItem( node: json.Node ): vscode.TreeItem  {
+    public getTreeItem( node: json.Node ): vscode.TreeItem  {
         // dir name
         let itemTitle = node['children'][0]['value'];
 
@@ -51,17 +39,13 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
             itemTitle, vscode.TreeItemCollapsibleState.None
         );
 
-        treeItem.iconPath = this.mhUtilities.getProjectThemeDirectory( 'view.svg' );
-
+        treeItem.iconPath     = this.mhUtilities.getProjectThemeDirectory( 'view.svg' );
         treeItem.contextValue = itemTitle;
-
-        treeItem.command = {
+        treeItem.command      = {
             command   : 'make-hidden.removeItem',
             title     : itemTitle,
-            arguments : [
-                itemTitle
-            ],
-            tooltip   : itemTitle
+            tooltip   : itemTitle,
+            arguments : [itemTitle]
         };
 
         return treeItem;
@@ -71,8 +55,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * Get user configuration file path
      * dec: Path to .vscode/settings.json
     */
-    private getSettingsJsonPath() : string {
-        return this.vsSettingsJsonPathInfo['absolute'];
+    private getSettingPath() : string {
+        return this.mhUtilities.getVscodeSettingPath('full');
     }
 
     /* --------------------
@@ -81,12 +65,33 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
     */
     private parseTree(): void  {
         // Get our work space configuration object
-        let workspace_config = this.getFilesExcludeObject();
+        let fileExcludeObject: any = this.getFilesExcludeObject();
+        console.log( fileExcludeObject );
+        if( fileExcludeObject != null ){
+            // Update the tree Parse tree accordingly
+            this.tree = json.parseTree( JSON.stringify( 
+                fileExcludeObject 
+            ) );
+        }
+    }
 
-        // Parse Tree accordingly
-        this.tree = json.parseTree(
-            JSON.stringify( workspace_config )
+    /* --------------------
+     * Get workspace configuration
+     * dec: in this case we want the files.exclude
+    */
+    public getFilesExcludeObject( ) : any {
+        let filesExclude = this.mhUtilities.getItemFromJsonFile(
+            this.getSettingPath(), 'files.exclude'
         );
+
+        if( filesExclude.hasOwnProperty( '__error' ) ){
+            if ( filesExclude['__error'] === 'File not found' ) {
+                this.creatSettingsFile();
+                return null;
+            }
+        }
+
+        return filesExclude;
     }
 
     /* --------------------
@@ -104,31 +109,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
     /* --------------------
      * Create vc setting.json directory
     */
-    private createVscodeSettingJson(
-        request_users_permission : boolean = true
-    ) : void 
-    {
-        let path : string = vscode.workspace.rootPath + this.vsSettingsJsonPathInfo['path'];
-
-        let noticeText: string = `No 'vscode/settings.json' has been found, would you like to create now`;
-        let grantedText: string = 'Yes, Create File';
-
-        vscode.window.showInformationMessage( 
-            noticeText, grantedText
-        ).then( ( selection : string ) => {
-            if( selection === grantedText ) {
-
-                fs.mkdir( path , e =>  {
-                    fs.writeFile( this.getSettingsJsonPath() , `{}`, ( err ) =>  {
-                        if ( err ) {
-                            vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);
-                            throw err
-                        };
-                    });
-                } );
-
-            }
-        });
+    private creatSettingsFile() : void  {
+        this.mhUtilities.createVscodeSettingJson( true );
     }
 
     /* --------------------
@@ -140,15 +122,14 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
         let vsSettingsKeys: string = 'files.exclude';
 
         /* -- check to see if there's a workspace available, if ask to create one -- */
-        if( ! this.work_space_file_exists() ) {
-            this.createVscodeSettingJson();
+        if( ! this.mhUtilities.fileExists( this.getSettingPath() ) ) {
+            this.creatSettingsFile();
         }
 
         else {
-            fs.readFile( this.getSettingsJsonPath(), 'utf8' , ( err, rawFildData ) => {
-
+            fs.readFile( this.getSettingPath(), 'utf8' , ( err, rawFileData ) => {
                 /* -- Append the new config data to the main setting doc -- */
-                var settingsDataParse = JSON.parse( rawFildData );    
+                var settingsDataParse = JSON.parse( rawFileData );    
                 settingsDataParse[ vsSettingsKeys ] = newExcludeObject;
 
                 /* -- Make string and JSON valid -- */
@@ -156,47 +137,12 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
                     settingsDataParse , null, 2
                 ).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
             
-                fs.writeFile( this.getSettingsJsonPath() , formattedSettings , ( err ) => {
+                fs.writeFile( this.getSettingPath() , formattedSettings , ( err ) => {
                     /* -- Refresh out tree for view -- */
                     this.refreshListView();
                 } );
             });
         }
-    }
-
-    /* --------------------
-     * Get workspace configuration
-     * dec: in this case we want the files.exclude
-    */
-    public getFilesExcludeObject( ) : any
-    {
-        let configFile : string = this.getSettingsJsonPath();
-        let jsonData   : string = '{}';
-
-        try  {
-            let readSettingsFile = JSON.parse( 
-                fs.readFileSync( configFile, { encoding: 'utf8' } )
-            );
-
-            /* -- Create the files.exclude property if dose not exist -- */
-            jsonData = ( readSettingsFile.hasOwnProperty( 'files.exclude' ) )? JSON.stringify( readSettingsFile['files.exclude'] ) : '{}';
-
-        } catch (err)  {
-            this.createVscodeSettingJson();
-            console.log('error', 'reading config file', { details: err });
-        }
-
-        return JSON.parse( 
-            jsonData 
-        );
-    }
-
-    /* --------------------
-     * Get file extension from path
-     * dec: It will return the file extension if one has been found.
-    */
-    private work_space_file_exists() {
-        return fs.existsSync( this.getSettingsJsonPath() )
     }
 
 }

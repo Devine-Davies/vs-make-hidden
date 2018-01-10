@@ -26,7 +26,6 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
 
         /* -- Assign our MH to VS window tree provider  --*/
         vscode.window.registerTreeDataProvider('makeHiddenViewPane', this);
-
         this.onDidChangeTreeData( ( e ) => { } )
     }
 
@@ -34,14 +33,39 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
      * Hide item
      * dec: Appends the dir/file name into vs code user settings file.excludes
     */
-    hideItem( itemPath : string = null ) : void {
-        // Get workspace and append item
+    public hideItem( itemPath : string = null ) : void {
         if ( itemPath ) {
-            let filesExcludeObject  : any = this.getFilesExcludeObject();
+            let filesExcludeObject: any = this.getFilesExcludeObject();
             filesExcludeObject[ itemPath ] = true;
-
             this.saveFilesExcludeObject( filesExcludeObject );
         }
+    }
+
+    /* --------------------
+     * Hide item
+     * dec: Appends the dir/file name into vs code user settings file.excludes
+    */
+    public superHide( e, rootPath ) {
+        let hideByOptions: string[] = [
+            `By Name`, `By Extension`,
+        ];
+
+        let hideLevelOptions: string[] = [
+            `Globally: Hide from root dir`,
+            `Current: Hide from current dir`,
+            `Current & Below: Hide from current dir & lower`,
+            `Below: Hide all from below here`
+        ];
+
+        vscode.window.showQuickPick( hideByOptions ).then( ( hideBySelection : string ) => {
+            let hideByType: boolean = ( hideByOptions.indexOf( hideBySelection ) > 0 )? true : false;
+
+            vscode.window.showQuickPick( hideLevelOptions ).then( ( val : string ) => {
+                let itemPath: string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
+                let hideLevel: number = hideLevelOptions.indexOf( val );
+                this.hideItems( itemPath, hideByType, hideLevel );
+            } );
+        } );
     }
 
     /* --------------------
@@ -50,35 +74,27 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
      * includeItemExtension: boolean = false,
      * hideLevelIndex : number = 0,
     */
-    hideItems(
+    public hideItems(
         itemPath : string = null,
         includeItemExtension: boolean = false,
         hideLevelIndex : number = 0,
     ) {
         let filesExcludeObject: any = this.getFilesExcludeObject();
-        let hideLevelObject: any = this.getHideLeveByIndex( hideLevelIndex );
+        let hideLevelObject: any = this.getHideLevelByIndex( hideLevelIndex );
         let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-
-        let excludeSnippet: string = `${ hideLevelObject.regexCode }`;
-
-        // Check to see if to add item path
-        if( hideLevelObject.incPath ){
-            excludeSnippet = `${ itemPathProps['path'] }` + excludeSnippet;
-        }
+        let excludeSnippets: any = this.buildExcludeRegex(
+            itemPath, hideLevelIndex
+        );
 
         // By Name
         if( ! includeItemExtension ){
-            excludeSnippet += `${ itemPathProps['filename'] }`;
-            filesExcludeObject[ excludeSnippet ] = true;
-
-            excludeSnippet += '.*'
-            filesExcludeObject[ excludeSnippet ] = true;
+            filesExcludeObject[ excludeSnippets['byName'] ] = true;
+            filesExcludeObject[ excludeSnippets['byNameWithExtension'] ] = true;
         }
 
         // By Extension
         if( includeItemExtension && itemPathProps['extension'] !== '' ){
-            excludeSnippet += `*.${ itemPathProps['extension'] }`; 
-            filesExcludeObject[ excludeSnippet ] = true;
+            filesExcludeObject[ excludeSnippets['allExtension'] ] = true;
         }
 
         /* -- Save the new work space -- */
@@ -90,7 +106,27 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
 
     /* --------------------
     */
-    getHideLeveByIndex( hide_level_index : number = 0 ) {
+    private buildExcludeRegex( itemPath : string = null, hideLevelIndex : number = 0 ) : any {
+        let hideLevelObject: any = this.getHideLevelByIndex( hideLevelIndex );
+        let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+
+        let excludeSnippet: string = `${ hideLevelObject.regexCode }`;
+
+        // Check to see if to add item path
+        if( hideLevelObject.incPath ){
+            excludeSnippet = `${ itemPathProps['path'] }` + excludeSnippet;
+        }
+
+        return {
+            'byName'              : `${ excludeSnippet }${ itemPathProps['filename'] }`,
+            'byNameWithExtension' : `${ excludeSnippet }${ itemPathProps['filename'] }.*`,
+            'allExtension'        : `${ excludeSnippet }*.${ itemPathProps['extension'] }`,
+        }
+    }
+
+    /* --------------------
+    */
+    private getHideLevelByIndex( hide_level_index : number = 0 ) {
         let hide_level : string = this.hideLevels[ hide_level_index ];
         let hide_level_object : any = this.hideLevelsObject[ hide_level ];   
         return hide_level_object;
@@ -100,7 +136,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
      * Remove regex from config list : Remove item
      * dec: Removes an item from the config list
     */
-    removeItem( item_key : string = null ) : void {
+    public removeItem( item_key : string = null ) : void {
         if( item_key ) {
             let filesExcludeObject  : any = this.getFilesExcludeObject();
             delete filesExcludeObject[ item_key ];
@@ -113,7 +149,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
      * Remove all regex item's from config list
      * dec: removes all items in get_workspace_configuration(files.exclude)
     */
-    removeAllItems() : void {
+    public removeAllItems() : void {
         this.saveFilesExcludeObject( {} );
     }
 
@@ -121,7 +157,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
      * Effected files counter
      * dec: info windows displays a count of all affected files
     */
-    countAllAffectedFiles( exclude_snippet : string = null ) {
+    private countAllAffectedFiles( exclude_snippet : string = null ) {
         let os_type : string = process.platform;
         let all_os_types : string[]     = ['darwin', 'freebsd', 'linux', 'sunos', 'win32'];
         let allowed_os_types : string[] = [ 'darwin', 'linux' ];

@@ -44,6 +44,18 @@
 
     ----
 
+    let ibo = <vscode.InputBoxOptions> {
+            prompt      : "This will hide the file from the project's directory.",
+            placeHolder : "Enter file name filename",
+            value       : null
+        };
+
+        vscode.window.showInputBox(ibo).then( ( file_name : string ) =>  {
+            excludeItemsController.hideItem( file_name );
+    });
+
+    ----
+
     vscode.window.showInformationMessage(
         'Our JavaScript support has been enhanced, would you like to view the Release Notes?',
         '',
