@@ -77,10 +77,8 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public superHide( e, rootPath ) {
         let hideByOptions: string[] = [
-            `With matching Name`,
-            `With matching Extension`,
-            // By Name
-            // By Extension
+            `Hide against matching name's`,
+            `Hide against matching extension's`,
             // By Name & Extension
         ];
 
