@@ -24,6 +24,7 @@
         "*",
         "onView:extension",
         "onCommand:make-hidden.hideItem",
+        "onCommand:make-hidden.hideAllButThis",
         "onCommand:make-hidden.superHide",
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeAllItems"
@@ -39,10 +40,13 @@
         },
         "commands": [ {
                 "command": "make-hidden.hideItem",
-                "title": "MH: Hide Item"
+                "title": "MH: Hide"
+            }, {
+                "command": "make-hidden.hideAllButThis",
+                "title": "MH: Hide all, but this"
             }, {
                 "command": "make-hidden.superHide",
-                "title": "MH: Super Hide"
+                "title": "MH: Super hide"
             }, {
                 "command": "make-hidden.removeItem",
                 "title": "MH: Remove item"
@@ -54,6 +58,8 @@
         "menus": {
             "explorer/context": [ {
                     "command": "make-hidden.hideItem"
+                },{
+                    "command": "make-hidden.hideAllButThis"
                 }, {
                     "command": "make-hidden.superHide"
                 }

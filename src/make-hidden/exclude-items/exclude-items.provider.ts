@@ -66,7 +66,6 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
     private parseTree(): void  {
         // Get our work space configuration object
         let fileExcludeObject: any = this.getFilesExcludeObject();
-        console.log( fileExcludeObject );
         if( fileExcludeObject != null ){
             // Update the tree Parse tree accordingly
             this.tree = json.parseTree( JSON.stringify( 

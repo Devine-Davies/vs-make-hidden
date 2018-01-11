@@ -5,6 +5,7 @@ import * as console from 'console';
 
 /* -- Make hidden lib's -- */
 import ExcludeItemsProvider from './exclude-items.provider';
+import { connect } from 'tls';
 
 export default class ExcludeItemsController extends ExcludeItemsProvider {
 
@@ -30,6 +31,35 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     }
 
     /* --------------------
+    */
+    public hideAllButThis( itemPath : string = null ){
+        if ( itemPath ) {
+            let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+            let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
+            var targetFile = `${ itemPathInfo['basename'] }`;
+            let filesExcludeObject: any = this.getFilesExcludeObject();
+
+            let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
+                `${ workspacePath }/${ itemPathInfo['path'] }`
+            );
+
+            for( var fileName of allItemInPath ){
+                if( fileName != targetFile ){
+                    let filePath = `${itemPathInfo['path']}${fileName}`
+                    filesExcludeObject[ filePath ] = true;
+                    // Could be an idear to match on revers
+                    // - hide all file that are not ype of this file
+                    // let excludeSnippets: any = this.buildExcludeRegex(
+                    //     filePath, 2
+                    // );
+                }
+            }
+
+            this.saveFilesExcludeObject( filesExcludeObject );
+        }
+    }
+
+    /* --------------------
      * Hide item
      * dec: Appends the dir/file name into vs code user settings file.excludes
     */
@@ -47,14 +77,18 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public superHide( e, rootPath ) {
         let hideByOptions: string[] = [
-            `By Name`, `By Extension`,
+            `With matching Name`,
+            `With matching Extension`,
+            // By Name
+            // By Extension
+            // By Name & Extension
         ];
 
         let hideLevelOptions: string[] = [
-            `Globally: Hide from root dir`,
-            `Current: Hide from current dir`,
-            `Current & Below: Hide from current dir & lower`,
-            `Below: Hide all from below here`
+            `From Root`,
+            `Current directory`,
+            `Current directory & Below`,
+            `Only Below`
         ];
 
         vscode.window.showQuickPick( hideByOptions ).then( ( hideBySelection : string ) => {
@@ -118,9 +152,10 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         }
 
         return {
-            'byName'              : `${ excludeSnippet }${ itemPathProps['filename'] }`,
-            'byNameWithExtension' : `${ excludeSnippet }${ itemPathProps['filename'] }.*`,
-            'allExtension'        : `${ excludeSnippet }*.${ itemPathProps['extension'] }`,
+            'self'                : `${itemPath}`,
+            'byName'              : `${excludeSnippet}${itemPathProps['filename']}`,
+            'byNameWithExtension' : `${excludeSnippet}${itemPathProps['filename']}.*`,
+            'allExtension'        : `${excludeSnippet}*${itemPathProps['extension']}`,
         }
     }
 

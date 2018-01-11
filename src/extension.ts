@@ -41,6 +41,20 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
+    let hideAllButThisItem = vscode.commands.registerCommand('make-hidden.hideAllButThis', ( e : any ) =>  {
+        if( isVscodeFileObject( e ) ) {
+            let fileName : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
+            excludeItemsController.hideAllButThis( fileName );
+        }
+        else if( e == undefined ) {
+            let msg: string = `MH: Select Hide Item in the context menu on a directory item`;
+            vscode.window.showInformationMessage( msg )
+        }
+    });
+
+    /* --------------------
+     * Called on 
+    */
     let superHide = vscode.commands.registerCommand('make-hidden.superHide', ( e : any ) =>   {
         if( isVscodeFileObject( e ) ) {
             excludeItemsController.superHide( e, rootPath );
@@ -76,6 +90,7 @@ export function activate( context : vscode.ExtensionContext ) {
     /* -- Subscribe commands -- */
     // -- hide
     context.subscriptions.push( hideItem );
+    context.subscriptions.push( hideAllButThisItem );
     context.subscriptions.push( superHide );
     // -- Show
     context.subscriptions.push( removeItem );

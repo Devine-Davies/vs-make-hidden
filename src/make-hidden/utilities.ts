@@ -8,7 +8,7 @@ export default class Utilities {
 
     constructor( 
         public vsContext : vscode.ExtensionContext
-    ){ }
+    ){}
 
     /* --------------------
     */
@@ -23,13 +23,21 @@ export default class Utilities {
      * dec: It will return the file extension if one has been found.
     */
     public getPathInfoFromPath( givenPath : string = null, ) : {  } {
-        let extension: string = givenPath.slice( ( givenPath.lastIndexOf(".") - 1 >>> 0 ) + 2 );
-        let pathName = path.basename( givenPath );
+        let extension: string = path.extname( givenPath );
+        let pathName: string  = path.basename( givenPath );
         return {
-            "filename": pathName.slice(0, -( extension.length + 1 ) ),
+            "basename": pathName,
+            "filename": pathName.slice(0, -extension.length ),
             "extension": extension,
-            "path": givenPath.replace( pathName , "")
+            "path": givenPath.replace( pathName , "" )
         }
+    }
+
+    /* --------------------
+    */
+    public getAllFilesDir( directory: string = './' ) {
+        var files = fs.readdirSync( directory );
+        return files;
     }
 
     /* --------------------
