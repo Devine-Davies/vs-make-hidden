@@ -8,6 +8,7 @@ import * as path from 'path';
 /* -- Make hidden lib's -- */
 import Utilities from './make-hidden/utilities';
 import ExcludeItemsController from './make-hidden/exclude-items/exclude-items.controller';
+import { connect } from 'net';
 // import MakeHiddenLayoutManager from './layout-manager/layout-manager.controller';
 
 
@@ -55,6 +56,13 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
+    let superShowOnly = vscode.commands.registerCommand('make-hidden.superShowOnly', ( e : any ) =>  {
+        console.log( 'superShowOnly' );
+    });
+
+    /* --------------------
+     * Called on 
+    */
     let superHide = vscode.commands.registerCommand('make-hidden.superHide', ( e : any ) =>   {
         if( isVscodeFileObject( e ) ) {
             excludeItemsController.superHide( e, rootPath );
@@ -91,6 +99,7 @@ export function activate( context : vscode.ExtensionContext ) {
     // -- hide
     context.subscriptions.push( hideItem );
     context.subscriptions.push( hideAllButThisItem );
+    context.subscriptions.push( superShowOnly );
     context.subscriptions.push( superHide );
     // -- Show
     context.subscriptions.push( removeItem );
