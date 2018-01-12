@@ -34,58 +34,32 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public showOnly( itemPath : string = null ){
         if ( itemPath ) {
+            this.showOnlyFilterer( itemPath, false, 1 );
+            /* 
+                let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+                let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
+                var targetFile = `${ itemPathInfo['basename'] }`;
+                let filesExcludeObject: any = this.getFilesExcludeObject();
 
-            this.superShowOnlyFilterer( itemPath, false, 1 );
-            // let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-            // let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
-            // var targetFile = `${ itemPathInfo['basename'] }`;
-            // let filesExcludeObject: any = this.getFilesExcludeObject();
+                let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
+                    `${ workspacePath }/${ itemPathInfo['path'] }`
+                );
 
-            // let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
-            //     `${ workspacePath }/${ itemPathInfo['path'] }`
-            // );
+                for( var fileName of allItemInPath ){
+                    if( fileName != targetFile ){
+                        let filePath = `${itemPathInfo['path']}${fileName}`
+                        filesExcludeObject[ filePath ] = true;
+                    }
+                }
 
-            // for( var fileName of allItemInPath ){
-            //     if( fileName != targetFile ){
-            //         let filePath = `${itemPathInfo['path']}${fileName}`
-            //         filesExcludeObject[ filePath ] = true;
-            //     }
-            // }
-
-            // this.saveFilesExcludeObject( filesExcludeObject );
+                this.saveFilesExcludeObject( filesExcludeObject );
+            */
         }
     }
 
     /* --------------------
     */
-    public superShowOnly( e, rootPath ) {
-        let hideByOptions: string[] = [
-            `Show against matching name's`,
-            `Show against matching extension's`,
-            // By Name & Extension
-        ];
-
-        let hideLevelOptions: string[] = [
-            `From Root`,
-            `Current directory`,
-            // `Current directory & Below`,
-            // `Only Below`
-        ];
-
-        vscode.window.showQuickPick( hideByOptions ).then( ( hideBySelection : string ) => {
-            let hideByType: boolean = ( hideByOptions.indexOf( hideBySelection ) > 0 )? true : false;
-
-            vscode.window.showQuickPick( hideLevelOptions ).then( ( val : string ) => {
-                let itemPath: string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
-                let hideLevel: number = hideLevelOptions.indexOf( val );
-                    this.superShowOnlyFilterer( itemPath, hideByType, hideLevel );
-            } );
-        } );
-    }
-
-    /* --------------------
-    */
-    private superShowOnlyFilterer( 
+    private showOnlyFilterer( 
         itemPath : string = null, 
         includeItemExtension: boolean = false ,
         hideLevel : number = 0

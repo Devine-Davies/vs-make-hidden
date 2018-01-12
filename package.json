@@ -26,7 +26,6 @@
         "onCommand:make-hidden.hideItem",
         "onCommand:make-hidden.superHide",
         "onCommand:make-hidden.showOnly",
-        "onCommand:make-hidden.superShowOnly",
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeAllItems"
     ],
@@ -49,9 +48,6 @@
                 "command": "make-hidden.showOnly",
                 "title": "MH: Show only"
             }, {
-                "command": "make-hidden.superShowOnly",
-                "title": "MH: Super show only"
-            }, {
                 "command": "make-hidden.removeItem",
                 "title": "MH: Put back"
             }, {
@@ -66,8 +62,6 @@
                     "command": "make-hidden.superHide"
                 },{
                     "command": "make-hidden.showOnly"
-                },{
-                    "command": "make-hidden.superShowOnly"
                 }
             ],
             "view/title": [ {

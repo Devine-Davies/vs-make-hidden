@@ -69,19 +69,6 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
-    let superShowOnly = vscode.commands.registerCommand('make-hidden.superShowOnly', ( e : any ) =>  {
-        if( isVscodeFileObject( e ) ) {
-            excludeItemsController.superShowOnly( e, rootPath );
-        }
-        else if( e == undefined ) {
-            let msg: string = `MH: Select Super Hide in the context menu on a directory item`;
-            vscode.window.showInformationMessage( msg )
-        }
-    });
-
-    /* --------------------
-     * Called on 
-    */
     let removeItem = vscode.commands.registerCommand('make-hidden.removeItem', ( excludeString : string ) =>  {
         if( typeof excludeString == 'string' ) {
             if( excludeString.length > 0 ){
@@ -106,7 +93,6 @@ export function activate( context : vscode.ExtensionContext ) {
     context.subscriptions.push( hideItem );
     context.subscriptions.push( superHide );
     context.subscriptions.push( showOnly );
-    context.subscriptions.push( superShowOnly );
     // -- Show
     context.subscriptions.push( removeItem );
     context.subscriptions.push( emptyConfig );
