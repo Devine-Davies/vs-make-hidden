@@ -43,16 +43,16 @@
                 "title": "MH: Hide"
             }, {
                 "command": "make-hidden.hideAllButThis",
-                "title": "MH: Hide all, but this"
+                "title": "MH: Show only"
             }, {
                 "command": "make-hidden.superHide",
                 "title": "MH: Super hide"
             }, {
                 "command": "make-hidden.removeItem",
-                "title": "MH: Remove item"
+                "title": "MH: Put back"
             }, {
                 "command": "make-hidden.removeAllItems",
-                "title": "MH: Remove all items"
+                "title": "MH: Put all item's back"
             }
         ],
         "menus": {
