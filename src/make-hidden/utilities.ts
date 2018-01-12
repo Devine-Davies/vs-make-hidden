@@ -27,7 +27,7 @@ export default class Utilities {
         let pathName: string  = path.basename( givenPath );
         return {
             "basename": pathName,
-            "filename": pathName.slice(0, -extension.length ),
+            "filename": ( extension === '' )? pathName : pathName.slice(0, -extension.length ),
             "extension": extension,
             "path": givenPath.replace( pathName , "" )
         }

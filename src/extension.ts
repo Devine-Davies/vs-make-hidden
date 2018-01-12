@@ -42,7 +42,20 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
-    let hideAllButThisItem = vscode.commands.registerCommand('make-hidden.showOnly', ( e : any ) =>  {
+    let superHide = vscode.commands.registerCommand('make-hidden.superHide', ( e : any ) =>   {
+        if( isVscodeFileObject( e ) ) {
+            excludeItemsController.superHide( e, rootPath );
+        }
+        else if( e == undefined ) {
+            let msg: string = `MH: Select Super Hide in the context menu on a directory item`;
+            vscode.window.showInformationMessage( msg )
+        }
+    });
+
+    /* --------------------
+     * Called on 
+    */
+    let showOnly = vscode.commands.registerCommand('make-hidden.showOnly', ( e : any ) =>  {
         if( isVscodeFileObject( e ) ) {
             let fileName : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
             excludeItemsController.showOnly( fileName );
@@ -57,15 +70,8 @@ export function activate( context : vscode.ExtensionContext ) {
      * Called on 
     */
     let superShowOnly = vscode.commands.registerCommand('make-hidden.superShowOnly', ( e : any ) =>  {
-        console.log( 'superShowOnly' );
-    });
-
-    /* --------------------
-     * Called on 
-    */
-    let superHide = vscode.commands.registerCommand('make-hidden.superHide', ( e : any ) =>   {
         if( isVscodeFileObject( e ) ) {
-            excludeItemsController.superHide( e, rootPath );
+            excludeItemsController.superShowOnly( e, rootPath );
         }
         else if( e == undefined ) {
             let msg: string = `MH: Select Super Hide in the context menu on a directory item`;
@@ -98,9 +104,9 @@ export function activate( context : vscode.ExtensionContext ) {
     /* -- Subscribe commands -- */
     // -- hide
     context.subscriptions.push( hideItem );
-    context.subscriptions.push( hideAllButThisItem );
-    context.subscriptions.push( superShowOnly );
     context.subscriptions.push( superHide );
+    context.subscriptions.push( showOnly );
+    context.subscriptions.push( superShowOnly );
     // -- Show
     context.subscriptions.push( removeItem );
     context.subscriptions.push( emptyConfig );

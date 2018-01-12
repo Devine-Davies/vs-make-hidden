@@ -34,27 +34,108 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public showOnly( itemPath : string = null ){
         if ( itemPath ) {
-            let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-            let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
-            var targetFile = `${ itemPathInfo['basename'] }`;
-            let filesExcludeObject: any = this.getFilesExcludeObject();
 
+            this.superShowOnlyFilterer( itemPath, false, 1 );
+            // let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+            // let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
+            // var targetFile = `${ itemPathInfo['basename'] }`;
+            // let filesExcludeObject: any = this.getFilesExcludeObject();
+
+            // let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
+            //     `${ workspacePath }/${ itemPathInfo['path'] }`
+            // );
+
+            // for( var fileName of allItemInPath ){
+            //     if( fileName != targetFile ){
+            //         let filePath = `${itemPathInfo['path']}${fileName}`
+            //         filesExcludeObject[ filePath ] = true;
+            //     }
+            // }
+
+            // this.saveFilesExcludeObject( filesExcludeObject );
+        }
+    }
+
+    /* --------------------
+    */
+    public superShowOnly( e, rootPath ) {
+        let hideByOptions: string[] = [
+            `Show against matching name's`,
+            `Show against matching extension's`,
+            // By Name & Extension
+        ];
+
+        let hideLevelOptions: string[] = [
+            `From Root`,
+            `Current directory`,
+            // `Current directory & Below`,
+            // `Only Below`
+        ];
+
+        vscode.window.showQuickPick( hideByOptions ).then( ( hideBySelection : string ) => {
+            let hideByType: boolean = ( hideByOptions.indexOf( hideBySelection ) > 0 )? true : false;
+
+            vscode.window.showQuickPick( hideLevelOptions ).then( ( val : string ) => {
+                let itemPath: string =  e.fsPath.replace( rootPath , '' ).slice( 1 );
+                let hideLevel: number = hideLevelOptions.indexOf( val );
+                    this.superShowOnlyFilterer( itemPath, hideByType, hideLevel );
+            } );
+        } );
+    }
+
+    /* --------------------
+    */
+    private superShowOnlyFilterer( 
+        itemPath : string = null, 
+        includeItemExtension: boolean = false ,
+        hideLevel : number = 0
+    ) {
+        if ( itemPath ) {
+            let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+            let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
+
+            var targetFile = `${ itemPathProps['basename'] }`;
+            let filesExcludeObject: any = this.getFilesExcludeObject();
             let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
-                `${ workspacePath }/${ itemPathInfo['path'] }`
+                `${ workspacePath }/${ itemPathProps['path'] }`
             );
 
             for( var fileName of allItemInPath ){
                 if( fileName != targetFile ){
-                    let filePath = `${itemPathInfo['path']}${fileName}`
-                    filesExcludeObject[ filePath ] = true;
-                    // Could be an idear to match on revers
-                    // - hide all file that are not ype of this file
-                    // let excludeSnippets: any = this.buildExcludeRegex(
-                    //     filePath, 2
-                    // );
+                    let filePath = `${itemPathProps['path']}${fileName}`;
+
+                    let thisFileNamePathProps: any = this.mhUtilities.getPathInfoFromPath( 
+                        filePath
+                    );
+
+                    let excludeSnippets: any = this.buildExcludeRegex(
+                        filePath, hideLevel
+                    );
+
+                    // By Name
+                    if( ! includeItemExtension ){
+                        // Hide with opposite names
+                        if( itemPathProps['filename'] != thisFileNamePathProps['filename'] ){
+                            filesExcludeObject[ excludeSnippets['byName'] ] = true;
+                            filesExcludeObject[ excludeSnippets['byNameWithExtension'] ] = true;
+                        }
+                    }
+
+                    // By Extension
+                    if( includeItemExtension && thisFileNamePathProps['extension'] !== "" ){
+                        // // Hide with opposite names
+                        if( itemPathProps['filename'] != thisFileNamePathProps['filename'] ){
+                            if( itemPathProps['extension'] != thisFileNamePathProps['extension'] ){
+                                filesExcludeObject[ excludeSnippets['allExtension'] ] = true;
+                            }
+                        }
+                    }
                 }
+
             }
 
+            console.log( filesExcludeObject );
+            /* -- Save the new work space -- */
             this.saveFilesExcludeObject( filesExcludeObject );
         }
     }
@@ -125,7 +206,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         }
 
         // By Extension
-        if( includeItemExtension && itemPathProps['extension'] !== '' ){
+        if( includeItemExtension && itemPathProps['extension'] !== '.' ){
             filesExcludeObject[ excludeSnippets['allExtension'] ] = true;
         }
 
@@ -173,7 +254,6 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         if( item_key ) {
             let filesExcludeObject  : any = this.getFilesExcludeObject();
             delete filesExcludeObject[ item_key ];
-
             this.saveFilesExcludeObject( filesExcludeObject )
         }
     }
