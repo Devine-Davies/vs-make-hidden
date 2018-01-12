@@ -41,10 +41,10 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
-    let hideAllButThisItem = vscode.commands.registerCommand('make-hidden.hideAllButThis', ( e : any ) =>  {
+    let hideAllButThisItem = vscode.commands.registerCommand('make-hidden.showOnly', ( e : any ) =>  {
         if( isVscodeFileObject( e ) ) {
             let fileName : string = e.fsPath.replace( rootPath , '' ).slice( 1 );
-            excludeItemsController.hideAllButThis( fileName );
+            excludeItemsController.showOnly( fileName );
         }
         else if( e == undefined ) {
             let msg: string = `MH: Select Hide Item in the context menu on a directory item`;

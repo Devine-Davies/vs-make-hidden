@@ -32,7 +32,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
 
     /* --------------------
     */
-    public hideAllButThis( itemPath : string = null ){
+    public showOnly( itemPath : string = null ){
         if ( itemPath ) {
             let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
             let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
