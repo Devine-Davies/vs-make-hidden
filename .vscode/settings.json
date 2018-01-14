@@ -1,7 +1,5 @@
 {
   "files.exclude": {
-    "vsc-extension-quickstart.md": true,
-    "make-hidden-0.12.0.vsix": true,
-    "node_modules": true
+    "tsconfig.json": true
   }
 }

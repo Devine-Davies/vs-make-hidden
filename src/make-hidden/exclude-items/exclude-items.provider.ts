@@ -39,7 +39,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
             itemTitle, vscode.TreeItemCollapsibleState.None
         );
 
-        treeItem.iconPath     = this.mhUtilities.getProjectThemeDirectory( 'view.svg' );
+        treeItem.iconPath     = this.mhUtilities.getProjectThemeDirectory( 'put-back-icon.svg' );
         treeItem.contextValue = itemTitle;
         treeItem.command      = {
             command   : 'make-hidden.removeItem',
