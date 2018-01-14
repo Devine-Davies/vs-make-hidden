@@ -143,5 +143,4 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
             });
         }
     }
-
 }

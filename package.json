@@ -40,28 +40,36 @@
         },
         "commands": [ {
                 "command": "make-hidden.hideItem",
-                "title": "MH: Hide"
+                "title": "Hide",
+                "category": "Make Hidden"
             }, {
                 "command": "make-hidden.superHide",
-                "title": "MH: Super hide"
+                "title": "Super Hide",
+                "category": "Make Hidden"
             }, {
                 "command": "make-hidden.showOnly",
-                "title": "MH: Show only"
+                "title": "Show Only",
+                "category": "Make Hidden"
             }, {
                 "command": "make-hidden.removeItem",
-                "title": "MH: Put back"
+                "title": "Put Pack",
+                "category": "Make Hidden"
             }, {
                 "command": "make-hidden.removeAllItems",
-                "title": "MH: Put all item's back"
+                "title": "Put all Back",
+                "category": "Make Hidden"
             }
         ],
         "menus": {
             "explorer/context": [ {
-                    "command": "make-hidden.hideItem"
+                    "command": "make-hidden.hideItem",
+                    "group": "make-hidden@1"
                 }, {
-                    "command": "make-hidden.superHide"
+                    "command": "make-hidden.superHide",
+                    "group": "make-hidden@1"
                 },{
-                    "command": "make-hidden.showOnly"
+                    "command": "make-hidden.showOnly",
+                    "group": "make-hidden@1"
                 }
             ],
             "view/title": [ {

@@ -6,6 +6,7 @@ import * as console from 'console';
 /* -- Make hidden lib's -- */
 import ExcludeItemsProvider from './exclude-items.provider';
 import { connect } from 'tls';
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 export default class ExcludeItemsController extends ExcludeItemsProvider {
 
@@ -34,49 +35,31 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public showOnly( itemPath : string = null ){
         if ( itemPath ) {
-            this.showOnlyFilterer( itemPath, false, 1 );
-            /* 
-                let itemPathInfo: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-                let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
-                var targetFile = `${ itemPathInfo['basename'] }`;
-                let filesExcludeObject: any = this.getFilesExcludeObject();
-
-                let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
-                    `${ workspacePath }/${ itemPathInfo['path'] }`
-                );
-
-                for( var fileName of allItemInPath ){
-                    if( fileName != targetFile ){
-                        let filePath = `${itemPathInfo['path']}${fileName}`
-                        filesExcludeObject[ filePath ] = true;
-                    }
-                }
-
-                this.saveFilesExcludeObject( filesExcludeObject );
-            */
+            this.showOnlyFilterer( itemPath, true, false, 1 );
         }
     }
 
     /* --------------------
     */
     private showOnlyFilterer( 
-        itemPath : string = null, 
-        includeItemExtension: boolean = false ,
+        itemPath : string = null,
+        matchByName : boolean = true,
+        matchByExtension: boolean = true,
         hideLevel : number = 0
     ) {
         if ( itemPath ) {
-            let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
+            let targetFilePathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
             let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
 
-            var targetFile = `${ itemPathProps['basename'] }`;
+            var targetFile = `${ targetFilePathProps['basename'] }`;
             let filesExcludeObject: any = this.getFilesExcludeObject();
             let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
-                `${ workspacePath }/${ itemPathProps['path'] }`
+                `${ workspacePath }/${ targetFilePathProps['path'] }`
             );
 
             for( var fileName of allItemInPath ){
                 if( fileName != targetFile ){
-                    let filePath = `${itemPathProps['path']}${fileName}`;
+                    let filePath = `${targetFilePathProps['path']}${fileName}`;
 
                     let thisFileNamePathProps: any = this.mhUtilities.getPathInfoFromPath( 
                         filePath
@@ -86,29 +69,30 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
                         filePath, hideLevel
                     );
 
-                    // By Name
-                    if( ! includeItemExtension ){
-                        // Hide with opposite names
-                        if( itemPathProps['filename'] != thisFileNamePathProps['filename'] ){
+                    let checks = {
+                       'byName'      : ( matchByName ),
+                       'byExtension' : ( matchByExtension && thisFileNamePathProps['extension'] !== "" ),
+                       
+                       // Hide with opposite Names & Extension
+                       'isDifferentNames'     : ( targetFilePathProps['filename']  != thisFileNamePathProps['filename'] ),
+                       'isDifferentExtension' : ( targetFilePathProps['extension'] != thisFileNamePathProps['extension'] ),
+                    }
+
+                    if( checks['byName'] ){
+                        if( checks['isDifferentNames'] ){
                             filesExcludeObject[ excludeSnippets['byName'] ] = true;
                             filesExcludeObject[ excludeSnippets['byNameWithExtension'] ] = true;
                         }
                     }
 
-                    // By Extension
-                    if( includeItemExtension && thisFileNamePathProps['extension'] !== "" ){
-                        // // Hide with opposite names
-                        if( itemPathProps['filename'] != thisFileNamePathProps['filename'] ){
-                            if( itemPathProps['extension'] != thisFileNamePathProps['extension'] ){
-                                filesExcludeObject[ excludeSnippets['allExtension'] ] = true;
-                            }
+                    if( checks['byExtension'] ){
+                        if( checks['isDifferentNames'] && checks['isDifferentExtension'] ){
+                            filesExcludeObject[ excludeSnippets['allExtension'] ] = true;
                         }
                     }
                 }
-
             }
 
-            console.log( filesExcludeObject );
             /* -- Save the new work space -- */
             this.saveFilesExcludeObject( filesExcludeObject );
         }
@@ -138,10 +122,10 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         ];
 
         let hideLevelOptions: string[] = [
-            `From Root`,
+            `Root directory`,
             `Current directory`,
-            `Current directory & Below`,
-            `Only Below`
+            `Current & Child directories`,
+            `Child directories only`
         ];
 
         vscode.window.showQuickPick( hideByOptions ).then( ( hideBySelection : string ) => {
@@ -226,7 +210,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     public removeItem( item_key : string = null ) : void {
         if( item_key ) {
-            let filesExcludeObject  : any = this.getFilesExcludeObject();
+            let filesExcludeObject: any = this.getFilesExcludeObject();
             delete filesExcludeObject[ item_key ];
             this.saveFilesExcludeObject( filesExcludeObject )
         }
@@ -261,5 +245,4 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
             });
         }
     }
-
 }
