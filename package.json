@@ -2,7 +2,7 @@
     "name": "make-hidden",
     "displayName": "Make Hidden",
     "description": "Make Hidden enhances the built-in functionality of `files.exclude` by proving an explorer view Pane interface for a quick overview of the hidden/exclude files/folders from the projects directory. Context menus options are also added to perform multiply hidden/exclude options quickly and effortlessly.",
-    "version": "0.32.0",
+    "version": "2.0.0",
     "publisher": "devine-davies",
     "icon": "resources/icon.png",
     "repository": {
@@ -32,47 +32,57 @@
     "main": "./out/src/extension",
     "contributes": {
         "views": {
-            "explorer": [ {
+            "explorer": [
+                {
                     "id": "makeHiddenViewPane",
                     "name": "Hidden in Directory"
                 }
             ]
         },
-        "commands": [ {
+        "commands": [
+            {
                 "command": "make-hidden.hideItem",
                 "title": "Hide",
                 "category": "Make Hidden"
-            }, {
+            },
+            {
                 "command": "make-hidden.superHide",
                 "title": "Super Hide",
                 "category": "Make Hidden"
-            }, {
+            },
+            {
                 "command": "make-hidden.showOnly",
                 "title": "Show Only",
                 "category": "Make Hidden"
-            }, {
+            },
+            {
                 "command": "make-hidden.removeItem",
                 "title": "Put Pack",
                 "category": "Make Hidden"
-            }, {
+            },
+            {
                 "command": "make-hidden.removeAllItems",
                 "title": "Put all Back",
                 "category": "Make Hidden"
             }
         ],
         "menus": {
-            "explorer/context": [ {
+            "explorer/context": [
+                {
                     "command": "make-hidden.hideItem",
                     "group": "make-hidden@1"
-                }, {
+                },
+                {
                     "command": "make-hidden.superHide",
                     "group": "make-hidden@1"
-                },{
+                },
+                {
                     "command": "make-hidden.showOnly",
                     "group": "make-hidden@1"
                 }
             ],
-            "view/title": [ {
+            "view/title": [
+                {
                     "command": "make-hidden.removeAllItems",
                     "when": "view == makeHiddenViewPane"
                 }
