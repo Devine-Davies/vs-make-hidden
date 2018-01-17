@@ -32,6 +32,14 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     }
 
     /* --------------------
+     * Remove all regex item's from config list
+     * dec: removes all items in get_workspace_configuration(files.exclude)
+    */
+    public loadList( fileExcludedObject: any = {} ) : void {
+        this.saveFilesExcludeObject( fileExcludedObject );
+    }
+
+    /* --------------------
     */
     public showOnly( itemPath : string = null ){
         if ( itemPath ) {

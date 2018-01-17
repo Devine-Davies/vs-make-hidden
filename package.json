@@ -27,7 +27,10 @@
         "onCommand:make-hidden.superHide",
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
-        "onCommand:make-hidden.removeAllItems"
+        "onCommand:make-hidden.removeAllItems",
+        "onCommand:make-hidden.layoutSave",
+        "onCommand:make-hidden.layoutLoad",
+        "onCommand:make-hidden.layoutDelete"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -39,30 +42,41 @@
                 }
             ]
         },
-        "commands": [
-            {
+        "commands": [{
                 "command": "make-hidden.hideItem",
                 "title": "Hide",
                 "category": "Make Hidden"
-            },
-            {
+            }, {
                 "command": "make-hidden.superHide",
                 "title": "Super Hide",
                 "category": "Make Hidden"
-            },
-            {
+            }, {
                 "command": "make-hidden.showOnly",
                 "title": "Show Only",
                 "category": "Make Hidden"
-            },
-            {
+            }, {
                 "command": "make-hidden.removeItem",
                 "title": "Put Pack",
                 "category": "Make Hidden"
-            },
-            {
+            }, {
                 "command": "make-hidden.removeAllItems",
-                "title": "Put all Back",
+                "title": "Empty",
+                "category": "Make Hidden",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+            }, {
+                "command": "make-hidden.layoutSave",
+                "title": "Save current layout",
+                "category": "Make Hidden"
+            }, {
+                "command": "make-hidden.layoutLoad",
+                "title": "Load layout",
+                "category": "Make Hidden"
+            }, {
+                "command": "make-hidden.layoutDelete",
+                "title": "Remove layout",
                 "category": "Make Hidden"
             }
         ],
@@ -81,10 +95,21 @@
                     "group": "make-hidden@1"
                 }
             ],
-            "view/title": [
-                {
+            "view/title": [{
                     "command": "make-hidden.removeAllItems",
                     "when": "view == makeHiddenViewPane"
+                }, {
+                    "command": "make-hidden.layoutSave",
+                    "when": "view == makeHiddenViewPane",
+                    "group": "layoutManager"
+                }, {
+                    "command": "make-hidden.layoutLoad",
+                    "when": "view == makeHiddenViewPane",
+                    "group": "layoutManager"
+                }, {
+                    "command": "make-hidden.layoutDelete",
+                    "when": "view == makeHiddenViewPane",
+                    "group": "layoutManager"
                 }
             ]
         }
