@@ -9,14 +9,14 @@ import * as path from 'path';
 import Utilities from './make-hidden/utilities';
 import { connect } from 'net';
 import ExcludeItemsController from './make-hidden/exclude-items/exclude-items.controller';
-import LayoutManagerController from './make-hidden/layout-manager/layout-manager.controller';
+import WorkspaceManagerController from './make-hidden/workspace-manager/workspace-manager.controller';
 
 
 var store = {
-    layoutManager: [ {
+    workspaceManager: [ {
         "name": "Wordpress Main",
         "accessLevel": "global",
-        "items": {
+        "excludedItems": {
             "*.DS_Store": true,
             "*.DS_Store.*": true,
             "*.git": true,
@@ -104,30 +104,19 @@ var store = {
             "wp-content/themes/*twentysixteen.*": true
         }
     }, {
-        "name": "layout-two",
-        "accessLevel": "projectDir",
-        "items": {
-            "somthing" : true
+        "name": "Workspace Two",
+        "accessLevel": "project",
+        "excludedItems": {
+            "index.php" : true
         }
     }],
 };
 
-// console.log( layoutManager.switch('layout-two') );
-// let currentLayout = layoutManager.getCurrentLayout();
-// currentLayout.name == 'layout-two';
-
-// layoutManager.remove('layout-one');
-// let switchTes = console.log( layoutManager.switch('layout-one') );
-
-// console.log(layoutManager.findByAccessLevel('global'));
-// console.log(layoutManager.findByAccessLevel('projectDir'));
-
 const rootPath = vscode.workspace.rootPath;
 
 /* --------------------
- * Extension activated methord
- * ---------------------------------------------------------------
- * Command is executed and extension is activated the very first time the 
+ * Extension activation
+ * Vscode Func: command is executed and extension is activated the very first time the 
 */
 export function activate( context : vscode.ExtensionContext ) {
 
@@ -136,10 +125,7 @@ export function activate( context : vscode.ExtensionContext ) {
     const excludeItemsController = new ExcludeItemsController( 
         utilities
     );
-    const layoutManager = new LayoutManagerController(
-        utilities,
-        store.layoutManager
-    );
+    const workspaceManager = new WorkspaceManagerController( utilities, store.workspaceManager );
 
     /* --------------------
      * Called on 
@@ -216,39 +202,57 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Called on 
     */
-    var layoutCmdList = ['layoutSave', 'layoutLoad', 'layoutDelete'];
-    layoutCmdList.forEach( ( layoutCmd ) => {
-        let registerCommand = vscode.commands.registerCommand(`make-hidden.${layoutCmd}`, () => {
-            switch( layoutCmd ){
-                case 'layoutSave' : 
-                    // let msg: string = `MH: Please select an item from the view pane 'Hidden in Directory'`;
-                    // vscode.window.showInformationMessage( msg )
-                break;
+    var workspaceCmdList = ['workspaceSave', 'workspaceLoad', 'workspaceDelete'];
+    workspaceCmdList.forEach( ( workspaceCmd ) => {
+        let registerCommand = vscode.commands.registerCommand(`make-hidden.${workspaceCmd}`, () => {
 
-                case 'layoutLoad' : 
-                    let allLayouts = layoutManager.getLayoutListForEnvironment( );
-                    let layoutNameList: string[] = [];
-                    allLayouts.forEach( ( layoutObject: any = {} ) => {
-                        layoutNameList.push( layoutObject.name );
-                    } );
+            let workspaceList = workspaceManager.getWorkspaceForProject( );
+            let workspaceNameList: string[] = [];
 
-                    layoutNameList.push( 'Close' );
-                    vscode.window.showQuickPick( layoutNameList )
-                    .then( ( val ) => {
-                        if( val !== 'Close' ){
-                            let chosenLayoutIndex = layoutNameList.indexOf( val );
-                            let chosenLayout = allLayouts[ chosenLayoutIndex ];
-                            excludeItemsController.loadList( chosenLayout.items )
-                        }
+            workspaceList.forEach( ( workspaceObject: any = {} ) => {
+                let label: string =  ( ( workspaceObject.accessLevel === 'global' )? 'Global: ' : '' ) + workspaceObject.name;
+                workspaceNameList.push( label );
+            } );
+            workspaceNameList.push( 'Close' );
+
+            switch( workspaceCmd ){
+                case 'workspaceSave' : 
+                    let accessLevelOptions: string[] = ['Save globally', 'Save for current project', 'Close'];
+                    vscode.window.showQuickPick( accessLevelOptions )
+                    .then( ( accessLevel ) => {
+                        if( accessLevel === 'Close' ) return;
+                        vscode.window.showInputBox({prompt: 'Name workspace'})
+                        .then( ( workspaceName ) => {
+                            workspaceManager.saveNew(
+                                workspaceName, accessLevelOptions.indexOf( accessLevel ), 
+                                excludeItemsController.getFilesExcludeObject()
+                            );
+                        });
                     });
                 break;
 
-                case 'layoutDelete' :
-                    let msg: string = `Are you sure you wish to delete this layout`;
-                    vscode.window.showInformationMessage( msg )
+                case 'workspaceLoad' :
+                    vscode.window.showQuickPick( workspaceNameList )
+                    .then( ( val ) => {
+                        if( val === 'Close' ) return;
+                        let chosenWorkspaceIndex = workspaceNameList.indexOf( val );
+                        let chosenWorkspace = workspaceList[ chosenWorkspaceIndex ];
+                        excludeItemsController.loadList( chosenWorkspace['excludedItems'] )
+                    });
+                break;
+
+                case 'workspaceDelete' :
+                    vscode.window.showQuickPick( workspaceNameList )
+                    .then( ( val ) => {
+                        if( val === 'Close' ) return;
+                        let chosenWorkspaceIndex = workspaceNameList.indexOf( val );
+                        let chosenWorkspace = workspaceList[ chosenWorkspaceIndex ];
+                        workspaceManager.remove( chosenWorkspace );
+                    });
                 break;
             }
         });
+
         context.subscriptions.push( registerCommand );
     })
 }
@@ -256,7 +260,6 @@ export function activate( context : vscode.ExtensionContext ) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 }
-
 
 function isVscodeFileObject( obj : any = null ) : boolean {
     if( typeof obj == 'object' ) {

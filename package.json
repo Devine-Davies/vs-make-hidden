@@ -28,9 +28,9 @@
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeAllItems",
-        "onCommand:make-hidden.layoutSave",
-        "onCommand:make-hidden.layoutLoad",
-        "onCommand:make-hidden.layoutDelete"
+        "onCommand:make-hidden.workspaceSave",
+        "onCommand:make-hidden.workspaceLoad",
+        "onCommand:make-hidden.workspaceDelete"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -67,16 +67,16 @@
 					"dark": "resources/dark/refresh.svg"
 				}
             }, {
-                "command": "make-hidden.layoutSave",
-                "title": "Save current layout",
+                "command": "make-hidden.workspaceSave",
+                "title": "Save as new workspace",
                 "category": "Make Hidden"
             }, {
-                "command": "make-hidden.layoutLoad",
-                "title": "Load layout",
+                "command": "make-hidden.workspaceLoad",
+                "title": "Load workspace",
                 "category": "Make Hidden"
             }, {
-                "command": "make-hidden.layoutDelete",
-                "title": "Remove layout",
+                "command": "make-hidden.workspaceDelete",
+                "title": "Remove workspace",
                 "category": "Make Hidden"
             }
         ],
@@ -99,17 +99,17 @@
                     "command": "make-hidden.removeAllItems",
                     "when": "view == makeHiddenViewPane"
                 }, {
-                    "command": "make-hidden.layoutSave",
+                    "command": "make-hidden.workspaceSave",
                     "when": "view == makeHiddenViewPane",
-                    "group": "layoutManager"
+                    "group": "workspaceManager"
                 }, {
-                    "command": "make-hidden.layoutLoad",
+                    "command": "make-hidden.workspaceLoad",
                     "when": "view == makeHiddenViewPane",
-                    "group": "layoutManager"
+                    "group": "workspaceManager"
                 }, {
-                    "command": "make-hidden.layoutDelete",
+                    "command": "make-hidden.workspaceDelete",
                     "when": "view == makeHiddenViewPane",
-                    "group": "layoutManager"
+                    "group": "workspaceManager"
                 }
             ]
         }
