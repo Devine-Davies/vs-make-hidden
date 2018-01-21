@@ -5,7 +5,6 @@ import * as console from 'console';
 
 /* -- Make hidden lib's -- */
 import ExcludeItemsProvider from './exclude-items.provider';
-import { connect } from 'tls';
 import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 export default class ExcludeItemsController extends ExcludeItemsProvider {

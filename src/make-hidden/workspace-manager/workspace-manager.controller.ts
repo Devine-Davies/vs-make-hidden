@@ -1,86 +1,127 @@
 /* -- Third party import's -- */
-import * as vscode from 'vscode';
-import * as ChildProcess from 'child_process';
+import * as fs from 'fs';
 import * as console from 'console';
 
 /* -- Make hidden lib's -- */
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
-import { connect } from 'tls';
+import * as Util from '../utilities';
 
-export default class WorkspaceManagerController { 
+export interface WorkspaceLayout {
+    id: string;
+    name: string;
+    path: string,
+    excludedItems: any;
+}
 
-    accessLevels = {
-        0 : 'global',
-        1 : 'project',
-    }
+export default class WorkspaceManager { 
 
-    constructor(
-        private mhUtilities: any = null,
-        private allWorkspaces: any = {}
-    ){}
-
-    /* --------------------
-    */
-    public getWorkspaceForProject( ){
-        var globalList  = this.findByAccessLevel('global');
-        var projectList = this.findByAccessLevel('project');
-        return projectList.concat( globalList );
-    }
+    workSpaceSettingPath : string = Util.getExtensionSettingPath();
+    workspaces: WorkspaceLayout[] = [];
+    projectRoot: string = '';
 
     /* --------------------
     */
-    public saveNew(
+    constructor(){
+        this.load();
+    }
+
+    /* --------------------
+    */
+    private load(){
+        let items: WorkspaceLayout[] = JSON.parse(fs.readFileSync( this.workSpaceSettingPath ).toString());
+        this.workspaces = items;
+    }
+
+    /* --------------------
+    */
+    private save(){
+        fs.writeFileSync( this.workSpaceSettingPath ,
+            JSON.stringify( this.workspaces , null, "\t")
+        );
+    }
+
+    /* --------------------
+    */
+    public create(
         name: string = 'makeHidden workspace',
-        accessLevelIndex: number = 0,
+        workspace: number = 0,
         excludedItems: any = {},
     ) {
-        this.allWorkspaces.push( this.buildWorkspaceObject( 
-            name, this.accessLevels[ accessLevelIndex ], excludedItems 
+        let workspaceChoices: any = {
+            0 : 'global',
+            1 : Util.getVsCodeCurrentPath(),
+        };
+
+        this.workspaces.push( this.buildObject( 
+            name, workspaceChoices[ workspace ], 
+            excludedItems 
         ) );
+
+        this.save();
     }
 
     /* --------------------
     */
-    public remove( workspaceObj : any = this.buildWorkspaceObject() ) {
-        let index = 0;
-        for ( let wso of this.allWorkspaces ) {
-            let check = {
-                "name" : wso["name"] === workspaceObj["name"],
-                "accessLevel" : wso["accessLevel"] === workspaceObj["accessLevel"]
+    public getAll( forProject: boolean = true ): WorkspaceLayout[] {
+        return this.workspaces;
+    }
+
+    /* --------------------
+    */
+    public removeById( id: string = null ) {
+        for ( let index in this.workspaces ) {
+            let workspaces = this.workspaces[ index ];
+            if ( workspaces.id === id ) {
+                this.workspaces.splice(Number(index), 1);
+                this.save();
             }
-            
-            if ( check["name"] && check["accessLevel"] ) {
-                this.allWorkspaces.splice(index, 1);
-            }
-            
-            index++;
         }
     }
 
     /* --------------------
-    */
-    private buildWorkspaceObject(
-        name: string = 'makeHidden workspace',
-        accessLevel: string = 'global',
-        excludedItems: any = {},
-    ){
-        return {
-            "name": name,
-            "accessLevel": accessLevel,
-            "excludedItems": excludedItems
+        private findByPath( path: string = 'all') {
+            let foundWorkspace: any = [];
+            for (let workspace of this.workspaces) { 
+                if( path === 'all' ){
+                    foundWorkspace.push( workspace );
+                }
+                else if ( workspace["path"] === path ) { 
+                    foundWorkspace.push( workspace );
+                }
+            }
+            return foundWorkspace;
         }
-    }
-
-    /* --------------------
     */
-    private findByAccessLevel(accessLevel: string = null) {
+    public fidById( id: string = null ) : WorkspaceLayout {
         let foundWorkspace: any = [];
-        for (let workspace of this.allWorkspaces) { 
-            if ( workspace["accessLevel"] === accessLevel ) { 
-                foundWorkspace.push( workspace );
+        for (let workspace of this.workspaces ) { 
+            if( workspace.id === id ){
+                return workspace;
             }
         }
+        return null;
+    }
 
-        return foundWorkspace;
+    /* --------------------
+    */
+    private buildObject(
+        name: string = 'Make Hidden Workspace',
+        path: string = 'global',
+        items: any = {},
+    ) : WorkspaceLayout {
+        return {
+            "id" : this.guidGenerator(),
+            "name": name,
+            "path": path,
+            "excludedItems": items
+        }
+    }
+
+    /* --------------------
+    */
+    private guidGenerator(): string {
+        var S4 = function() {
+           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        };
+        return (S4()+"-"+S4());
     }
 }

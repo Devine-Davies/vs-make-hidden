@@ -135,6 +135,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
                 let formattedSettings : any = JSON.stringify( 
                     settingsDataParse , null, 2
                 ).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
+
+                // let formattedSettings : any = JSON.stringify(settingsDataParse, null, "\t");
             
                 fs.writeFile( this.getSettingPath() , formattedSettings , ( err ) => {
                     /* -- Refresh out tree for view -- */

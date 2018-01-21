@@ -6,111 +6,11 @@ import * as console from 'console';
 import * as path from 'path';
 
 /* -- Make hidden lib's -- */
+
 import Utilities from './make-hidden/utilities';
-import { connect } from 'net';
+import * as Util from './make-hidden/utilities';
 import ExcludeItemsController from './make-hidden/exclude-items/exclude-items.controller';
-import WorkspaceManagerController from './make-hidden/workspace-manager/workspace-manager.controller';
-
-
-var store = {
-    workspaceManager: [ {
-        "name": "Wordpress Main",
-        "accessLevel": "global",
-        "excludedItems": {
-            "*.DS_Store": true,
-            "*.DS_Store.*": true,
-            "*.git": true,
-            "*.git.*": true,
-            "*.gitignore": true,
-            "*.gitignore.*": true,
-            "*.htaccess": true,
-            "*.htaccess.*": true,
-            "*.vscode.*": true,
-            "*README": true,
-            "*README.*": true,
-            "*index": true,
-            "*index.*": true,
-            "*license": true,
-            "*license.*": true,
-            "*readme": true,
-            "*readme.*": true,
-            "*wp-activate": true,
-            "*wp-activate.*": true,
-            "*wp-admin": true,
-            "*wp-admin.*": true,
-            "*wp-blog-header": true,
-            "*wp-blog-header.*": true,
-            "*wp-comments-post": true,
-            "*wp-comments-post.*": true,
-            "*wp-config-sample": true,
-            "*wp-config-sample.*": true,
-            "*wp-config": true,
-            "*wp-config.*": true,
-            "*wp-cron": true,
-            "*wp-cron.*": true,
-            "*wp-includes": true,
-            "*wp-includes.*": true,
-            "*wp-links-opml": true,
-            "*wp-links-opml.*": true,
-            "*wp-load": true,
-            "*wp-load.*": true,
-            "*wp-login": true,
-            "*wp-login.*": true,
-            "*wp-mail": true,
-            "*wp-mail.*": true,
-            "*wp-settings": true,
-            "*wp-settings.*": true,
-            "*wp-signup": true,
-            "*wp-signup.*": true,
-            "*wp-snapshots": true,
-            "*wp-snapshots.*": true,
-            "*wp-trackback": true,
-            "*wp-trackback.*": true,
-            "*xmlrpc": true,
-            "*xmlrpc.*": true,
-            "wp-content/plugins/*.DS_Store": true,
-            "wp-content/plugins/*.DS_Store.*": true,
-            "wp-content/plugins/*advanced-custom-fields-pro": true,
-            "wp-content/plugins/*advanced-custom-fields-pro.*": true,
-            "wp-content/plugins/*akismet": true,
-            "wp-content/plugins/*akismet.*": true,
-            "wp-content/plugins/*contact-form-7": true,
-            "wp-content/plugins/*contact-form-7.*": true,
-            "wp-content/plugins/*duplicator": true,
-            "wp-content/plugins/*duplicator.*": true,
-            "wp-content/plugins/*hello": true,
-            "wp-content/plugins/*hello.*": true,
-            "wp-content/plugins/*index": true,
-            "wp-content/plugins/*index.*": true,
-            "wp-content/plugins/*insert-pages": true,
-            "wp-content/plugins/*insert-pages.*": true,
-            "wp-content/plugins/*multisite-language-switcher": true,
-            "wp-content/plugins/*multisite-language-switcher.*": true,
-            "wp-content/plugins/*polylang": true,
-            "wp-content/plugins/*polylang.*": true,
-            "wp-content/plugins/*svg-support": true,
-            "wp-content/plugins/*svg-support.*": true,
-            "wp-content/plugins/*tinymce-advanced": true,
-            "wp-content/plugins/*tinymce-advanced.*": true,
-            "wp-content/themes/*.DS_Store": true,
-            "wp-content/themes/*.DS_Store.*": true,
-            "wp-content/themes/*index": true,
-            "wp-content/themes/*index.*": true,
-            "wp-content/themes/*twentyfifteen": true,
-            "wp-content/themes/*twentyfifteen.*": true,
-            "wp-content/themes/*twentyseventeen": true,
-            "wp-content/themes/*twentyseventeen.*": true,
-            "wp-content/themes/*twentysixteen": true,
-            "wp-content/themes/*twentysixteen.*": true
-        }
-    }, {
-        "name": "Workspace Two",
-        "accessLevel": "project",
-        "excludedItems": {
-            "index.php" : true
-        }
-    }],
-};
+import WorkspaceManager from './make-hidden/workspace-manager/workspace-manager.controller';
 
 const rootPath = vscode.workspace.rootPath;
 
@@ -122,10 +22,8 @@ export function activate( context : vscode.ExtensionContext ) {
 
     /* -- Make Hidden Classes -- */
     const utilities = new Utilities( context );
-    const excludeItemsController = new ExcludeItemsController( 
-        utilities
-    );
-    const workspaceManager = new WorkspaceManagerController( utilities, store.workspaceManager );
+    const excludeItemsController = new ExcludeItemsController( utilities );
+    const workspaceManager = new WorkspaceManager();
 
     /* --------------------
      * Called on 
@@ -206,25 +104,36 @@ export function activate( context : vscode.ExtensionContext ) {
     workspaceCmdList.forEach( ( workspaceCmd ) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${workspaceCmd}`, () => {
 
-            let workspaceList = workspaceManager.getWorkspaceForProject( );
-            let workspaceNameList: string[] = [];
+            let workspaces = workspaceManager.getAll();
+            let workspaceList: string[] = [];
+            let workspaceIdsList: string[] = [];
 
-            workspaceList.forEach( ( workspaceObject: any = {} ) => {
-                let label: string =  ( ( workspaceObject.accessLevel === 'global' )? 'Global: ' : '' ) + workspaceObject.name;
-                workspaceNameList.push( label );
+            workspaces.forEach( ( workspace: any = {} ) => {
+                let label: string = null;
+                if( workspace.path == 'global' ){
+                    label = `Global: ${workspace.name}`;
+                } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
+                    label = `${workspace.name}`;
+                }
+
+                if( label !== null ){
+                    workspaceList.push( label );
+                    workspaceIdsList.push( workspace.id );
+                }
             } );
-            workspaceNameList.push( 'Close' );
+
+            workspaceList.push('Close');
 
             switch( workspaceCmd ){
                 case 'workspaceSave' : 
-                    let accessLevelOptions: string[] = ['Save globally', 'Save for current project', 'Close'];
-                    vscode.window.showQuickPick( accessLevelOptions )
-                    .then( ( accessLevel ) => {
-                        if( accessLevel === 'Close' ) return;
-                        vscode.window.showInputBox({prompt: 'Name workspace'})
+                    let workspaceChoices: string[] = ['Save globally', 'Save for current project', 'Close'];
+                    vscode.window.showQuickPick( workspaceChoices )
+                    .then( ( choice ) => {
+                        if( choice === 'Close' ) return;
+                        vscode.window.showInputBox({prompt: 'Name of Workspace'})
                         .then( ( workspaceName ) => {
-                            workspaceManager.saveNew(
-                                workspaceName, accessLevelOptions.indexOf( accessLevel ), 
+                            workspaceManager.create(
+                                workspaceName, workspaceChoices.indexOf( choice ), 
                                 excludeItemsController.getFilesExcludeObject()
                             );
                         });
@@ -232,22 +141,21 @@ export function activate( context : vscode.ExtensionContext ) {
                 break;
 
                 case 'workspaceLoad' :
-                    vscode.window.showQuickPick( workspaceNameList )
+                    vscode.window.showQuickPick( workspaceList )
                     .then( ( val ) => {
                         if( val === 'Close' ) return;
-                        let chosenWorkspaceIndex = workspaceNameList.indexOf( val );
-                        let chosenWorkspace = workspaceList[ chosenWorkspaceIndex ];
+                        let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
+                        let chosenWorkspace = workspaceManager.fidById( chosenWorkspaceId );
                         excludeItemsController.loadList( chosenWorkspace['excludedItems'] )
                     });
                 break;
 
                 case 'workspaceDelete' :
-                    vscode.window.showQuickPick( workspaceNameList )
+                    vscode.window.showQuickPick( workspaceList )
                     .then( ( val ) => {
                         if( val === 'Close' ) return;
-                        let chosenWorkspaceIndex = workspaceNameList.indexOf( val );
-                        let chosenWorkspace = workspaceList[ chosenWorkspaceIndex ];
-                        workspaceManager.remove( chosenWorkspace );
+                        let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
+                        workspaceManager.removeById( chosenWorkspaceId );
                     });
                 break;
             }
