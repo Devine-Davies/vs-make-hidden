@@ -4,8 +4,8 @@ import * as ChildProcess from 'child_process';
 import * as console from 'console';
 
 /* -- Make hidden lib's -- */
+import * as Util from '../utilities';
 import ExcludeItemsProvider from './exclude-items.provider';
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 export default class ExcludeItemsController extends ExcludeItemsProvider {
 
@@ -20,10 +20,8 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         "below"         : { regexCode : '*/',  incPath : true  },
     };
 
-    constructor(
-        mhUtilities: any = null
-    )  {
-        super( mhUtilities );
+    constructor() {
+        super( );
 
         /* -- Assign our MH to VS window tree provider  --*/
         vscode.window.registerTreeDataProvider('makeHiddenViewPane', this);
@@ -48,19 +46,19 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
 
     /* --------------------
     */
-    private showOnlyFilterer( 
+    private showOnlyFilterer(
         itemPath : string = null,
         matchByName : boolean = true,
         matchByExtension: boolean = true,
         hideLevel : number = 0
     ) {
         if ( itemPath ) {
-            let targetFilePathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-            let workspacePath : any = this.mhUtilities.getVscodeCurrentDirPath();;
+            let targetFilePathProps: any = Util.getPathInfoFromPath( itemPath );
+            let workspacePath : any = Util.getVsCodeCurrentPath();;
 
             var targetFile = `${ targetFilePathProps['basename'] }`;
             let filesExcludeObject: any = this.getFilesExcludeObject();
-            let allItemInPath : string[] = this.mhUtilities.getAllFilesDir(
+            let allItemInPath : string[] = Util.getAllItemsInDir(
                 `${ workspacePath }/${ targetFilePathProps['path'] }`
             );
 
@@ -68,9 +66,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
                 if( fileName != targetFile ){
                     let filePath = `${targetFilePathProps['path']}${fileName}`;
 
-                    let thisFileNamePathProps: any = this.mhUtilities.getPathInfoFromPath( 
-                        filePath
-                    );
+                    let thisFileNamePathProps: any = Util.getPathInfoFromPath(filePath);
 
                     let excludeSnippets: any = this.buildExcludeRegex(
                         filePath, hideLevel
@@ -79,7 +75,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
                     let checks = {
                        'byName'      : ( matchByName ),
                        'byExtension' : ( matchByExtension && thisFileNamePathProps['extension'] !== "" ),
-                       
+
                        // Hide with opposite Names & Extension
                        'isDifferentNames'     : ( targetFilePathProps['filename']  != thisFileNamePathProps['filename'] ),
                        'isDifferentExtension' : ( targetFilePathProps['extension'] != thisFileNamePathProps['extension'] ),
@@ -157,12 +153,10 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         includeItemExtension: boolean = false,
         hideLevelIndex : number = 0,
     ) {
-        let filesExcludeObject: any = this.getFilesExcludeObject();
-        let hideLevelObject: any = this.getHideLevelByIndex( hideLevelIndex );
-        let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-        let excludeSnippets: any = this.buildExcludeRegex(
-            itemPath, hideLevelIndex
-        );
+        let filesExcludeObject : any = this.getFilesExcludeObject();
+        let hideLevelObject    : any = this.getHideLevelByIndex(hideLevelIndex);
+        let itemPathProps      : any = Util.getPathInfoFromPath(itemPath);
+        let excludeSnippets    : any = this.buildExcludeRegex(itemPath, hideLevelIndex);
 
         // By Name
         if( ! includeItemExtension ){
@@ -185,10 +179,9 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     /* --------------------
     */
     private buildExcludeRegex( itemPath : string = null, hideLevelIndex : number = 0 ) : any {
-        let hideLevelObject: any = this.getHideLevelByIndex( hideLevelIndex );
-        let itemPathProps: any = this.mhUtilities.getPathInfoFromPath( itemPath );
-
-        let excludeSnippet: string = `${ hideLevelObject.regexCode }`;
+        let hideLevelObject : any = this.getHideLevelByIndex(hideLevelIndex);
+        let itemPathProps   : any = Util.getPathInfoFromPath(itemPath);
+        let excludeSnippet  : string = `${ hideLevelObject.regexCode }`;
 
         // Check to see if to add item path
         if( hideLevelObject.incPath ){
@@ -207,7 +200,7 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     */
     private getHideLevelByIndex( hide_level_index : number = 0 ) {
         let hide_level : string = this.hideLevels[ hide_level_index ];
-        let hide_level_object : any = this.hideLevelsObject[ hide_level ];   
+        let hide_level_object : any = this.hideLevelsObject[ hide_level ];
         return hide_level_object;
     }
 
@@ -238,16 +231,15 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
     private countAllAffectedFiles( exclude_snippet : string = null ) {
         let os_type : string = process.platform;
         let all_os_types : string[]     = ['darwin', 'freebsd', 'linux', 'sunos', 'win32'];
-        let allowed_os_types : string[] = [ 'darwin', 'linux' ];
+        let allowed_os_types : string[] = ['darwin', 'linux'];
 
-        if( allowed_os_types.indexOf( os_type ) > -1 )
-        {
+        if( allowed_os_types.indexOf( os_type ) > -1 ) {
             ChildProcess.exec(`cd ${vscode.workspace.rootPath} && find ${exclude_snippet}  -type f | wc -l`, (error, stdout, stderr) => {
-                
+
                 if (error) {
                     console.error(`exec error: ${error}`); return;
                 }
-        
+
                 vscode.window.showInformationMessage(`Affected files: ${stdout}`);
             });
         }

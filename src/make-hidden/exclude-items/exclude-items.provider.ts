@@ -3,15 +3,15 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import * as Util from '../utilities';
+
 export default class ExcludeItemsProvider implements vscode.TreeDataProvider<json.Node>  {
 
     private _onDidChangeTreeData: vscode.EventEmitter<json.Node | null> = new vscode.EventEmitter<json.Node | null>();
     readonly onDidChangeTreeData: vscode.Event<json.Node | null> = this._onDidChangeTreeData.event;
     private tree : json.Node;
 
-    constructor(
-        public mhUtilities: any = null,
-    ) {
+    constructor() {
         /* -- Render our tree DOM -- */
         this.parseTree();
     }
@@ -21,8 +21,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * dec: pass our tree object nodes to vs code
     */
     public getChildren(node?: json.Node): Thenable<json.Node[]>  {
-        return Promise.resolve( 
-            this.tree ? this.tree.children : [] 
+        return Promise.resolve(
+            this.tree ? this.tree.children : []
         );
     }
 
@@ -39,7 +39,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
             itemTitle, vscode.TreeItemCollapsibleState.None
         );
 
-        treeItem.iconPath     = this.mhUtilities.getProjectThemeDirectory( 'put-back-icon.svg' );
+        treeItem.iconPath     = Util.getProjectThemeDirectory( 'put-back-icon.svg' );
         treeItem.contextValue = itemTitle;
         treeItem.command      = {
             command   : 'make-hidden.removeItem',
@@ -56,7 +56,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * dec: Path to .vscode/settings.json
     */
     private getSettingPath() : string {
-        return this.mhUtilities.getVscodeSettingPath('full');
+        return Util.getVscodeSettingPath('full');
     }
 
     /* --------------------
@@ -68,8 +68,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
         let fileExcludeObject: any = this.getFilesExcludeObject();
         if( fileExcludeObject != null ){
             // Update the tree Parse tree accordingly
-            this.tree = json.parseTree( JSON.stringify( 
-                fileExcludeObject 
+            this.tree = json.parseTree( JSON.stringify(
+                fileExcludeObject
             ) );
         }
     }
@@ -79,7 +79,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * dec: in this case we want the files.exclude
     */
     public getFilesExcludeObject( ) : any {
-        let filesExclude = this.mhUtilities.getItemFromJsonFile(
+        let filesExclude = Util.getItemFromJsonFile(
             this.getSettingPath(), 'files.exclude'
         );
 
@@ -100,8 +100,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
     public refreshListView() : void {
         // Create a link to our hidden list model
         this.parseTree();
-        
-        // Fire the Callback func 
+
+        // Fire the Callback func
         this._onDidChangeTreeData.fire();
     }
 
@@ -109,7 +109,7 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * Create vc setting.json directory
     */
     private creatSettingsFile() : void  {
-        this.mhUtilities.createVscodeSettingJson( true );
+        Util.createVscodeSettingJson( true );
     }
 
     /* --------------------
@@ -121,23 +121,23 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
         let vsSettingsKeys: string = 'files.exclude';
 
         /* -- check to see if there's a workspace available, if ask to create one -- */
-        if( ! this.mhUtilities.fileExists( this.getSettingPath() ) ) {
+        if( ! Util.fileExists( this.getSettingPath() ) ) {
             this.creatSettingsFile();
         }
 
         else {
             fs.readFile( this.getSettingPath(), 'utf8' , ( err, rawFileData ) => {
                 /* -- Append the new config data to the main setting doc -- */
-                var settingsDataParse = JSON.parse( rawFileData );    
+                var settingsDataParse = JSON.parse( rawFileData );
                 settingsDataParse[ vsSettingsKeys ] = newExcludeObject;
 
                 /* -- Make string and JSON valid -- */
-                let formattedSettings : any = JSON.stringify( 
+                let formattedSettings : any = JSON.stringify(
                     settingsDataParse , null, 2
                 ).replace(/^[^{]+|[^}]+$/, '').replace(/(.+?[^:])\/\/.+$/gm, '$1');
 
                 // let formattedSettings : any = JSON.stringify(settingsDataParse, null, "\t");
-            
+
                 fs.writeFile( this.getSettingPath() , formattedSettings , ( err ) => {
                     /* -- Refresh out tree for view -- */
                     this.refreshListView();
