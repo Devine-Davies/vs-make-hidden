@@ -103,15 +103,21 @@ export function createVscodeSettingJson(
         noticeText, grantedText
     ).then( ( selection : string ) => {
         if( selection === grantedText ) {
-            creatFile( getVscodeSettingPath('path'), `{}` );
-            // fs.mkdir( path , e =>  {
-            //     fs.writeFile( this.getVscodeSettingPath('full') , `{}`, ( err ) =>  {
-            //         if ( err ) {
-            //             vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);
-            //             throw err
-            //         };
-            //     });
-            // } );
+            const info = getVscodeSettingPath( );
+
+            // if( ! fileExists( info[ 'path' ] ) ){
+            //     creatFolder( info[ 'path' ] )
+            // }
+            // creatFile( info['full'], `{}` );
+
+            fs.mkdir( info[ 'path' ] , e =>  {
+                fs.writeFile( info[ 'full' ] , `{}`, ( err ) =>  {
+                    if ( err ) {
+                        vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);
+                        throw err
+                    };
+                });
+            } );
         }
     });
 }

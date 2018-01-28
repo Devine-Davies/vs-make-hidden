@@ -4,12 +4,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import * as Util from '../utilities';
+import { on } from 'cluster';
 
 export default class ExcludeItemsProvider implements vscode.TreeDataProvider<json.Node>  {
 
     private _onDidChangeTreeData: vscode.EventEmitter<json.Node | null> = new vscode.EventEmitter<json.Node | null>();
     readonly onDidChangeTreeData: vscode.Event<json.Node | null> = this._onDidChangeTreeData.event;
     private tree : json.Node;
+    private newTree : json.Node;
 
     constructor() {
         /* -- Render our tree DOM -- */
@@ -65,7 +67,14 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
     */
     private parseTree(): void  {
         // Get our work space configuration object
-        let fileExcludeObject: any = this.getFilesExcludeObject();
+        // let fileExcludeObject: any = this.getFilesExcludeObject();
+        let fileExcludeObject: any = Util.getItemFromJsonFile(
+            this.getSettingPath(), 'files.exclude'
+        );
+
+        // FIX
+        fileExcludeObject = this.fixRemove__Error( fileExcludeObject );
+
         if( fileExcludeObject != null ){
             // Update the tree Parse tree accordingly
             this.tree = json.parseTree( JSON.stringify(
@@ -144,5 +153,21 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
                 } );
             });
         }
+    }
+
+    /* --------------------
+     * FIX
+    */
+    private fixRemove__Error( object ) {
+        let newObject = object;
+        let remove = '__error';
+        if( object.hasOwnProperty(remove) ){
+            for( let item in newObject ){
+                if( item === remove ){
+                    delete newObject[ item ];
+                }
+            }
+        }
+        return newObject;
     }
 }
