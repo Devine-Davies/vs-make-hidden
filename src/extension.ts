@@ -86,7 +86,7 @@ export function activate( context : vscode.ExtensionContext ) {
             workspaces.forEach( ( workspace: any = {} ) => {
                 let label: string = null;
                 if( workspace.path == 'global' ){
-                    label = `Global: ${workspace.name}`;
+                    label = `G: ${workspace.name}`;
                 } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
                     label = `${workspace.name}`;
                 }
@@ -101,16 +101,21 @@ export function activate( context : vscode.ExtensionContext ) {
 
             switch( workspaceCmd ){
                 case 'workspaceSave' :
-                    let workspaceChoices: string[] = ['Save globally', 'Save for current project', 'Close'];
+                    let workspaceChoices: string[] = ['Globally', 'Current working directory', 'Close'];
                     vscode.window.showQuickPick( workspaceChoices )
                     .then( ( choice ) => {
                         if( choice === 'Close' ) return;
                         vscode.window.showInputBox({prompt: 'Name of Workspace'})
                         .then( ( workspaceName ) => {
-                            workspaceManager.create(
-                                workspaceName, workspaceChoices.indexOf( choice ),
-                                excludeItemsController.getFilesExcludeObject()
-                            );
+                            if( workspaceName !== undefined ){
+                                let excludeItems: any = excludeItemsController.getFilesExcludeObject();
+                                if( choice === 'Globally' ){
+                                    workspaceManager.create( workspaceName, excludeItems );
+                                }
+                                else if( choice === 'Current working directory' ) {
+                                    workspaceManager.create( workspaceName, excludeItems, Util.getVsCodeCurrentPath() );
+                                }
+                            }
                         });
                     });
                 break;
@@ -121,7 +126,9 @@ export function activate( context : vscode.ExtensionContext ) {
                         if( val === 'Close' ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
                         let chosenWorkspace = workspaceManager.fidById( chosenWorkspaceId );
-                        excludeItemsController.loadList( chosenWorkspace['excludedItems'] )
+                        if( chosenWorkspace ){
+                            excludeItemsController.loadList( chosenWorkspace['excludedItems'] )
+                        }
                     });
                 break;
 
@@ -130,7 +137,9 @@ export function activate( context : vscode.ExtensionContext ) {
                     .then( ( val ) => {
                         if( val === 'Close' ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
-                        workspaceManager.removeById( chosenWorkspaceId );
+                        if( chosenWorkspaceId !== undefined ){
+                            workspaceManager.removeById( chosenWorkspaceId );
+                        }
                     });
                 break;
             }

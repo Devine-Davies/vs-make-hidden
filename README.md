@@ -1,5 +1,5 @@
 # Make Hidden
-Make Hidden provides you with the simple way to hide/show files & folders within your project's directory.
+Make Hidden provides more control over your project's directory by enabling context menus that allow you to perform hide/show actions effortlessly, a view pane explorer to see hidden items and the ability to save workspaces to quickly toggle between bulk hidden items.
 
 #### Feature List
 1. **Hide**: will hide the current file/folder from the projects directory and add it into the "Hidden in directory" View Pane.
@@ -36,7 +36,9 @@ Will keep the selected file/folder and hide all other items in the same director
 ![Preview](resources/showcase-showOnly.gif)
 
 #### View Pane "Hidden in directory"
-The "Hidden in directory" view pane will show all current items listed in the "files.exclude".
+The "Hidden in directory" view pane displays all hidden items within the current directory. From here you can also create, save and remove personal workspaces.
+
+![Preview](resources/showcase-makeHiddenViewPane.png)
 
 ## License
 [MIT](LICENSE.md)

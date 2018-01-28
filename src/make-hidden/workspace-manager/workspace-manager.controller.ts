@@ -1,3 +1,7 @@
+// Remove the workspace
+// cd /Users/rhysdevine-davies/Library/Application\ Support/Code/User
+// rm makeHidden.js
+
 /* -- Third party import's -- */
 import * as fs from 'fs';
 import * as console from 'console';
@@ -12,7 +16,7 @@ export interface WorkspaceLayout {
     excludedItems: any;
 }
 
-export default class WorkspaceManager { 
+export default class WorkspaceManager {
 
     workSpaceSettingPath : string = Util.getExtensionSettingPath();
     workspaces: WorkspaceLayout[] = [];
@@ -27,8 +31,18 @@ export default class WorkspaceManager {
     /* --------------------
     */
     private load(){
-        let items: WorkspaceLayout[] = JSON.parse(fs.readFileSync( this.workSpaceSettingPath ).toString());
-        this.workspaces = items;
+        if( Util.fileExists( this.workSpaceSettingPath ) ){
+            try {
+                let items: WorkspaceLayout[] = JSON.parse(
+                    fs.readFileSync( this.workSpaceSettingPath ).toString()
+                );
+                this.workspaces = items;
+            } catch {
+                // console.log( 'Failed to read file' );
+            }
+        } else {
+            Util.creatFile( this.workSpaceSettingPath, [] );
+        }
     }
 
     /* --------------------
@@ -42,21 +56,17 @@ export default class WorkspaceManager {
     /* --------------------
     */
     public create(
-        name: string = 'makeHidden workspace',
-        workspace: number = 0,
-        excludedItems: any = {},
+        name: string = null,
+        excludedItems: any = null,
+        path: string = 'global',
     ) {
-        let workspaceChoices: any = {
-            0 : 'global',
-            1 : Util.getVsCodeCurrentPath(),
-        };
+        if( name && excludedItems ){
+            this.workspaces.push( this.buildObject(
+                name, path, excludedItems
+            ) );
 
-        this.workspaces.push( this.buildObject( 
-            name, workspaceChoices[ workspace ], 
-            excludedItems 
-        ) );
-
-        this.save();
+            this.save();
+        }
     }
 
     /* --------------------
@@ -78,22 +88,19 @@ export default class WorkspaceManager {
     }
 
     /* --------------------
-        private findByPath( path: string = 'all') {
-            let foundWorkspace: any = [];
-            for (let workspace of this.workspaces) { 
-                if( path === 'all' ){
-                    foundWorkspace.push( workspace );
-                }
-                else if ( workspace["path"] === path ) { 
-                    foundWorkspace.push( workspace );
-                }
-            }
-            return foundWorkspace;
-        }
+    */
+    public removeAll(){
+        this.workspaces = [];
+        fs.writeFileSync( this.workSpaceSettingPath ,
+            JSON.stringify( [] , null, "\t")
+        );
+    }
+
+    /* --------------------
     */
     public fidById( id: string = null ) : WorkspaceLayout {
         let foundWorkspace: any = [];
-        for (let workspace of this.workspaces ) { 
+        for (let workspace of this.workspaces ) {
             if( workspace.id === id ){
                 return workspace;
             }
@@ -103,7 +110,7 @@ export default class WorkspaceManager {
 
     /* --------------------
     */
-    private buildObject(
+    protected buildObject(
         name: string = 'Make Hidden Workspace',
         path: string = 'global',
         items: any = {},
