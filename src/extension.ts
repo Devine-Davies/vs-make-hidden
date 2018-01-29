@@ -77,8 +77,6 @@ export function activate( context : vscode.ExtensionContext ) {
     */
     ['workspaceSave', 'workspaceLoad', 'workspaceDelete'].forEach( ( workspaceCmd ) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${workspaceCmd}`, () => {
-            // vscode.window.showInformationMessage( 'In development' );
-            // return;
 
             let workspaces = workspaceManager.getAll();
             let workspaceList: string[] = [];
@@ -86,17 +84,18 @@ export function activate( context : vscode.ExtensionContext ) {
 
             workspaces.forEach( ( workspace: any = {} ) => {
                 let label: string = null;
-                // if( workspace.path == 'global' ){
-                //     label = `G: ${workspace.name}`;
-                // } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
-                //     label = `${workspace.name}`;
-                // }
-
-                // if( label !== null ){
-                    workspaceList.push( workspace.name );
+                if( workspace.path == 'global' ){
+                    label = `${workspace.name} (G)`;
+                } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
+                    label = `${workspace.name}`;
+                }
+                if( label !== null ){
+                    workspaceList.push( label );
                     workspaceIdsList.push( workspace.id );
-                // }
+                }
             } );
+
+            workspaceList.sort();
             workspaceList.push('Close');
 
             switch( workspaceCmd ){

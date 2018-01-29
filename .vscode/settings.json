@@ -1,3 +1,29 @@
 {
-  "files.exclude": {}
+  "files.exclude": {
+    "*.DS_Store": true,
+    "*.DS_Store.*": true,
+    "*.git": true,
+    "*.git.*": true,
+    "*.gitignore": true,
+    "*.gitignore.*": true,
+    "*.vscode-test": true,
+    "*.vscode-test.*": true,
+    "*.vscodeignore": true,
+    "*.vscodeignore.*": true,
+    "*CHANGELOG": true,
+    "*CHANGELOG.*": true,
+    "*README": true,
+    "*README.*": true,
+    "*node_modules": true,
+    "*node_modules.*": true,
+    "*out": true,
+    "*out.*": true,
+    "*resources.*": true,
+    "*snippets": true,
+    "*snippets.*": true,
+    "*test": true,
+    "*test.*": true,
+    "*tsconfig": true,
+    "*tsconfig.*": true
+  }
 }
