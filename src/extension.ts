@@ -14,16 +14,18 @@ import WorkspaceManager from './make-hidden/workspace-manager/workspace-manager.
 const ROOT_PATH = vscode.workspace.rootPath;
 const PLUGIN_NAME = 'makeHidden';
 
-// Classes
-// const utilities = new Utilities( context );
-const excludeItemsController = new ExcludeItemsController();
-const workspaceManager = new WorkspaceManager();
-
 /* --------------------
  * Extension activation
  * Vscode Func: command is executed and extension is activated the very first time the
 */
 export function activate( context : vscode.ExtensionContext ) {
+
+    // vscode.window.showInformationMessage( Util.getExtensionSettingPath() )
+
+    const excludeItemsController = new ExcludeItemsController();
+    const workspaceManager = new WorkspaceManager(
+        Util.getExtensionSettingPath()
+    );
 
     /* -- Set vs code context -- */
     Util.setVsCodeContext(context);
@@ -78,6 +80,8 @@ export function activate( context : vscode.ExtensionContext ) {
     */
     ['workspaceSave', 'workspaceLoad', 'workspaceDelete'].forEach( ( workspaceCmd ) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${workspaceCmd}`, () => {
+            // vscode.window.showInformationMessage( 'In development' );
+            // return;
 
             let workspaces = workspaceManager.getAll();
             let workspaceList: string[] = [];
@@ -85,18 +89,17 @@ export function activate( context : vscode.ExtensionContext ) {
 
             workspaces.forEach( ( workspace: any = {} ) => {
                 let label: string = null;
-                if( workspace.path == 'global' ){
-                    label = `G: ${workspace.name}`;
-                } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
-                    label = `${workspace.name}`;
-                }
+                // if( workspace.path == 'global' ){
+                //     label = `G: ${workspace.name}`;
+                // } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
+                //     label = `${workspace.name}`;
+                // }
 
-                if( label !== null ){
-                    workspaceList.push( label );
+                // if( label !== null ){
+                    workspaceList.push( workspace.name );
                     workspaceIdsList.push( workspace.id );
-                }
+                // }
             } );
-
             workspaceList.push('Close');
 
             switch( workspaceCmd ){
@@ -106,7 +109,7 @@ export function activate( context : vscode.ExtensionContext ) {
                     .then( ( choice ) => {
                         if( choice === 'Close' ) return;
                         vscode.window.showInputBox({prompt: 'Name of Workspace'})
-                        .then( ( workspaceName ) => {
+                        .then( ( workspaceName: string ) => {
                             if( workspaceName !== undefined ){
                                 let excludeItems: any = excludeItemsController.getFilesExcludeObject();
                                 if( choice === 'Globally' ){
@@ -122,7 +125,7 @@ export function activate( context : vscode.ExtensionContext ) {
 
                 case 'workspaceLoad' :
                     vscode.window.showQuickPick( workspaceList )
-                    .then( ( val ) => {
+                    .then( ( val: string ) => {
                         if( val === 'Close' ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
                         let chosenWorkspace = workspaceManager.fidById( chosenWorkspaceId );
@@ -134,7 +137,7 @@ export function activate( context : vscode.ExtensionContext ) {
 
                 case 'workspaceDelete' :
                     vscode.window.showQuickPick( workspaceList )
-                    .then( ( val ) => {
+                    .then( ( val: string ) => {
                         if( val === 'Close' ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
                         if( chosenWorkspaceId !== undefined ){

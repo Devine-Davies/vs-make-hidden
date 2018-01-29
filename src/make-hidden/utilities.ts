@@ -4,8 +4,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from "os";
+import * as process from "process";
 
-let VS_CODE_CONTEXT: any = null;
+let VS_CODE_CONTEXT: any    = null;
 const HOME_DIR: string      = os.homedir();
 const PROJECTS_FILE: string = "makeHidden.json";
 
@@ -17,18 +18,17 @@ export function setVsCodeContext( context ){
 */
 export function getExtensionSettingPath(): string {
     let projectFile: string;
-    const projectsLocation: string = vscode.workspace.getConfiguration("projectManager").get<string>("projectsLocation");
-    if (projectsLocation !== "") {
-        projectFile = path.join(projectsLocation, PROJECTS_FILE);
-    } else {
-        const appData = process.env.APPDATA || (process.platform === "darwin" ? process.env.HOME + "/Library/Application Support" : "/var/local");
-        const channelPath: string = this.getChannelPath();
-        projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
-        // in linux, it may not work with /var/local, then try to use /home/myuser/.config
-        if ((process.platform === "linux") && (!fs.existsSync(projectFile))) {
-            projectFile = path.join( HOME_DIR, ".config/", channelPath, "User", PROJECTS_FILE );
-        }
+
+    const appData = process.env.APPDATA || (process.platform === "darwin" ? process.env.HOME + "/Library/Application Support" : "/var/local");
+    const channelPath: string = this.getChannelPath();
+    // console.log( appData );
+
+    projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
+    // in linux, it may not work with /var/local, then try to use /home/myuser/.config
+    if ((process.platform === "linux") && (!fs.existsSync(projectFile))) {
+        projectFile = path.join( HOME_DIR, ".config/", channelPath, "User", PROJECTS_FILE );
     }
+
     return projectFile;
 }
 

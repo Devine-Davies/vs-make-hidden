@@ -18,37 +18,40 @@ export interface WorkspaceLayout {
 
 export default class WorkspaceManager {
 
-    workSpaceSettingPath : string = Util.getExtensionSettingPath();
     workspaces: WorkspaceLayout[] = [];
     projectRoot: string = '';
 
     /* --------------------
     */
-    constructor(){
+    constructor(
+        private settingPath: string = null
+    ){
+        // this.settingPath = Util.getExtensionSettingPath();
+        // console.log( this.settingPath );
         this.load();
     }
 
     /* --------------------
     */
-    private load(){
-        if( Util.fileExists( this.workSpaceSettingPath ) ){
+    public load( ){
+        let path: string = this.settingPath;
+        if( Util.fileExists( path ) ){
             try {
-                let items: WorkspaceLayout[] = JSON.parse(
-                    fs.readFileSync( this.workSpaceSettingPath ).toString()
+                this.workspaces = JSON.parse(
+                    fs.readFileSync( path ).toString()
                 );
-                this.workspaces = items;
             } catch {
-                // console.log( 'Failed to read file' );
+                // console.lo bg( 'Failed to read file' );
             }
         } else {
-            Util.creatFile( this.workSpaceSettingPath, [] );
+            Util.creatFile( path, [] );
         }
     }
 
     /* --------------------
     */
     private save(){
-        fs.writeFileSync( this.workSpaceSettingPath ,
+        fs.writeFileSync( this.settingPath ,
             JSON.stringify( this.workspaces , null, "\t")
         );
     }
@@ -91,7 +94,7 @@ export default class WorkspaceManager {
     */
     public removeAll(){
         this.workspaces = [];
-        fs.writeFileSync( this.workSpaceSettingPath ,
+        fs.writeFileSync( this.settingPath ,
             JSON.stringify( [] , null, "\t")
         );
     }
