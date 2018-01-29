@@ -25,11 +25,7 @@ export default class WorkspaceManager {
     */
     constructor(
         private settingPath: string = null
-    ){
-        // this.settingPath = Util.getExtensionSettingPath();
-        // console.log( this.settingPath );
-        this.load();
-    }
+    ){ this.load(); }
 
     /* --------------------
     */

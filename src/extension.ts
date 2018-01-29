@@ -19,9 +19,6 @@ const PLUGIN_NAME = 'makeHidden';
  * Vscode Func: command is executed and extension is activated the very first time the
 */
 export function activate( context : vscode.ExtensionContext ) {
-
-    // vscode.window.showInformationMessage( Util.getExtensionSettingPath() )
-
     const excludeItemsController = new ExcludeItemsController();
     const workspaceManager = new WorkspaceManager(
         Util.getExtensionSettingPath()

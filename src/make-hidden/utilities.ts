@@ -25,7 +25,7 @@ export function getExtensionSettingPath(): string {
 
     projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
     // in linux, it may not work with /var/local, then try to use /home/myuser/.config
-    if ((process.platform === "linux") && (!fs.existsSync(projectFile))) {
+    if ( ( process.platform === "linux" ) && ( ! fs.existsSync( projectFile ) ) ) {
         projectFile = path.join( HOME_DIR, ".config/", channelPath, "User", PROJECTS_FILE );
     }
 
