@@ -34,6 +34,7 @@
         "onCommand:make-hidden.superHide",
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
+        "onCommand:make-hidden.removeSearch",
         "onCommand:make-hidden.removeAllItems",
         "onCommand:make-hidden.workspaceSave",
         "onCommand:make-hidden.workspaceLoad",
@@ -63,6 +64,11 @@
             {
                 "command": "make-hidden.showOnly",
                 "title": "Show Only",
+                "category": "Make Hidden"
+            },
+            {
+                "command": "make-hidden.removeSearch",
+                "title": "Remove Search",
                 "category": "Make Hidden"
             },
             {
@@ -112,10 +118,6 @@
             ],
             "view/title": [
                 {
-                    "command": "make-hidden.removeAllItems",
-                    "when": "view == makeHiddenViewPane"
-                },
-                {
                     "command": "make-hidden.workspaceSave",
                     "when": "view == makeHiddenViewPane",
                     "group": "workspaceManager"
@@ -129,6 +131,14 @@
                     "command": "make-hidden.workspaceDelete",
                     "when": "view == makeHiddenViewPane",
                     "group": "workspaceManager"
+                },
+                {
+                    "command": "make-hidden.removeSearch",
+                    "when": "view == makeHiddenViewPane"
+                },
+                {
+                    "command": "make-hidden.removeAllItems",
+                    "when": "view == makeHiddenViewPane"
                 }
             ]
         }

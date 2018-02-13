@@ -10,8 +10,9 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
 
     private _onDidChangeTreeData: vscode.EventEmitter<json.Node | null> = new vscode.EventEmitter<json.Node | null>();
     readonly onDidChangeTreeData: vscode.Event<json.Node | null> = this._onDidChangeTreeData.event;
-    private tree : json.Node;
-    private newTree : json.Node;
+
+    public excludeList: any = [];
+    private tree: json.Node;
 
     constructor() {
         /* -- Render our tree DOM -- */
@@ -77,6 +78,8 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
 
         if( fileExcludeObject != null ){
             // Update the tree Parse tree accordingly
+            this.excludeList = fileExcludeObject;
+
             this.tree = json.parseTree( JSON.stringify(
                 fileExcludeObject
             ) );
@@ -126,7 +129,6 @@ export default class ExcludeItemsProvider implements vscode.TreeDataProvider<jso
      * dec: Save files.exclude to configuration_file_path
     */
     public saveFilesExcludeObject( newExcludeObject : any )  {
-
         let vsSettingsKeys: string = 'files.exclude';
 
         /* -- check to see if there's a workspace available, if ask to create one -- */

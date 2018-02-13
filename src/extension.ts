@@ -55,9 +55,21 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Show Cmd's
     */
-    ['removeItem', 'removeAllItems'].forEach( ( cmd ) => {
+    ['removeSearch', 'removeItem', 'removeAllItems'].forEach( ( cmd ) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, ( excludeString : string ) =>  {
             switch( cmd ){
+                case 'removeSearch' :
+                    let excludeList: any = excludeItemsController.getList();
+                    let workspaceChoices: string[] =[];
+
+                    for( let item in excludeList )
+                        workspaceChoices.push( item );
+
+                    vscode.window.showQuickPick( workspaceChoices ).then( ( excludeString: string ) => {
+                        excludeItemsController.removeItem( excludeString );
+                    });
+                break;
+
                 case 'removeItem' :
                     if( typeof excludeString == 'string' && excludeString.length > 0 ) {
                         excludeItemsController.removeItem( excludeString );
