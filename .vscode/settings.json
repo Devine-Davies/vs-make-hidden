@@ -7,7 +7,6 @@
     "*.gitignore": true,
     "*.gitignore.*": true,
     "*.vscode-test": true,
-    "*.vscode-test.*": true,
     "*.vscodeignore": true,
     "*.vscodeignore.*": true,
     "*CHANGELOG": true,
