@@ -66,7 +66,10 @@ export function activate( context : vscode.ExtensionContext ) {
                         workspaceChoices.push( item );
 
                     vscode.window.showQuickPick( workspaceChoices ).then( ( excludeString: string ) => {
-                        excludeItemsController.removeItem( excludeString );
+                        if( excludeString !== undefined ){
+                            excludeItemsController.removeItem( excludeString );
+                            vscode.commands.executeCommand('make-hidden.removeSearch' );
+                        }
                     });
                 break;
 
