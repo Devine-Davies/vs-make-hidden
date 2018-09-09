@@ -107,6 +107,8 @@ export default class ExcludeItemsController extends ExcludeItemsProvider {
         }
     }
 
+
+
     /* --------------------
      * Hide item
      * dec: Appends the dir/file name into vs code user settings file.excludes

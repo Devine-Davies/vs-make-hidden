@@ -100,27 +100,24 @@ export function activate( context : vscode.ExtensionContext ) {
             workspaces.forEach( ( workspace: any = {} ) => {
                 let label: string = null;
                 if( workspace.path == 'global' ){
-                    label = `${workspace.name} (G)`;
+                    label = `(G) ${workspace.name}`;
                 } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
                     label = `${workspace.name}`;
                 }
                 if( label !== null ){
-                    workspaceList.push( label );
-                    workspaceIdsList.push( workspace.id );
+                    workspaceList.push(label);
+                    workspaceIdsList.push(workspace.id);
                 }
             } );
 
-            workspaceList.sort();
             workspaceList.push('Close');
 
             switch( workspaceCmd ){
                 case 'workspaceSave' :
                     let workspaceChoices: string[] = ['Globally', 'Current working directory', 'Close'];
-                    vscode.window.showQuickPick( workspaceChoices )
-                    .then( ( choice ) => {
+                    vscode.window.showQuickPick( workspaceChoices ).then( ( choice ) => {
                         if( choice === 'Close' ) return;
-                        vscode.window.showInputBox({prompt: 'Name of Workspace'})
-                        .then( ( workspaceName: string ) => {
+                        vscode.window.showInputBox({prompt: 'Name of Workspace'}).then( ( workspaceName: string ) => {
                             if( workspaceName !== undefined ){
                                 let excludeItems: any = excludeItemsController.getFilesExcludeObject();
                                 if( choice === 'Globally' ){
@@ -135,25 +132,19 @@ export function activate( context : vscode.ExtensionContext ) {
                 break;
 
                 case 'workspaceLoad' :
-                    vscode.window.showQuickPick( workspaceList )
-                    .then( ( val: string ) => {
-                        if( val === 'Close' ) return;
-                        let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
-                        let chosenWorkspace = workspaceManager.fidById( chosenWorkspaceId );
-                        if( chosenWorkspace ){
-                            excludeItemsController.loadList( chosenWorkspace['excludedItems'] )
-                        }
+                    vscode.window.showQuickPick(workspaceList).then( ( val: string ) => {
+                        if(val === 'Close'|| val !== undefined) return;
+                        let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf(val) ];
+                        let chosenWorkspace = workspaceManager.fidById(chosenWorkspaceId);
+                        excludeItemsController.loadList(chosenWorkspace['excludedItems']);
                     });
                 break;
 
                 case 'workspaceDelete' :
-                    vscode.window.showQuickPick( workspaceList )
-                    .then( ( val: string ) => {
-                        if( val === 'Close' ) return;
+                    vscode.window.showQuickPick( workspaceList ).then( ( val: string ) => {
+                        if( val === 'Close' || val !== undefined ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
-                        if( chosenWorkspaceId !== undefined ){
-                            workspaceManager.removeById( chosenWorkspaceId );
-                        }
+                        workspaceManager.removeById(chosenWorkspaceId);
                     });
                 break;
             }

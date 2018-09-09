@@ -33,9 +33,7 @@ export default class WorkspaceManager {
         let path: string = this.settingPath;
         if( Util.fileExists( path ) ){
             try {
-                this.workspaces = JSON.parse(
-                    fs.readFileSync( path ).toString()
-                );
+                this.workspaces = JSON.parse(fs.readFileSync(path).toString());
             } catch {
                 // console.lo bg( 'Failed to read file' );
             }
@@ -54,11 +52,7 @@ export default class WorkspaceManager {
 
     /* --------------------
     */
-    public create(
-        name: string = null,
-        excludedItems: any = null,
-        path: string = 'global',
-    ) {
+    public create(name: string = null, excludedItems: any = null, path: string = 'global') {
         if( name && excludedItems ){
             this.workspaces.push( this.buildObject(
                 name, path, excludedItems

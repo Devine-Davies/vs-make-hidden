@@ -11,7 +11,6 @@
     "*.vscodeignore.*": true,
     "*CHANGELOG": true,
     "*CHANGELOG.*": true,
-    "*README": true,
     "*README.*": true,
     "*node_modules": true,
     "*node_modules.*": true,
