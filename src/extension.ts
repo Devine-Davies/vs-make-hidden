@@ -20,17 +20,17 @@ const PLUGIN_NAME = 'makeHidden';
 */
 export function activate( context : vscode.ExtensionContext ) {
     const excludeItemsController = new ExcludeItemsController();
-    const workspaceManager = new WorkspaceManager(
-        Util.getExtensionSettingPath()
-    );
+    const workspaceManager = new WorkspaceManager(Util.getExtensionSettingPath());
 
     /* -- Set vs code context -- */
     Util.setVsCodeContext(context);
 
+    const statusBarIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
+
     /* --------------------
      * Hide Cmd's
     */
-    ['hideItem', 'superHide', 'showOnly'].forEach( ( cmd ) => {
+    ['hideItem', 'superHide', 'showOnly'].forEach((cmd) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, ( e : any ) =>  {
             if( ! Util.isVsCodeFileObject( e ) ) { return; }
             switch( cmd ){
@@ -55,7 +55,7 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Show Cmd's
     */
-    ['removeSearch', 'removeItem', 'removeAllItems'].forEach( ( cmd ) => {
+    ['removeSearch', 'removeItem', 'removeAllItems'].forEach((cmd) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, ( excludeString : string ) =>  {
             switch( cmd ){
                 case 'removeSearch' :
@@ -63,12 +63,12 @@ export function activate( context : vscode.ExtensionContext ) {
                     let workspaceChoices: string[] =[];
 
                     for( let item in excludeList )
-                        workspaceChoices.push( item );
+                        workspaceChoices.push(item);
 
                     vscode.window.showQuickPick( workspaceChoices ).then( ( excludeString: string ) => {
                         if( excludeString !== undefined ){
                             excludeItemsController.removeItem( excludeString );
-                            vscode.commands.executeCommand('make-hidden.removeSearch' );
+                            vscode.commands.executeCommand('make-hidden.removeSearch');
                         }
                     });
                 break;
@@ -90,59 +90,53 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Workspace Cmd's
     */
-    ['workspaceSave', 'workspaceLoad', 'workspaceDelete'].forEach( ( workspaceCmd ) => {
+    ['workspaceSave', 'workspaceLoad', 'workspaceDelete'].forEach((workspaceCmd) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${workspaceCmd}`, () => {
 
             let workspaces = workspaceManager.getAll();
             let workspaceList: string[] = [];
             let workspaceIdsList: string[] = [];
 
-            workspaces.forEach( ( workspace: any = {} ) => {
-                let label: string = null;
-                if( workspace.path == 'global' ){
-                    label = `(G) ${workspace.name}`;
-                } else if ( workspace.path == Util.getVsCodeCurrentPath() ){
-                    label = `${workspace.name}`;
-                }
-                if( label !== null ){
+            workspaces.forEach((workspace: any = {}) => {
+                let path: string = workspace.path;
+                if(path == 'global' || path == Util.getVsCodeCurrentPath()){
+                    let label: string = ((path === 'global')? 'G: ' : '' ) + `${workspace.name}`;
                     workspaceList.push(label);
                     workspaceIdsList.push(workspace.id);
                 }
-            } );
-
+            });
             workspaceList.push('Close');
 
-            switch( workspaceCmd ){
+            switch(workspaceCmd){
                 case 'workspaceSave' :
-                    let workspaceChoices: string[] = ['Globally', 'Current working directory', 'Close'];
-                    vscode.window.showQuickPick( workspaceChoices ).then( ( choice ) => {
-                        if( choice === 'Close' ) return;
+                    vscode.window.showQuickPick(['Globally', 'Current working directory', 'Close']).then( (choice) => {
+                        if(choice === 'Close'|| choice === undefined) return;
                         vscode.window.showInputBox({prompt: 'Name of Workspace'}).then( ( workspaceName: string ) => {
-                            if( workspaceName !== undefined ){
-                                let excludeItems: any = excludeItemsController.getFilesExcludeObject();
-                                if( choice === 'Globally' ){
-                                    workspaceManager.create( workspaceName, excludeItems );
-                                }
-                                else if( choice === 'Current working directory' ) {
-                                    workspaceManager.create( workspaceName, excludeItems, Util.getVsCodeCurrentPath() );
-                                }
-                            }
+                            if(workspaceName === undefined) return;
+                            let excludeItems: any = excludeItemsController.getFilesExcludeObject();
+                            let type:string = (choice === 'Globally')? null : Util.getVsCodeCurrentPath();
+                            workspaceManager.create(workspaceName, excludeItems, type);
                         });
                     });
                 break;
 
                 case 'workspaceLoad' :
-                    vscode.window.showQuickPick(workspaceList).then( ( val: string ) => {
-                        if(val === 'Close'|| val !== undefined) return;
-                        let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf(val) ];
-                        let chosenWorkspace = workspaceManager.fidById(chosenWorkspaceId);
+                    vscode.window.showQuickPick(workspaceList).then((val: string) => {
+                        if(val === 'Close'|| val === undefined) return;
+                        let chosenWorkspaceId = workspaceIdsList[workspaceList.indexOf(val)];
+                        let chosenWorkspace   = workspaceManager.fidById(chosenWorkspaceId);
                         excludeItemsController.loadList(chosenWorkspace['excludedItems']);
+
+                        // statusBarIndicator.command = 'editor.action.commentLine';
+                        statusBarIndicator.text = `Hidden Workspace: ${chosenWorkspace.name}`;
+                        statusBarIndicator.show();
+                        context.subscriptions.push(statusBarIndicator);
                     });
                 break;
 
                 case 'workspaceDelete' :
-                    vscode.window.showQuickPick( workspaceList ).then( ( val: string ) => {
-                        if( val === 'Close' || val !== undefined ) return;
+                    vscode.window.showQuickPick( workspaceList ).then((val: string) => {
+                        if( val === 'Close' || val === undefined ) return;
                         let chosenWorkspaceId = workspaceIdsList[ workspaceList.indexOf( val ) ];
                         workspaceManager.removeById(chosenWorkspaceId);
                     });

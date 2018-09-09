@@ -53,19 +53,24 @@ export default class WorkspaceManager {
     /* --------------------
     */
     public create(name: string = null, excludedItems: any = null, path: string = 'global') {
-        if( name && excludedItems ){
+        if(name && excludedItems){
             this.workspaces.push( this.buildObject(
                 name, path, excludedItems
-            ) );
-
+            ));
             this.save();
         }
     }
 
     /* --------------------
     */
-    public getAll( forProject: boolean = true ): WorkspaceLayout[] {
-        return this.workspaces;
+    public getAll(forProject:string = null): WorkspaceLayout[] {
+        let clone: WorkspaceLayout[] = JSON.parse(JSON.stringify(this.workspaces));
+        clone.sort(function(a, b) {
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+          return 0;
+        });
+        return clone;
     }
 
     /* --------------------
