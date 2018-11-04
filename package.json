@@ -77,6 +77,16 @@
                 "category": "Make Hidden"
             },
             {
+                "command": "make-hidden.stepBack",
+                "title": "Step Back",
+                "category": "Make Hidden"
+            },
+            {
+                "command": "make-hidden.stepForward",
+                "title": "Step Forward",
+                "category": "Make Hidden"
+            },
+            {
                 "command": "make-hidden.removeAllItems",
                 "title": "Empty",
                 "category": "Make Hidden",
