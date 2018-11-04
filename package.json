@@ -149,6 +149,14 @@
                 {
                     "command": "make-hidden.removeAllItems",
                     "when": "view == makeHiddenViewPane"
+                },
+                {
+                    "command": "make-hidden.stepBack",
+                    "when": "view == makeHiddenViewPane"
+                },
+                {
+                    "command": "make-hidden.stepForward",
+                    "when": "view == makeHiddenViewPane"
                 }
             ]
         }

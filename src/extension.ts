@@ -56,7 +56,7 @@ export function activate( context : vscode.ExtensionContext ) {
     /* --------------------
      * Show Cmd's
     */
-    ['removeSearch', 'removeItem', 'removeAllItems'].forEach((cmd) => {
+    ['removeSearch', 'removeItem', 'removeAllItems', 'stepBack', 'stepForward'].forEach((cmd) => {
         let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, ( excludeString : string ) =>  {
             switch( cmd ){
                 case 'removeSearch' : {
@@ -85,6 +85,11 @@ export function activate( context : vscode.ExtensionContext ) {
 
                 case 'removeAllItems' : {
                     excludeItemsController.removeAllItems();
+                    break;
+                }
+
+                case 'stepBack' : case 'stepForward' : {
+                    console.log('Setting back or forwards');
                     break;
                 }
             }
