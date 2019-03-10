@@ -101,8 +101,8 @@ export function activate(context: vscode.ExtensionContext) {
 
       workspaces.forEach((workspace: any = {}) => {
         let path: string = workspace.path;
-        if (path == 'global' || path == Util.getVsCodeCurrentPath()) {
-          let label: string = ((path === 'global') ? 'G: ' : '') + `${workspace.name}`;
+        if (path == null || path == Util.getVsCodeCurrentPath()) {
+          let label: string = ((path === null) ? 'G: ' : '') + `${workspace.name}`;
           workspaceList.push(label);
           workspaceIdsList.push(workspace.id);
         }
