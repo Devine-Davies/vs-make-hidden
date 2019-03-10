@@ -14,7 +14,7 @@ import * as vscode from 'vscode';
 import * as myExtension from '../src/extension';
 
 import * as Util from '../src/make-hidden/utilities';
-import WorkspaceManager from '../src/make-hidden/workspace-manager/workspace-manager.controller';
+import { WorkspaceManager} from '../src/make-hidden/workspace-manager/workspace-manager.controller';
 let workspaceManager = new WorkspaceManager();
 
 suite("utilities Tests", () => {

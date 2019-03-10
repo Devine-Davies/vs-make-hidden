@@ -1,11 +1,9 @@
 "use strict";
-
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from "os";
 import * as process from "process";
-import * as util from "util";
 
 let VS_CODE_CONTEXT: any    = null;
 const HOME_DIR: string      = os.homedir();
@@ -168,17 +166,4 @@ export function getItemFromJsonFile(
     }
 
     return { "__error" : `fileFullPath & objectItem not set` };
-}
-
-/* --------------------
-*/
-export function isVsCodeFileObject( obj : any = null ) : boolean {
-    if( typeof obj == 'object' ) {
-        for ( let prop in obj )  {
-            if( prop == 'fsPath') {
-                return true;
-            }
-        }
-    }
-    return false;
 }
