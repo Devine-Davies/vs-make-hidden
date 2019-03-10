@@ -1,12 +1,6 @@
-// Remove the workspace
-// cd /Users/rhysdevine-davies/Library/Application\ Support/Code/User
-// rm makeHidden.js
-
 /* -- Third party import's -- */
 import * as fs from 'fs';
 import * as console from 'console';
-
-/* -- Make hidden lib's -- */
 import * as Util from '../utilities';
 
 export interface WorkspaceLayout {
@@ -16,13 +10,10 @@ export interface WorkspaceLayout {
     excludedItems: any;
 }
 
-export default class WorkspaceManager {
-
+export class WorkspaceManager {
     workspaces: WorkspaceLayout[] = [];
     projectRoot: string = '';
 
-    /* --------------------
-    */
     constructor(
         private settingPath: string = null
     ){ this.load(); }
@@ -63,7 +54,7 @@ export default class WorkspaceManager {
 
     /* --------------------
     */
-    public getAll(forProject:string = null): WorkspaceLayout[] {
+    public getAll(): WorkspaceLayout[] {
         let clone: WorkspaceLayout[] = JSON.parse(JSON.stringify(this.workspaces));
         clone.sort(function(a, b) {
             if (a.name < b.name) return -1;
