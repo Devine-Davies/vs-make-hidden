@@ -8,6 +8,6 @@ export function LoadJSONAsync(filename: string, key: string = undefined) {
       }
 
       resolve(json)
-    });
+    }).catch((e) => console.log(e))
   });
 }

@@ -7,7 +7,7 @@ import * as process from "process";
 
 let VS_CODE_CONTEXT: any = null;
 const HOME_DIR: string = os.homedir();
-const PROJECTS_FILE: string = "makeHidden.json";
+const PROJECTS_FILE: string = "MakeHidden.json";
 
 export function setVsCodeContext(context) {
     VS_CODE_CONTEXT = context;
@@ -17,13 +17,14 @@ export function setVsCodeContext(context) {
 */
 export function getExtensionSettingPath(): string {
     let projectFile: string;
-
     const appData = process.env.APPDATA || (process.platform === "darwin" ? process.env.HOME + "/Library/Application Support" : "/var/local");
-    const channelPath: string = this.getChannelPath();
-    // console.log( appData );
+    const channelPath: string = 'Code';
+    // console.log(this.getChannelPath());
+    // const channelPath: string = this.getChannelPath();
 
     projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
     // in linux, it may not work with /var/local, then try to use /home/myuser/.config
+
     if ((process.platform === "linux") && (!fs.existsSync(projectFile))) {
         projectFile = path.join(HOME_DIR, ".config/", channelPath, "User", PROJECTS_FILE);
     }
@@ -92,6 +93,33 @@ export function getVscodeSettingPath(pathType: string = null) {
 /* --------------------
     * Create vc setting.json directory
 */
+export function createPluginSettingsJson(): void {
+    let noticeText: string = `Plugin MakeHidden requires a 'MakeHidden.json' file, would you like to create now?`;
+    let grantedText: string = 'One Time Create';
+
+    vscode.window.showInformationMessage(
+        noticeText, grantedText
+    ).then((selection: string) => {
+        if (selection === grantedText) {
+            let path: string = getExtensionSettingPath();
+            const info = getPathInfoFromPath(path);
+            info['full'] = path;
+
+            fs.mkdir(info['path'], e => {
+                fs.writeFile(info['full'], `{}`, (err) => {
+                    if (err) {
+                        vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);
+                        throw err
+                    };
+                });
+            });
+        }
+    });
+}
+
+/* --------------------
+    * Create vc setting.json directory
+*/
 export function createVscodeSettingJson(): void {
     let noticeText: string = `No 'vscode/settings.json' has been found, would you like to create now`;
     let grantedText: string = 'Yes, Create File';
@@ -103,6 +131,7 @@ export function createVscodeSettingJson(): void {
             const info = getVscodeSettingPath();
 
             fs.mkdir(info['path'], e => {
+                console.log(e);
                 fs.writeFile(info['full'], `{}`, (err) => {
                     if (err) {
                         vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);

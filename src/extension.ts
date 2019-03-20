@@ -1,15 +1,11 @@
-'use strict';
-
-/* -- Third party import's -- */
 import * as vscode from 'vscode';
-// import * as console from 'console';
 import * as Util from './make-hidden/utilities';
 import ExcludeItems from './make-hidden/ExcludeItems/ExcludeItems.controller';
 import { Workspaces, Workspace } from './make-hidden/Workspaces/Workspaces.controller';
 
 // Const
 const ROOT_PATH = vscode.workspace.rootPath;
-const PLUGIN_NAME = 'makeHidden';
+const PLUGIN_NAME = 'MakeHidden';
 
 /* --------------------
  * Extension activation
@@ -25,41 +21,43 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Hide Cmd's
   */
-  ['hideItem', 'superHide', 'showOnly'].forEach((cmd:string) => {
+  ['hideItem', 'superHide', 'showOnly'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
-      if (settingsFileExists() && e.fsPath) {
-        let fileName: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
-        switch (cmd) {
-          case 'hideItem' : {
-            excludeItems.hideItem(fileName);
-            break;
-          }
+      if (!settingsFileExists() && !e.fsPath) {
+        return;
+      }
 
-          case 'superHide': {
-            let hideByOptions: string[] = [`Matching name`, `Matching extension`];
-            let hideLevelOptions: string[] = [
-                `Root directory`,
-                `Current directory`,
-                `Current & Child directories`,
-                `Child directories only`
-            ];
+      let fileName: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
+      switch (cmd) {
+        case 'hideItem': {
+          excludeItems.hideItem(fileName);
+          break;
+        }
 
-            vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
-                let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
-                vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
-                    let itemPath: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
-                    let hideLevel: number = hideLevelOptions.indexOf(val);
-                    excludeItems.hideItems(itemPath, hideByType, hideLevel);
-                });
+        case 'superHide': {
+          let hideByOptions: string[] = [`Matching name`, `Matching extension`];
+          let hideLevelOptions: string[] = [
+            `Root directory`,
+            `Current directory`,
+            `Current & Child directories`,
+            `Child directories only`
+          ];
+
+          vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
+            let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
+            vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
+              let itemPath: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
+              let hideLevel: number = hideLevelOptions.indexOf(val);
+              excludeItems.hideItems(itemPath, hideByType, hideLevel);
             });
+          });
 
-            break;
-          }
+          break;
+        }
 
-          case 'showOnly': {
-            excludeItems.showOnly(fileName);
-            break;
-          }
+        case 'showOnly': {
+          excludeItems.showOnly(fileName);
+          break;
         }
       }
     });
@@ -70,17 +68,17 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Show Cmd's
   */
-  ['removeSearch', 'removeItem', 'removeAllItems'].forEach((cmd:string) => {
+  ['removeSearch', 'removeItem', 'removeAllItems'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (excludeString: string) => {
       switch (cmd) {
         case 'removeSearch': {
-          excludeItems.getHiddenItemList().then((excludeList:any) => {
-              vscode.window.showQuickPick(excludeList).then((excludeString:string) => {
-                if (excludeString) {
-                  excludeItems.makeVisible(excludeString);
-                  vscode.commands.executeCommand('make-hidden.removeSearch');
-                }
-              });
+          excludeItems.getHiddenItemList().then((excludeList: any) => {
+            vscode.window.showQuickPick(excludeList).then((excludeString: string) => {
+              if (excludeString) {
+                excludeItems.makeVisible(excludeString);
+                vscode.commands.executeCommand('make-hidden.removeSearch');
+              }
+            });
           });
           break;
         }
@@ -105,13 +103,17 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Workspace Cmd's
   */
-  ['workspace.create', 'workspace.load', 'workspace.delete'].forEach((cmd:string) => {
+  ['workspace.create', 'workspace.load', 'workspace.delete'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, () => {
+      if (!pluginSettingsJson()) {
+        return;
+      }
+
       workspaceManager.getWorkspaces().then((workspaces: Workspace[]) => {
         let workspaceIds: string[] = Object.keys(workspaces);
         let workspacesNames: string[] = [];
 
-        workspaceIds.map((id:string, i: number) => {
+        workspaceIds.map((id: string, i: number) => {
           let workspace: Workspace = workspaces[id];
           let path: string = workspace.path;
 
@@ -165,9 +167,19 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 }
 
+function pluginSettingsJson(): boolean {
+  const codeSettingsFileExists: boolean = Util.fileExists(`${Util.getExtensionSettingPath()}`);
+  if (codeSettingsFileExists) {
+    return true;
+  } else {
+    Util.createPluginSettingsJson();
+    return false;
+  }
+}
+
 function settingsFileExists(): boolean {
   const codeSettingsFileExists: boolean = Util.fileExists(`${Util.getVsCodeCurrentPath()}/.vscode/settings.json`);
-  if(codeSettingsFileExists) {
+  if (codeSettingsFileExists) {
     return true;
   } else {
     Util.createVscodeSettingJson();

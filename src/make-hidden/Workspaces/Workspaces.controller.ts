@@ -14,7 +14,7 @@ export class Workspaces {
   workspaces: Workspace[];
 
   constructor(
-    private settingPath: string = Util.getExtensionSettingPath()
+    settingPath: string = Util.getExtensionSettingPath()
   ) {
     this.store = new ItemStore(settingPath, `workspaces`);
   }

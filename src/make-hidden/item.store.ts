@@ -28,12 +28,8 @@ export class ItemStore {
         return new Promise((resolve, reject) => {
             const storePath: string = this.storePath;
             LoadJSONAsync(storePath).then((res: any) => {
-                console.log('res');
-                console.log(res);
                 res[this.storeName] = newStore;
                 SaveFileAsync(storePath, JSON.stringify(res, null, 2)).then(() => {
-                    console.log('newStore');
-                    console.log(newStore);
                     resolve(newStore);
                 }).catch((err) => {
                     console.log('good.json error', err.message); // never called
