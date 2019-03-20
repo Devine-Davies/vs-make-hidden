@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 // import * as console from 'console';
 import * as Util from './make-hidden/utilities';
 import ExcludeItems from './make-hidden/ExcludeItems/ExcludeItems.controller';
-import { WorkspaceManager, WorkspaceLayout } from './make-hidden/ExcludeItems/ExcludeItems.workspaces';
+import { Workspaces, Workspace } from './make-hidden/Workspaces/Workspaces.controller';
 
 // Const
 const ROOT_PATH = vscode.workspace.rootPath;
@@ -16,7 +16,7 @@ const PLUGIN_NAME = 'makeHidden';
  * Vscode Func: command is executed and extension is activated the very first time the
 */
 export function activate(context: vscode.ExtensionContext) {
-  const workspaceManager = new WorkspaceManager(Util.getExtensionSettingPath());
+  const workspaceManager = new Workspaces();
   const excludeItems = new ExcludeItems();
 
   /* -- Set vs code context -- */
@@ -105,56 +105,58 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Workspace Cmd's
   */
-  ['workspaceSave', 'workspaceLoad', 'workspaceDelete'].forEach((cmd:string) => {
+  ['workspace.create', 'workspace.load', 'workspace.delete'].forEach((cmd:string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, () => {
-      let workspaces: WorkspaceLayout[] = workspaceManager.getAll();
-      let workspaceList: string[] = [];
-      let workspaceIdsList: string[] = [];
+      workspaceManager.getWorkspaces().then((workspaces: Workspace[]) => {
+        let workspaceIds: string[] = Object.keys(workspaces);
+        let workspacesNames: string[] = [];
 
-      workspaces.forEach((workspace: any = {}) => {
-        let path: string = workspace.path;
-        if (path == null || path == Util.getVsCodeCurrentPath()) {
-          let label: string = ((path === null) ? 'G: ' : '') + `${workspace.name}`;
-          workspaceList.push(label);
-          workspaceIdsList.push(workspace.id);
+        workspaceIds.map((id:string, i: number) => {
+          let workspace: Workspace = workspaces[id];
+          let path: string = workspace.path;
+
+          if (path == null || path == Util.getVsCodeCurrentPath()) {
+            let label: string = `${i}. ` + `${workspace.name}` + ((path === null) ? ' •' : '');
+            workspacesNames.push(label);
+          }
+        });
+        workspacesNames.push('Close');
+
+        switch (cmd) {
+          case 'workspace.create': {
+            vscode.window.showQuickPick(['Globally', 'Current working directory', 'Close']).then((choice) => {
+              if (choice === 'Close' || choice === undefined) return;
+              vscode.window.showInputBox({ prompt: 'Name of Workspace' }).then((workspaceName: string) => {
+                if (workspaceName === undefined) return;
+                excludeItems.getHiddenItemList().then((excludeItems: string[]) => {
+                  let type: string = (choice === 'Globally') ? null : Util.getVsCodeCurrentPath();
+                  workspaceManager.create(workspaceName, excludeItems, type);
+                })
+              });
+            });
+            break;
+          }
+
+          case 'workspace.load': {
+            vscode.window.showQuickPick(workspacesNames).then((val: string) => {
+              if (val === 'Close' || val === undefined) return;
+              let chosenWorkspaceId = workspaceIds[workspacesNames.indexOf(val)];
+              let chosenWorkspace = workspaces[chosenWorkspaceId];
+              excludeItems.loadExcludedList(chosenWorkspace['excludedItems']);
+            });
+            break;
+          }
+
+          case 'workspace.delete': {
+            vscode.window.showQuickPick(workspacesNames).then((val: string) => {
+              if (val === 'Close' || val === undefined) return;
+              let chosenWorkspaceId = workspaceIds[workspacesNames.indexOf(val)];
+              workspaceManager.removeById(chosenWorkspaceId);
+            });
+            break;
+          }
         }
       });
-      workspaceList.push('Close');
-
-      switch (cmd) {
-        case 'workspaceSave': {
-          vscode.window.showQuickPick(['Globally', 'Current working directory', 'Close']).then((choice) => {
-            if (choice === 'Close' || choice === undefined) return;
-            vscode.window.showInputBox({ prompt: 'Name of Workspace' }).then((workspaceName: string) => {
-              if (workspaceName === undefined) return;
-              excludeItems.getHiddenItemList().then((excludeItems: string[]) => {
-                let type: string = (choice === 'Globally') ? null : Util.getVsCodeCurrentPath();
-                workspaceManager.create(workspaceName, excludeItems, type);
-              })
-            });
-          });
-          break;
-        }
-
-        case 'workspaceLoad': {
-          vscode.window.showQuickPick(workspaceList).then((val: string) => {
-            if (val === 'Close' || val === undefined) return;
-            let chosenWorkspaceId = workspaceIdsList[workspaceList.indexOf(val)];
-            let chosenWorkspace = workspaceManager.fidById(chosenWorkspaceId);
-            excludeItems.loadExcludedList(chosenWorkspace['excludedItems']);
-          });
-          break;
-        }
-
-        case 'workspaceDelete': {
-          vscode.window.showQuickPick(workspaceList).then((val: string) => {
-            if (val === 'Close' || val === undefined) return;
-            let chosenWorkspaceId = workspaceIdsList[workspaceList.indexOf(val)];
-            workspaceManager.removeById(chosenWorkspaceId);
-          });
-          break;
-        }
-      }
     });
     context.subscriptions.push(registerCommand);
   });
@@ -163,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 }
 
-function settingsFileExists() {
+function settingsFileExists(): boolean {
   const codeSettingsFileExists: boolean = Util.fileExists(`${Util.getVsCodeCurrentPath()}/.vscode/settings.json`);
   if(codeSettingsFileExists) {
     return true;

@@ -2,14 +2,23 @@
 import * as Util from '../utilities';
 import { DirectoryPathInfo } from '../Service/DirectoryPathInfo';
 
-import ExcludeItemsStore from './ExcludeItems.store';
+import { ItemStore } from '../item.store';
 import ExcludeItemsViewPane from './ExcludeItems.viewpane';
-import { WorkspaceManager, WorkspaceLayout } from './ExcludeItems.workspaces';
+
+interface ExcludeItemsObject {
+    [s: string]: boolean
+}
+
+interface RegexExcluder {
+    self:string
+    byName:string
+    byNameWithExtension:string
+    allExtension:string
+}
 
 export default class ExcludeItems {
-    private store;
-    private workspaces;
-    private viewPane;
+    private store: ItemStore;
+    private viewPane: ExcludeItemsViewPane;
 
     private hideLevels: string[] = ["root", "current", "current&below", "below"];
     private hideLevelsObject: any = {
@@ -20,9 +29,8 @@ export default class ExcludeItems {
     };
 
     constructor() {
-        this.store = new ExcludeItemsStore();
+        this.store = new ItemStore(Util.getVscodeSettingPath('full'), `files.exclude`);
         this.viewPane = new ExcludeItemsViewPane(`makeHiddenViewPane`);
-        this.workspaces = new WorkspaceManager(Util.getExtensionSettingPath());
 
         this.onListUpdate();
     }
@@ -39,53 +47,46 @@ export default class ExcludeItems {
     /* --------------------
      * Expose the list
     */
-    public loadExcludedList(list: string[]) {
-        let newExcludeObject: any = {};
-        list.map((item) => {
-            newExcludeObject[item] = true;
-        })
-        /* -- Save the new work space -- */
-        this.store.set(newExcludeObject).then(() => {
-            this.onListUpdate();
-        });
+    public loadExcludedList(list: string[]): void {
+        // Format for store
+        let store: ExcludeItemsObject = {};
+        list.map((item:string) => store[item] = true);
+
+        // Update the view
+        this.store.set(store).then(() => this.onListUpdate());
     }
 
     /* --------------------
      * Have done this here as i think it will be good when
      * formatting the list, e.g by file type(.exe) name acs/desc
     */
-    public getHiddenItemList(): Thenable<String[]> {
+    public getHiddenItemList(): Promise<String[]> {
         return new Promise((resolve, reject) => {
-            this.store.get().then((store: any) => {
-                let itemList = [];
-                const keys = Object.keys(store);
-                for (const item of keys) {
-                    if (store[item]) {
-                        itemList.push(item);
-                    }
-
-                }
-                resolve(itemList);
+            this.store.get().then((store: ExcludeItemsObject) => {
+                // quick cheep way to get the as string[] might want to check in future
+                const keys: string[] = Object.keys(store);
+                resolve(keys);
             });
         });
     }
 
     /* --------------------
      * Remove an item from the current working directory
+     * itemName: file/folder name
     */
-    public hideItem(item: string): void {
-        this.store.addItem(item).then((store) => {
-            this.onListUpdate();
-        });
+    public hideItem(itemName: string): void {
+        this.store.addItem(itemName, true).then(
+            (store:ExcludeItemsObject) => this.onListUpdate()
+        );
     }
 
     /* --------------------
      * Will hide an item from the projects directory
     */
     public hideItems(itemPath: string = null, includeExtension: boolean = false, hideLevelIndex: number = 0) {
-        this.store.get().then((filesExcludeObject) => {
+        this.store.get().then((filesExcludeObject: ExcludeItemsObject) => {
             let itemPathProps: DirectoryPathInfo = DirectoryPathInfo(itemPath);
-            let excludeSnippets: any = this.buildExcludeRegex(itemPath, hideLevelIndex);
+            let excludeSnippets: RegexExcluder = this.buildExcludeRegex(itemPath, hideLevelIndex);
 
             if (!includeExtension) {
                 filesExcludeObject[excludeSnippets['byName']] = true;
@@ -198,7 +199,7 @@ export default class ExcludeItems {
     /* --------------------
     * TODO:: Need to Refactor to own class
     */
-    private buildExcludeRegex(itemPath: string = null, hideLevelIndex: number = 0): any {
+    private buildExcludeRegex(itemPath: string = null, hideLevelIndex: number = 0): RegexExcluder {
         let hideLevelObject: any = this.getHideLevelByIndex(hideLevelIndex);
         let itemPathProps: any = Util.getPathInfoFromPath(itemPath);
         let excludeSnippet: string = `${hideLevelObject.regexCode}`;

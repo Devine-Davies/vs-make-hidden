@@ -36,9 +36,9 @@
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeSearch",
         "onCommand:make-hidden.removeAllItems",
-        "onCommand:make-hidden.workspaceSave",
-        "onCommand:make-hidden.workspaceLoad",
-        "onCommand:make-hidden.workspaceDelete"
+        "onCommand:make-hidden.workspace.create",
+        "onCommand:make-hidden.workspace.load",
+        "onCommand:make-hidden.workspace.delete"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -86,17 +86,17 @@
                 }
             },
             {
-                "command": "make-hidden.workspaceSave",
-                "title": "Save as new workspace",
+                "command": "make-hidden.workspace.create",
+                "title": "Create workspace",
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.workspaceLoad",
+                "command": "make-hidden.workspace.load",
                 "title": "Load workspace",
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.workspaceDelete",
+                "command": "make-hidden.workspace.delete",
                 "title": "Remove workspace",
                 "category": "Make Hidden"
             }
@@ -118,17 +118,17 @@
             ],
             "view/title": [
                 {
-                    "command": "make-hidden.workspaceSave",
+                    "command": "make-hidden.workspace.create",
                     "when": "view == makeHiddenViewPane",
                     "group": "workspaceManager"
                 },
                 {
-                    "command": "make-hidden.workspaceLoad",
+                    "command": "make-hidden.workspace.load",
                     "when": "view == makeHiddenViewPane",
                     "group": "workspaceManager"
                 },
                 {
-                    "command": "make-hidden.workspaceDelete",
+                    "command": "make-hidden.workspace.delete",
                     "when": "view == makeHiddenViewPane",
                     "group": "workspaceManager"
                 },

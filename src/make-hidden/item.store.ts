@@ -1,17 +1,19 @@
 /* -- Third party import's -- */
 import * as console from 'console';
-import * as Util from '../utilities';
-import { LoadJSONAsync } from '../Service/LoadJSONAsync';
-import { SaveFileAsync } from '../Service/SaveFileAsync';
+import * as Util from './utilities';
+import { LoadJSONAsync } from './Service/LoadJSONAsync';
+import { SaveFileAsync } from './Service/SaveFileAsync';
 
-export default class ExcludeItemsStore {
-    private storePath: string = Util.getVscodeSettingPath('full');
-    private storeName: string = `files.exclude`;
+export class ItemStore {
+    constructor(
+        private storePath: string,
+        private storeName: string = `files.exclude`,
+    ) { }
 
     /* --------------------
      * Loads and exposes the store (`files.exclude`)
     */
-    public get(): any {
+    public get(): Promise<any> {
         return new Promise((resolve, reject) => {
             LoadJSONAsync(this.storePath, this.storeName).then((store) => {
                 resolve(store)
@@ -22,12 +24,16 @@ export default class ExcludeItemsStore {
     /* --------------------
      * Update the settings.json file to hide the new regex items
     */
-    public set(newStore: any = {}): Thenable<any> {
+    public set(newStore: any = {}): Promise<any> {
         return new Promise((resolve, reject) => {
-            const settingsPath: string = Util.getVscodeSettingPath('full');
-            LoadJSONAsync(settingsPath).then((res: any) => {
-                res[`files.exclude`] = newStore;
-                SaveFileAsync(settingsPath, JSON.stringify(res, null, 2)).then(() => {
+            const storePath: string = this.storePath;
+            LoadJSONAsync(storePath).then((res: any) => {
+                console.log('res');
+                console.log(res);
+                res[this.storeName] = newStore;
+                SaveFileAsync(storePath, JSON.stringify(res, null, 2)).then(() => {
+                    console.log('newStore');
+                    console.log(newStore);
                     resolve(newStore);
                 }).catch((err) => {
                     console.log('good.json error', err.message); // never called
@@ -42,14 +48,12 @@ export default class ExcludeItemsStore {
      * Remove regex from config list
      * When removing an item it will be placed back into the directory
     */
-    public removeItem(item: string = null) {
+    public removeItem(itemKey: string = null): Promise<any> {
         return new Promise((resolve, reject) => {
             this.get().then((store: any) => {
-                if (store[item]) {
-                    delete store[item];
-                    this.set(store).then(() => {
-                        resolve(store)
-                    });
+                if (store[itemKey]) {
+                    delete store[itemKey];
+                    this.set(store).then(() => resolve(store));
                 }
             }).catch((err) => {
                 console.log('good.json error', err.message); // never called
@@ -61,13 +65,11 @@ export default class ExcludeItemsStore {
      * Added regex from config list
      * When add an item it will be removed from the directory
     */
-    public addItem(item: string = null) {
+    public addItem(itemKey: string, itemInfo: any) {
         return new Promise((resolve, reject) => {
             this.get().then((store: any) => {
-                store[item] = true;
-                this.set(store).then(() => {
-                    resolve(store)
-                });
+                store[itemKey] = itemInfo;
+                this.set(store).then(() => resolve(store));
             }).catch((err) => {
                 console.log('good.json error', err.message); // never called
             });

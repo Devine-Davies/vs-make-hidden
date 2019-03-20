@@ -21,7 +21,7 @@ export default class ExcludeItemsViewPane implements TreeDataProvider<Node>  {
   /* --------------------
   * Register a view pane with vs code view: showing the excluded items
   */
-  private register(name: string = ''): any {
+  private register(name: string = '') {
       window.registerTreeDataProvider(name, this);
   }
 
@@ -37,7 +37,7 @@ export default class ExcludeItemsViewPane implements TreeDataProvider<Node>  {
   /* --------------------
    * Updates the view pane item list
   */
-  public update(list: any) {
+  public update(list: string[]): void {
       let treeString: string = JSON.stringify(list)
       this.tree = parseTree(treeString);
       this.viewUpdatedEventEmitter.fire();
@@ -47,10 +47,8 @@ export default class ExcludeItemsViewPane implements TreeDataProvider<Node>  {
    * vscode function
    *
   */
-  public getChildren(node?: Node): Thenable<Node[]> {
-      return Promise.resolve(
-          this.tree.children
-      );
+  public getChildren(): Thenable<Node[]> {
+      return Promise.resolve(this.tree.children);
   }
 
   /* --------------------
@@ -59,8 +57,10 @@ export default class ExcludeItemsViewPane implements TreeDataProvider<Node>  {
   */
   public getTreeItem(node: Node): TreeItem {
       let itemTitle: string = node.value;
+
       let treeItem: TreeItem = new TreeItem(
-          itemTitle, TreeItemCollapsibleState.None
+          itemTitle,
+          TreeItemCollapsibleState.None
       );
 
       treeItem.iconPath = Util.getProjectThemeDirectory('put-back-icon.svg');
