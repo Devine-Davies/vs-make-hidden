@@ -4,8 +4,8 @@
 import * as vscode from 'vscode';
 // import * as console from 'console';
 import * as Util from './make-hidden/utilities';
-import ExcludeItemsController from './make-hidden/exclude-items/exclude-items.controller';
-import { WorkspaceManager, WorkspaceLayout } from './make-hidden/workspace-manager/workspace-manager.controller';
+import ExcludeItems from './make-hidden/ExcludeItems/ExcludeItems.controller';
+import { WorkspaceManager, WorkspaceLayout } from './make-hidden/ExcludeItems/ExcludeItems.workspaces';
 
 // Const
 const ROOT_PATH = vscode.workspace.rootPath;
@@ -16,33 +16,50 @@ const PLUGIN_NAME = 'makeHidden';
  * Vscode Func: command is executed and extension is activated the very first time the
 */
 export function activate(context: vscode.ExtensionContext) {
-  const excludeItemsController = new ExcludeItemsController();
   const workspaceManager = new WorkspaceManager(Util.getExtensionSettingPath());
+  const excludeItems = new ExcludeItems();
 
   /* -- Set vs code context -- */
   Util.setVsCodeContext(context);
-
-  const statusBarIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
 
   /* --------------------
    * Hide Cmd's
   */
   ['hideItem', 'superHide', 'showOnly'].forEach((cmd:string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
-      if (e.fsPath) {
+      if (settingsFileExists() && e.fsPath) {
         let fileName: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
         switch (cmd) {
-          case 'hideItem':
-            excludeItemsController.hideItem(fileName);
+          case 'hideItem' : {
+            excludeItems.hideItem(fileName);
             break;
+          }
 
-          case 'superHide':
-            excludeItemsController.superHide(e, ROOT_PATH);
-            break;
+          case 'superHide': {
+            let hideByOptions: string[] = [`Matching name`, `Matching extension`];
+            let hideLevelOptions: string[] = [
+                `Root directory`,
+                `Current directory`,
+                `Current & Child directories`,
+                `Child directories only`
+            ];
 
-          case 'showOnly':
-            excludeItemsController.showOnly(fileName);
+            vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
+                let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
+                vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
+                    let itemPath: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
+                    let hideLevel: number = hideLevelOptions.indexOf(val);
+                    excludeItems.hideItems(itemPath, hideByType, hideLevel);
+                });
+            });
+
             break;
+          }
+
+          case 'showOnly': {
+            excludeItems.showOnly(fileName);
+            break;
+          }
         }
       }
     });
@@ -57,31 +74,26 @@ export function activate(context: vscode.ExtensionContext) {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (excludeString: string) => {
       switch (cmd) {
         case 'removeSearch': {
-          let excludeList: any = excludeItemsController.getList();
-          let workspaceChoices: string[] = [];
-
-          for (let item in excludeList) {
-            workspaceChoices.push(item);
-          }
-
-          vscode.window.showQuickPick(workspaceChoices).then((excludeString: string) => {
-            if (excludeString !== undefined) {
-              excludeItemsController.removeItem(excludeString);
-              vscode.commands.executeCommand('make-hidden.removeSearch');
-            }
+          excludeItems.getHiddenItemList().then((excludeList:any) => {
+              vscode.window.showQuickPick(excludeList).then((excludeString:string) => {
+                if (excludeString) {
+                  excludeItems.makeVisible(excludeString);
+                  vscode.commands.executeCommand('make-hidden.removeSearch');
+                }
+              });
           });
           break;
         }
 
         case 'removeItem': {
           if (typeof excludeString == 'string' && excludeString.length > 0) {
-            excludeItemsController.removeItem(excludeString);
+            excludeItems.makeVisible(excludeString);
           }
           break;
         }
 
         case 'removeAllItems': {
-          excludeItemsController.removeAllItems();
+          excludeItems.showAllItems();
           break;
         }
       }
@@ -115,9 +127,10 @@ export function activate(context: vscode.ExtensionContext) {
             if (choice === 'Close' || choice === undefined) return;
             vscode.window.showInputBox({ prompt: 'Name of Workspace' }).then((workspaceName: string) => {
               if (workspaceName === undefined) return;
-              let excludeItems: any = excludeItemsController.getFilesExcludeObject();
-              let type: string = (choice === 'Globally') ? null : Util.getVsCodeCurrentPath();
-              workspaceManager.create(workspaceName, excludeItems, type);
+              excludeItems.getHiddenItemList().then((excludeItems: string[]) => {
+                let type: string = (choice === 'Globally') ? null : Util.getVsCodeCurrentPath();
+                workspaceManager.create(workspaceName, excludeItems, type);
+              })
             });
           });
           break;
@@ -128,12 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (val === 'Close' || val === undefined) return;
             let chosenWorkspaceId = workspaceIdsList[workspaceList.indexOf(val)];
             let chosenWorkspace = workspaceManager.fidById(chosenWorkspaceId);
-            excludeItemsController.loadList(chosenWorkspace['excludedItems']);
-
-            // statusBarIndicator.command = 'editor.action.commentLine';
-            statusBarIndicator.text = `Hidden Workspace: ${chosenWorkspace.name}`;
-            statusBarIndicator.show();
-            context.subscriptions.push(statusBarIndicator);
+            excludeItems.loadExcludedList(chosenWorkspace['excludedItems']);
           });
           break;
         }
@@ -153,4 +161,14 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
+}
+
+function settingsFileExists() {
+  const codeSettingsFileExists: boolean = Util.fileExists(`${Util.getVsCodeCurrentPath()}/.vscode/settings.json`);
+  if(codeSettingsFileExists) {
+    return true;
+  } else {
+    Util.createVscodeSettingJson();
+    return false;
+  }
 }
