@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 
-export function ReadFileAsync(filename) {
+/* --------------------
+ * Reads a give file and returns content as a promise
+*/
+export function ReadFileAsync(filename): Promise<any> {
     return new Promise((resolve,reject) => {
         fs.readFile(filename, { encoding: 'utf8' }, (err,result) => {
             if (err) reject(err);

@@ -18,6 +18,8 @@ export function setVsCodeContext(context) {
 export function getExtensionSettingPath(): string {
     let projectFile: string;
     const appData = process.env.APPDATA || (process.platform === "darwin" ? process.env.HOME + "/Library/Application Support" : "/var/local");
+
+    // TODO: find out more about this
     const channelPath: string = 'Code';
     // console.log(this.getChannelPath());
     // const channelPath: string = this.getChannelPath();
@@ -131,7 +133,6 @@ export function createVscodeSettingJson(): void {
             const info = getVscodeSettingPath();
 
             fs.mkdir(info['path'], e => {
-                console.log(e);
                 fs.writeFile(info['full'], `{}`, (err) => {
                     if (err) {
                         vscode.window.showInformationMessage(`Error creating settings.json in .vscode directory`);
@@ -143,76 +144,9 @@ export function createVscodeSettingJson(): void {
     });
 }
 
-/* --------------------
-*/
-export function creatFolder(path: string = null) {
-    fs.mkdir(path, e => { });
-}
-
-/* --------------------
-*/
-export function creatFile(
-    path: string = null,
-    data: any = {}
-) {
-    fs.writeFileSync(path, JSON.stringify(data, null, "\t"));
-}
 
 /* --------------------
 */
 export function fileExists(filePath: string = '') {
     return fs.existsSync(filePath);
 }
-
-/* --------------------
-*/
-export function getItemFromJsonFile(
-    fileFullPath: string = null,
-    objectItem: string = null
-) {
-    if (fileFullPath && objectItem) {
-        try {
-            const readFile = JSON.parse(fs.readFileSync(
-                fileFullPath, { encoding: 'utf8' }
-            ));
-            if (readFile.hasOwnProperty(objectItem)) {
-                return readFile[objectItem];
-            }
-            else {
-                return { "__error": 'Not found' };
-            }
-        }
-        catch (err) {
-            return { "__error": 'File not found' };
-        }
-    }
-
-    return { "__error": `fileFullPath & objectItem not set` };
-}
-
-
-// /* --------------------
-// */
-// export function getItemFromJsonFile(
-//     fileFullPath: string = null,
-//     objectItem: string = null
-// ) {
-//     if (fileFullPath && objectItem) {
-//         try {
-//             const readFile = JSON.parse(fs.readFileSync(
-//                 fileFullPath, { encoding: 'utf8' }
-//             ));
-//             if (readFile.hasOwnProperty(objectItem)) {
-//                 return readFile[objectItem];
-//             }
-//             else {
-//                 return { "__error": 'Not found' };
-//             }
-//         }
-//         catch (err) {
-//             return { "__error": 'File not found' };
-//         }
-//     }
-
-//     return { "__error": `fileFullPath & objectItem not set` };
-// }

@@ -1,14 +1,23 @@
 /* -- Third party import's -- */
-import * as console from 'console';
-import * as Util from './utilities';
-import { LoadJSONAsync } from './Service/LoadJSONAsync';
-import { SaveFileAsync } from './Service/SaveFileAsync';
+import * as console from 'console';;
+import { LoadJSONAsync } from './../../Service/LoadJSONAsync';
+import { SaveFileAsync } from './../../Service/SaveFileAsync';
 
 export class ItemStore {
+    // Holds the targets store last state
+    previousState:any;
+
     constructor(
         private storePath: string,
-        private storeName: string = `files.exclude`,
+        private storeName: string,
     ) { }
+
+    /* --------------------
+     * Loads and exposes the store (`files.exclude`)
+    */
+   public getPreviousState(): any {
+       return this.previousState;
+   }
 
     /* --------------------
      * Loads and exposes the store (`files.exclude`)
@@ -28,6 +37,8 @@ export class ItemStore {
         return new Promise((resolve, reject) => {
             const storePath: string = this.storePath;
             LoadJSONAsync(storePath).then((res: any) => {
+                // Copy & Save the previous store state
+                this.previousState = JSON.parse(JSON.stringify(res[this.storeName]));
                 res[this.storeName] = newStore;
                 SaveFileAsync(storePath, JSON.stringify(res, null, 2)).then(() => {
                     resolve(newStore);

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import * as Util from './make-hidden/utilities';
-import ExcludeItems from './make-hidden/ExcludeItems/ExcludeItems.controller';
-import { Workspaces, Workspace } from './make-hidden/Workspaces/Workspaces.controller';
+import * as Util from './MakeHidden/utilities';
+import ExcludeItems from './MakeHidden/Classes/ExcludeItems/ExcludeItems.class';
+import { Workspaces, Workspace } from './MakeHidden/Classes/Workspaces/Workspaces.class';
 
 // Const
 const ROOT_PATH = vscode.workspace.rootPath;
@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Hide Cmd's
   */
-  ['hideItem', 'superHide', 'showOnly'].forEach((cmd: string) => {
+  ['hideItem', 'superHide', 'showOnly', 'undo'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
       if (!settingsFileExists() && !e.fsPath) {
         return;
@@ -59,6 +59,11 @@ export function activate(context: vscode.ExtensionContext) {
           excludeItems.showOnly(fileName);
           break;
         }
+
+        case 'undo': {
+          excludeItems.undo();
+          break;
+        }
       }
     });
 
@@ -76,7 +81,8 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showQuickPick(excludeList).then((excludeString: string) => {
               if (excludeString) {
                 excludeItems.makeVisible(excludeString);
-                vscode.commands.executeCommand('make-hidden.removeSearch');
+                // TODO: Don't like this fix as it runs before promise showing old list
+                setTimeout( () => vscode.commands.executeCommand('make-hidden.removeSearch'), 500);
               }
             });
           });

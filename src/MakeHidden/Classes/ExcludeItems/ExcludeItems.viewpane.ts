@@ -1,5 +1,5 @@
 /* -- Make hidden lib's -- */
-import * as Util from '../utilities';
+import * as Util from '../../utilities';
 import { Node, parseTree } from 'jsonc-parser';
 import { TreeDataProvider, EventEmitter, Event, TreeItem, TreeItemCollapsibleState, window } from 'vscode';
 
@@ -44,16 +44,14 @@ export default class ExcludeItemsViewPane implements TreeDataProvider<Node>  {
   }
 
   /* --------------------
-   * vscode function
-   *
+   * vscode function to render items to view
   */
   public getChildren(): Thenable<Node[]> {
       return Promise.resolve(this.tree.children);
   }
 
   /* --------------------
-   * vscode function
-   * Pass our tree node item object to vs code
+   * vscode function, Pass our tree node item object to vs code
   */
   public getTreeItem(node: Node): TreeItem {
       let itemTitle: string = node.value;

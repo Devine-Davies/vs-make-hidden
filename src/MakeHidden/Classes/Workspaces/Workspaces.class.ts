@@ -1,6 +1,6 @@
 /* -- Third party import's -- */
-import * as Util from '../utilities';
-import { ItemStore } from '../item.store';
+import * as Util from '../../utilities';
+import { ItemStore } from '../ItemStore/ItemStore.class';
 
 export interface Workspace {
   id: string;
@@ -32,30 +32,17 @@ export class Workspaces {
   }
 
   /* --------------------
-  */
-  public getWorkspacesList(): Promise<string[]> {
-    return new Promise((resolve, reject) => {
-      this.store.get().then((store: Workspace[]) => {
-        // quick cheep way to get the as string[] might want to check in future
-        const keys: string[] = Object.keys(store);
-        resolve(keys);
-      });
-    });
-  }
-
-  /* --------------------
+   * Creates & Saves a new workspace object
   */
   public create(name: string = null, excludedItems: any = null, path: string = 'global') {
     if (name && excludedItems) {
-      const workspace: Workspace = this.buildWorkspace(name, path, excludedItems)
-      this.store.addItem(workspace.id, workspace).then((workspaces: Workspace[]) => {
-        console.log('workspaces');
-        console.log(workspaces);
-      });
+      const workspace: Workspace = this.buildWorkspace(name, path, excludedItems);
+      this.store.addItem(workspace.id, workspace).then((workspaces: Workspace[]) => {});
     }
   }
 
   /* --------------------
+  * Removes a given workspace by id
   */
   public removeById(id: string = null) {
     this.store.removeItem(id).then(() => {
@@ -63,24 +50,9 @@ export class Workspaces {
   }
 
   /* --------------------
+   * Builds an workspace object for the store
   */
-  public fidById(id: string = null): Workspace {
-    let foundWorkspace: any = [];
-    for (let workspace of this.workspaces) {
-      if (workspace.id === id) {
-        return workspace;
-      }
-    }
-    return null;
-  }
-
-  /* --------------------
-  */
-  protected buildWorkspace(
-    name: string,
-    path: string = 'global',
-    items: any = {},
-  ): Workspace {
+  protected buildWorkspace(name: string, path: string = 'global', items: any = {}): Workspace {
     return {
       "id": this.guidGenerator(),
       "name": name,
@@ -90,6 +62,7 @@ export class Workspaces {
   }
 
   /* --------------------
+   * Create id
   */
   private guidGenerator(): string {
     var S4 = function () {

@@ -1,9 +1,10 @@
 /* -- Make hidden lib's -- */
-import * as Util from '../utilities';
-import { DirectoryPathInfo } from '../Service/DirectoryPathInfo';
+import * as Util from '../../utilities';
+import { DirectoryPathInfo } from '../../Service/DirectoryPathInfo';
 
-import { ItemStore } from '../item.store';
+import { ItemStore } from '../ItemStore/ItemStore.class';
 import ExcludeItemsViewPane from './ExcludeItems.viewpane';
+import { Workspace } from '../Workspaces/Workspaces.class';
 
 interface ExcludeItemsObject {
     [s: string]: boolean
@@ -194,6 +195,15 @@ export default class ExcludeItems {
         this.store.set({}).then(() => {
             this.onListUpdate();
         });
+    }
+
+    /* --------------------
+     *
+    */
+    public undo() {
+        const previousState: Workspace[] = this.store.getPreviousState();
+        const previousStore: string[] = Object.keys(previousState);
+        this.loadExcludedList(previousStore)
     }
 
     /* --------------------
