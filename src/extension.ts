@@ -21,11 +21,9 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Hide Cmd's
   */
-  ['hideItem', 'superHide', 'showOnly', 'undo'].forEach((cmd: string) => {
+  ['hideItem', 'superHide', 'showOnly'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
-      if (!settingsFileExists() && !e.fsPath) {
-        return;
-      }
+      if (!settingsFileExists() && !e.fsPath) { return; }
 
       let fileName: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
       switch (cmd) {
@@ -59,11 +57,6 @@ export function activate(context: vscode.ExtensionContext) {
           excludeItems.showOnly(fileName);
           break;
         }
-
-        case 'undo': {
-          excludeItems.undo();
-          break;
-        }
       }
     });
 
@@ -73,7 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Show Cmd's
   */
-  ['removeSearch', 'removeItem', 'removeAllItems'].forEach((cmd: string) => {
+  ['removeSearch', 'removeItem', 'removeAllItems', 'undo'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (excludeString: string) => {
       switch (cmd) {
         case 'removeSearch': {
@@ -98,6 +91,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         case 'removeAllItems': {
           excludeItems.showAllItems();
+          break;
+        }
+
+        case 'undo': {
+          excludeItems.undo();
           break;
         }
       }

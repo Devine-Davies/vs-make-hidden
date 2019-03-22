@@ -36,10 +36,13 @@ export class ItemStore {
     public set(newStore: any = {}): Promise<any> {
         return new Promise((resolve, reject) => {
             const storePath: string = this.storePath;
+            const storeName: string = this.storeName;
             LoadJSONAsync(storePath).then((res: any) => {
+                // Check if store space exists
+                if(!res[storeName]){ res[storeName] = {} }
                 // Copy & Save the previous store state
-                this.previousState = JSON.parse(JSON.stringify(res[this.storeName]));
-                res[this.storeName] = newStore;
+                this.previousState = JSON.parse(JSON.stringify(res[storeName]));
+                res[storeName] = newStore;
                 SaveFileAsync(storePath, JSON.stringify(res, null, 2)).then(() => {
                     resolve(newStore);
                 }).catch((err) => {

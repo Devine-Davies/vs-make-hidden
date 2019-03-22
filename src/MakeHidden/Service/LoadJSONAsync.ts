@@ -5,15 +5,11 @@ import { ReadFileAsync } from './ReadFileAsync';
  : TODO:: Why dose exclude still work with out key given??
 */
 export function LoadJSONAsync(filename: string, key: string = undefined): Promise<any> {
-  // console.log('key');
-  // console.log(key);
   return new Promise((resolve, reject) => {
     return ReadFileAsync(filename).then((res: any) => {
       const json = JSON.parse(res);
       if (key) {
-        // console.log('json');
-        // console.log(json[key]);
-        resolve(json[key]);
+        resolve(json[key] || {});
       }
 
       resolve(json)

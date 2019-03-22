@@ -59,7 +59,7 @@
             },
             {
                 "command": "make-hidden.undo",
-                "title": "Undo Last",
+                "title": "Undo Last Exclude",
                 "category": "Make Hidden"
             },
             {
