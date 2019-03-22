@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as Util from './MakeHidden/utilities';
+import * as fs from 'fs';
+import * as path from 'path';
 import ExcludeItems from './MakeHidden/Classes/ExcludeItems/ExcludeItems.class';
 import { Workspaces, Workspace } from './MakeHidden/Classes/Workspaces/Workspaces.class';
 
@@ -21,43 +23,49 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Hide Cmd's
   */
-  ['hideItem', 'superHide', 'showOnly'].forEach((cmd: string) => {
+  ['hideItem', 'hideMany', 'showOnly'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
       if (!settingsFileExists() && !e.fsPath) { return; }
+      let chosenFilePath: string = e.fsPath;
+      fs.lstat(chosenFilePath, (err, stats) => {
+        if (err) return console.log(err); //Handle error
 
-      let fileName: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
-      switch (cmd) {
-        case 'hideItem': {
-          excludeItems.hideItem(fileName);
-          break;
-        }
+        let relativePath: string = path.relative(ROOT_PATH, chosenFilePath);
+        let fileName: string = path.basename(e.fsPath);
+        var extension: string = path.extname(fileName);
+        var file: string = path.basename(fileName, extension);
 
-        case 'superHide': {
-          let hideByOptions: string[] = [`Matching name`, `Matching extension`];
-          let hideLevelOptions: string[] = [
-            `Root directory`,
-            `Current directory`,
-            `Current & Child directories`,
-            `Child directories only`
-          ];
+        switch (cmd) {
+          case 'hideItem': {
+            excludeItems.hide(relativePath);
+            break;
+          }
 
-          vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
-            let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
-            vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
-              let itemPath: string = e.fsPath.replace(ROOT_PATH, '').slice(1);
-              let hideLevel: number = hideLevelOptions.indexOf(val);
-              excludeItems.hideItems(itemPath, hideByType, hideLevel);
+          case 'hideMany': {
+            let hideByOptions: string[] = [`By Name: ${file}`];
+            if (stats.isFile()) hideByOptions.push(`By Extension: ${extension}`); // Allow matching extension on files
+            let hideLevelOptions: string[] = [
+              `Root directory`, `Current directory`,
+              `Current & Child directories`, `Child directories only`
+            ];
+
+            vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
+              let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
+              vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
+                let hideLevel: number = hideLevelOptions.indexOf(val);
+                excludeItems.hideMany(relativePath, hideByType, hideLevel);
+              });
             });
-          });
 
-          break;
-        }
+            break;
+          }
 
-        case 'showOnly': {
-          excludeItems.showOnly(fileName);
-          break;
+          case 'showOnly': {
+            excludeItems.showOnly(relativePath);
+            break;
+          }
         }
-      }
+      });
     });
 
     context.subscriptions.push(registerCommand);
@@ -75,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
               if (excludeString) {
                 excludeItems.makeVisible(excludeString);
                 // TODO: Don't like this fix as it runs before promise showing old list
-                setTimeout( () => vscode.commands.executeCommand('make-hidden.removeSearch'), 500);
+                setTimeout(() => vscode.commands.executeCommand('make-hidden.removeSearch'), 500);
               }
             });
           });

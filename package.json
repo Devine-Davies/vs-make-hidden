@@ -31,7 +31,7 @@
         "*",
         "onView:extension",
         "onCommand:make-hidden.hideItem",
-        "onCommand:make-hidden.superHide",
+        "onCommand:make-hidden.hideMany",
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeSearch",
@@ -58,18 +58,18 @@
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.undo",
-                "title": "Undo Last Exclude",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.superHide",
-                "title": "Super Hide",
+                "command": "make-hidden.hideMany",
+                "title": "Hide Many",
                 "category": "Make Hidden"
             },
             {
                 "command": "make-hidden.showOnly",
                 "title": "Show Only",
+                "category": "Make Hidden"
+            },
+            {
+                "command": "make-hidden.undo",
+                "title": "Undo Last",
                 "category": "Make Hidden"
             },
             {
@@ -118,7 +118,7 @@
                     "group": "make-hidden@1"
                 },
                 {
-                    "command": "make-hidden.superHide",
+                    "command": "make-hidden.hideMany",
                     "group": "make-hidden@1"
                 },
                 {

@@ -75,8 +75,8 @@ export default class ExcludeItems {
      * Remove an item from the current working directory
      * itemName: file/folder name
     */
-    public hideItem(itemName: string): void {
-        this.store.addItem(itemName, true).then(
+    public hide(relativePath: string): void {
+        this.store.addItem(relativePath, true).then(
             (store:ExcludeItemsObject) => this.onListUpdate()
         );
     }
@@ -84,11 +84,12 @@ export default class ExcludeItems {
     /* --------------------
      * Will hide an item from the projects directory
     */
-    public hideItems(itemPath: string = null, includeExtension: boolean = false, hideLevelIndex: number = 0) {
+    public hideMany(relativePath: string = null, includeExtension: boolean = false, hideLevelIndex: number = 0) {
         this.store.get().then((filesExcludeObject: ExcludeItemsObject) => {
-            let itemPathProps: DirectoryPathInfo = DirectoryPathInfo(itemPath);
-            let excludeSnippets: RegexExcluder = this.buildExcludeRegex(itemPath, hideLevelIndex);
+            let itemPathProps: DirectoryPathInfo = DirectoryPathInfo(relativePath);
+            let excludeSnippets: RegexExcluder = this.buildExcludeRegex(relativePath, hideLevelIndex);
 
+            // By Name
             if (!includeExtension) {
                 filesExcludeObject[excludeSnippets['byName']] = true;
                 filesExcludeObject[excludeSnippets['byNameWithExtension']] = true;
@@ -109,9 +110,9 @@ export default class ExcludeItems {
     /* --------------------
      * Will hide an item from the projects directory
     */
-    public showOnly(itemPath: string = null) {
-        if (itemPath) {
-            this.showOnlyFilterer(itemPath, true, false, 1);
+    public showOnly(relativePath: string = null) {
+        if (relativePath) {
+            this.showOnlyFilterer(relativePath, true, false, 1);
         }
     }
 
