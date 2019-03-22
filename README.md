@@ -12,22 +12,24 @@ A VS Code plugin that provides more control over your excluded items in your "Pr
 -  **View Pane**: Outlines all hidden/excluded files and folder. Items can also add back into the directory by selecting one, making it quick and easy to show/hide.
 -  **Workspaces**: Store excluded items and switch between saved workspaces.
 
-## Usage
+# Usage
 ### Hide
+Right click on a file or folder in the projects directory. Then select **`Hide`** to exclude that item rendering it invisible.
+
 ![Preview](resources/showcase-hideItem.gif)
 
 ### Hide Many
-Firstly, right click on a file or folder in the projects directory. Then select **Hide Many** and you will be presented with the following options:
+Right click on a file or folder in the projects directory. Then select **`Hide Many`** and you will be presented with the following options:
 
-**Option One**
-1. **By name**: Hide all items with a matching selected item name.
-2. **By extension**: To only target item with the corresponding extension.
+**First Options**
+1. **By name**: Hide all items that match the selected items name.
+2. **By extension**: To only target & exclude items with the corresponding extension.
 
-**Option Two**
+**Second Options**
 1. **From root**: Hide all files/folders from the root.
-2. **Current directory**: Hide all from the directory the item is in.
-3. **Current & Child directories**: Hide all matching items from the directory the item is in and all child.
-4. ***Child directories only***: Will hide all files/folders from the root.
+2. **From current directory**: Hide all from the directory the ite is in.
+3. **From current & child directories**: Hide all matching items from the directory the item is in and all child.
+4. **Child directories only**: Will hide all files/folders from the root.
 
 ![Preview](resources/showcase-hideItem.gif)
 

@@ -17,21 +17,25 @@ interface RegexExcluder {
     allExtension:string
 }
 
+interface HideLevelsObject {
+    root: HideLevelObject
+    current: HideLevelObject
+    "current&below": HideLevelObject
+    below: HideLevelObject
+}
+
+interface HideLevelObject {
+    regexCode: String
+    incRelativePath: Boolean
+}
+
 export default class ExcludeItems {
     private store: ItemStore;
     private viewPane: ExcludeItemsViewPane;
 
-    private hideLevels: string[] = ["root", "current", "current&below", "below"];
-    private hideLevelsObject: any = {
-        "root": { regexCode: '**/', incPath: false },
-        "current": { regexCode: '*', incPath: true },
-        "current&below": { regexCode: '**/', incPath: true },
-        "below": { regexCode: '*/', incPath: true },
-    };
-
     constructor() {
         this.store = new ItemStore(Util.getVscodeSettingPath('full'), `files.exclude`);
-        this.viewPane = new ExcludeItemsViewPane(`makeHiddenViewPane`);
+        this.viewPane = new ExcludeItemsViewPane(`makeHidden.ViewPane.hiddenItems`);
 
         this.onListUpdate();
     }
@@ -101,9 +105,7 @@ export default class ExcludeItems {
             }
 
             /* -- Save the new work space -- */
-            this.store.set(filesExcludeObject).then(() => {
-                this.onListUpdate();
-            });
+            this.store.set(filesExcludeObject).then(() => this.onListUpdate());
         });
     }
 
@@ -216,7 +218,8 @@ export default class ExcludeItems {
         let excludeSnippet: string = `${hideLevelObject.regexCode}`;
 
         // Check to see if to add item path
-        if (hideLevelObject.incPath) {
+        console.log(hideLevelObject);
+        if (hideLevelObject.incRelativePath) {
             excludeSnippet = `${itemPathProps['path']}` + excludeSnippet;
         }
 
@@ -231,9 +234,17 @@ export default class ExcludeItems {
     /* --------------------
     * TODO:: Need to Refactor to own class
     */
-    private getHideLevelByIndex(hide_level_index: number = 0) {
-        let hide_level: string = this.hideLevels[hide_level_index];
-        let hide_level_object: any = this.hideLevelsObject[hide_level];
-        return hide_level_object;
+    private getHideLevelByIndex(hideLevelIndex: number = 0) : HideLevelObject {
+        const hideLevels: string[] = ["root", "current", "current&below", "below"];
+        const hideLevelsObject: HideLevelsObject = {
+            "root": { regexCode: '**/', incRelativePath: false },
+            "current": { regexCode: '*', incRelativePath: true },
+            "current&below": { regexCode: '**/', incRelativePath: true },
+            "below": { regexCode: '*/', incRelativePath: true },
+        };
+
+        let hideLevelKey: string = hideLevels[hideLevelIndex];
+        let hideLevel: HideLevelObject = hideLevelsObject[hideLevelKey];
+        return hideLevel;
     }
 }

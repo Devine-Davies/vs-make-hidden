@@ -45,15 +45,15 @@ export function activate(context: vscode.ExtensionContext) {
             let hideByOptions: string[] = [`By Name: ${file}`];
             if (stats.isFile()) hideByOptions.push(`By Extension: ${extension}`); // Allow matching extension on files
             let hideLevelOptions: string[] = [
-              `Root directory`, `Current directory`,
-              `Current & Child directories`, `Child directories only`
+              `From root`, `From current directory`,
+              `From current & child directories`, `Child directories only`
             ];
 
             vscode.window.showQuickPick(hideByOptions).then((hideBySelection: string) => {
               let hideByType: boolean = (hideByOptions.indexOf(hideBySelection) > 0) ? true : false;
               vscode.window.showQuickPick(hideLevelOptions).then((val: string) => {
-                let hideLevel: number = hideLevelOptions.indexOf(val);
-                excludeItems.hideMany(relativePath, hideByType, hideLevel);
+                let hideLevelIndex: number = hideLevelOptions.indexOf(val);
+                excludeItems.hideMany(relativePath, hideByType, hideLevelIndex);
               });
             });
 

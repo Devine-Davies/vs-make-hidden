@@ -46,8 +46,8 @@
         "views": {
             "explorer": [
                 {
-                    "id": "makeHiddenViewPane",
-                    "name": "Hidden in Directory"
+                    "id": "makeHidden.ViewPane.hiddenItems",
+                    "name": "Hidden Items"
                 }
             ]
         },
@@ -103,7 +103,7 @@
             },
             {
                 "command": "make-hidden.workspace.delete",
-                "title": "Remove Workspace",
+                "title": "Delete Workspace",
                 "category": "Make Hidden"
             }
         ],
@@ -129,26 +129,26 @@
             "view/title": [
                 {
                     "command": "make-hidden.workspace.create",
-                    "when": "view == makeHiddenViewPane",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
                     "command": "make-hidden.workspace.load",
-                    "when": "view == makeHiddenViewPane",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
                     "command": "make-hidden.workspace.delete",
-                    "when": "view == makeHiddenViewPane",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
                     "command": "make-hidden.removeSearch",
-                    "when": "view == makeHiddenViewPane"
+                    "when": "view == makeHidden.ViewPane.hiddenItems"
                 },
                 {
                     "command": "make-hidden.removeAllItems",
-                    "when": "view == makeHiddenViewPane"
+                    "when": "view == makeHidden.ViewPane.hiddenItems"
                 }
             ]
         }
