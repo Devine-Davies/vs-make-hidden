@@ -142,10 +142,7 @@ export default class ExcludeItems {
                         let filePath = `${targetFilePathProps['path']}${fileName}`;
 
                         let thisFileNamePathProps: any = Util.getPathInfoFromPath(filePath);
-
-                        let excludeSnippets: any = this.buildExcludeRegex(
-                            filePath, hideLevel
-                        );
+                        let regexExcluder: RegexExcluder = this.buildExcludeRegex(filePath, hideLevel);
 
                         let checks = {
                             'byName': (matchByName),
@@ -158,14 +155,14 @@ export default class ExcludeItems {
 
                         if (checks['byName']) {
                             if (checks['isDifferentNames']) {
-                                filesExcludeObject[excludeSnippets['byName']] = true;
-                                filesExcludeObject[excludeSnippets['byNameWithExtension']] = true;
+                                filesExcludeObject[regexExcluder['byName']] = true;
+                                filesExcludeObject[regexExcluder['byNameWithExtension']] = true;
                             }
                         }
 
                         if (checks['byExtension']) {
                             if (checks['isDifferentNames'] && checks['isDifferentExtension']) {
-                                filesExcludeObject[excludeSnippets['allExtension']] = true;
+                                filesExcludeObject[regexExcluder['allExtension']] = true;
                             }
                         }
                     }
@@ -218,7 +215,6 @@ export default class ExcludeItems {
         let excludeSnippet: string = `${hideLevelObject.regexCode}`;
 
         // Check to see if to add item path
-        console.log(hideLevelObject);
         if (hideLevelObject.incRelativePath) {
             excludeSnippet = `${itemPathProps['path']}` + excludeSnippet;
         }

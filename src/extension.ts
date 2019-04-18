@@ -23,12 +23,13 @@ export function activate(context: vscode.ExtensionContext) {
   /* --------------------
    * Hide Cmd's
   */
-  ['hideItem', 'hideMany', 'showOnly'].forEach((cmd: string) => {
+  ['hide', 'hideMany', 'showOnly'].forEach((cmd: string) => {
     let registerCommand = vscode.commands.registerCommand(`make-hidden.${cmd}`, (e: any) => {
       if (!settingsFileExists() && !e.fsPath) { return; }
+
       let chosenFilePath: string = e.fsPath;
       fs.lstat(chosenFilePath, (err, stats) => {
-        if (err) return console.log(err); //Handle error
+        if (err) return;
 
         let relativePath: string = path.relative(ROOT_PATH, chosenFilePath);
         let fileName: string = path.basename(e.fsPath);
@@ -36,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
         var file: string = path.basename(fileName, extension);
 
         switch (cmd) {
-          case 'hideItem': {
+          case 'hide': {
             excludeItems.hide(relativePath);
             break;
           }
@@ -130,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
           let path: string = workspace.path;
 
           if (path == null || path == Util.getVsCodeCurrentPath()) {
-            let label: string = `${i}. ` + `${workspace.name}` + ((path === null) ? ' •' : '');
+            let label: string = `${workspace.name}` + ((path === null) ? ' •' : '');
             workspacesNames.push(label);
           }
         });

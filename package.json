@@ -30,7 +30,7 @@
     "activationEvents": [
         "*",
         "onView:extension",
-        "onCommand:make-hidden.hideItem",
+        "onCommand:make-hidden.hide",
         "onCommand:make-hidden.hideMany",
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
@@ -53,7 +53,7 @@
         },
         "commands": [
             {
-                "command": "make-hidden.hideItem",
+                "command": "make-hidden.hide",
                 "title": "Hide",
                 "category": "Make Hidden"
             },
@@ -110,7 +110,7 @@
         "menus": {
             "explorer/context": [
                 {
-                    "command": "make-hidden.hideItem",
+                    "command": "make-hidden.hide",
                     "group": "make-hidden@1"
                 },
                 {

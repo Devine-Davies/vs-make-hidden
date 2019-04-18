@@ -21,7 +21,6 @@ export function getExtensionSettingPath(): string {
 
     // TODO: find out more about this
     const channelPath: string = 'Code';
-    // console.log(this.getChannelPath());
     // const channelPath: string = this.getChannelPath();
 
     projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
