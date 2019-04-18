@@ -30,40 +30,46 @@
     "activationEvents": [
         "*",
         "onView:extension",
-        "onCommand:make-hidden.hideItem",
-        "onCommand:make-hidden.superHide",
+        "onCommand:make-hidden.hide",
+        "onCommand:make-hidden.hideMany",
         "onCommand:make-hidden.showOnly",
         "onCommand:make-hidden.removeItem",
         "onCommand:make-hidden.removeSearch",
         "onCommand:make-hidden.removeAllItems",
-        "onCommand:make-hidden.workspaceSave",
-        "onCommand:make-hidden.workspaceLoad",
-        "onCommand:make-hidden.workspaceDelete"
+        "onCommand:make-hidden.undo",
+        "onCommand:make-hidden.workspace.create",
+        "onCommand:make-hidden.workspace.load",
+        "onCommand:make-hidden.workspace.delete"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "views": {
             "explorer": [
                 {
-                    "id": "makeHiddenViewPane",
-                    "name": "Hidden in Directory"
+                    "id": "makeHidden.ViewPane.hiddenItems",
+                    "name": "Hidden Items"
                 }
             ]
         },
         "commands": [
             {
-                "command": "make-hidden.hideItem",
+                "command": "make-hidden.hide",
                 "title": "Hide",
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.superHide",
-                "title": "Super Hide",
+                "command": "make-hidden.hideMany",
+                "title": "Hide Many",
                 "category": "Make Hidden"
             },
             {
                 "command": "make-hidden.showOnly",
                 "title": "Show Only",
+                "category": "Make Hidden"
+            },
+            {
+                "command": "make-hidden.undo",
+                "title": "Undo Last",
                 "category": "Make Hidden"
             },
             {
@@ -86,29 +92,33 @@
                 }
             },
             {
-                "command": "make-hidden.workspaceSave",
-                "title": "Save as new workspace",
+                "command": "make-hidden.workspace.create",
+                "title": "Create Workspace",
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.workspaceLoad",
-                "title": "Load workspace",
+                "command": "make-hidden.workspace.load",
+                "title": "Load Workspace",
                 "category": "Make Hidden"
             },
             {
-                "command": "make-hidden.workspaceDelete",
-                "title": "Remove workspace",
+                "command": "make-hidden.workspace.delete",
+                "title": "Delete Workspace",
                 "category": "Make Hidden"
             }
         ],
         "menus": {
             "explorer/context": [
                 {
-                    "command": "make-hidden.hideItem",
+                    "command": "make-hidden.hide",
                     "group": "make-hidden@1"
                 },
                 {
-                    "command": "make-hidden.superHide",
+                    "command": "make-hidden.undo",
+                    "group": "make-hidden@1"
+                },
+                {
+                    "command": "make-hidden.hideMany",
                     "group": "make-hidden@1"
                 },
                 {
@@ -118,27 +128,27 @@
             ],
             "view/title": [
                 {
-                    "command": "make-hidden.workspaceSave",
-                    "when": "view == makeHiddenViewPane",
+                    "command": "make-hidden.workspace.create",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
-                    "command": "make-hidden.workspaceLoad",
-                    "when": "view == makeHiddenViewPane",
+                    "command": "make-hidden.workspace.load",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
-                    "command": "make-hidden.workspaceDelete",
-                    "when": "view == makeHiddenViewPane",
+                    "command": "make-hidden.workspace.delete",
+                    "when": "view == makeHidden.ViewPane.hiddenItems",
                     "group": "workspaceManager"
                 },
                 {
                     "command": "make-hidden.removeSearch",
-                    "when": "view == makeHiddenViewPane"
+                    "when": "view == makeHidden.ViewPane.hiddenItems"
                 },
                 {
                     "command": "make-hidden.removeAllItems",
-                    "when": "view == makeHiddenViewPane"
+                    "when": "view == makeHidden.ViewPane.hiddenItems"
                 }
             ]
         }
@@ -158,6 +168,8 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "jsonc-parser": "^0.4.2"
+        "fs-readfile-promise": "^3.0.1",
+        "jsonc-parser": "^0.4.2",
+        "rxjs": "^6.4.0"
     }
 }
