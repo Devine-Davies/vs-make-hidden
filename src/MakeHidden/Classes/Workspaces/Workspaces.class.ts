@@ -1,6 +1,7 @@
 /* -- Third party import's -- */
+import { Observable } from 'rxjs';
 import * as Util from '../../utilities';
-import { ItemStore } from '../ItemStore/ItemStore.class';
+import { ItemStore } from '../itemStore/itemStore.class';
 
 export interface Workspace {
   id: string;
@@ -13,9 +14,7 @@ export class Workspaces {
   store: ItemStore;
   workspaces: Workspace[];
 
-  constructor(
-    settingPath: string = Util.getExtensionSettingPath()
-  ) {
+  constructor(settingPath: string) {
     this.store = new ItemStore(settingPath, `workspaces`);
   }
 
@@ -23,12 +22,13 @@ export class Workspaces {
    * Have done this here as i think it will be good when
    * formatting the list, e.g by file type(.exe) name acs/desc
   */
-  public getWorkspaces(): Promise<Workspace[]> {
-    return new Promise((resolve, reject) => {
-      this.store.get().then((store: Workspace[]) => {
-        resolve(store);
-      });
-    });
+  public getWorkspaces(): Observable<Workspace[]> {
+    return this.store.get();
+    // return new Promise((resolve, reject) => {
+    //   this.store.get().then((store: Workspace[]) => {
+    //     resolve(store);
+    //   });
+    // });
   }
 
   /* --------------------

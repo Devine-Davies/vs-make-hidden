@@ -1,175 +1,174 @@
 {
-    "name": "make-hidden",
-    "displayName": "Make Hidden",
-    "description": "Make Hidden provides more control over your project's directory by enabling context menus that allow you to perform hide/show actions effortlessly, a view pane explorer to see hidden items and the ability to save workspaces to quickly toggle between bulk hidden items.",
-    "version": "2.3.5",
-    "publisher": "devine-davies",
-    "icon": "resources/icon.png",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Devine-Davies/vs-make-hidden"
-    },
-    "private": false,
-    "bugs": {
-        "email": "rhysdevine@gmail.com",
-        "url": "https://github.com/Devine-Davies/vs-make-hidden/issues"
-    },
-    "engines": {
-        "vscode": "^1.16.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "keywords": [
-        "workspace",
-        "show",
-        "hide",
-        "files",
-        "exclude"
-    ],
-    "activationEvents": [
-        "*",
-        "onView:extension",
-        "onCommand:make-hidden.hide",
-        "onCommand:make-hidden.hideMany",
-        "onCommand:make-hidden.showOnly",
-        "onCommand:make-hidden.removeItem",
-        "onCommand:make-hidden.removeSearch",
-        "onCommand:make-hidden.removeAllItems",
-        "onCommand:make-hidden.undo",
-        "onCommand:make-hidden.workspace.create",
-        "onCommand:make-hidden.workspace.load",
-        "onCommand:make-hidden.workspace.delete"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {
-        "views": {
-            "explorer": [
-                {
-                    "id": "makeHidden.ViewPane.hiddenItems",
-                    "name": "Hidden Items"
-                }
-            ]
-        },
-        "commands": [
-            {
-                "command": "make-hidden.hide",
-                "title": "Hide",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.hideMany",
-                "title": "Hide Many",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.showOnly",
-                "title": "Show Only",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.undo",
-                "title": "Undo Last",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.removeSearch",
-                "title": "Remove Search",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.removeItem",
-                "title": "Put Pack",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.removeAllItems",
-                "title": "Empty",
-                "category": "Make Hidden",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
-            },
-            {
-                "command": "make-hidden.workspace.create",
-                "title": "Create Workspace",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.workspace.load",
-                "title": "Load Workspace",
-                "category": "Make Hidden"
-            },
-            {
-                "command": "make-hidden.workspace.delete",
-                "title": "Delete Workspace",
-                "category": "Make Hidden"
-            }
-        ],
-        "menus": {
-            "explorer/context": [
-                {
-                    "command": "make-hidden.hide",
-                    "group": "make-hidden@1"
-                },
-                {
-                    "command": "make-hidden.undo",
-                    "group": "make-hidden@1"
-                },
-                {
-                    "command": "make-hidden.hideMany",
-                    "group": "make-hidden@1"
-                },
-                {
-                    "command": "make-hidden.showOnly",
-                    "group": "make-hidden@1"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "make-hidden.workspace.create",
-                    "when": "view == makeHidden.ViewPane.hiddenItems",
-                    "group": "workspaceManager"
-                },
-                {
-                    "command": "make-hidden.workspace.load",
-                    "when": "view == makeHidden.ViewPane.hiddenItems",
-                    "group": "workspaceManager"
-                },
-                {
-                    "command": "make-hidden.workspace.delete",
-                    "when": "view == makeHidden.ViewPane.hiddenItems",
-                    "group": "workspaceManager"
-                },
-                {
-                    "command": "make-hidden.removeSearch",
-                    "when": "view == makeHidden.ViewPane.hiddenItems"
-                },
-                {
-                    "command": "make-hidden.removeAllItems",
-                    "when": "view == makeHidden.ViewPane.hiddenItems"
-                }
-            ]
+  "name": "make-hidden",
+  "displayName": "Make Hidden",
+  "description": "Make Hidden provides more control over your project's directory by enabling context menus that allow you to perform hide/show actions effortlessly, a view pane explorer to see hidden items and the ability to save workspaces to quickly toggle between bulk hidden items.",
+  "version": "2.3.5",
+  "publisher": "devine-davies",
+  "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Devine-Davies/vs-make-hidden"
+  },
+  "private": false,
+  "bugs": {
+    "email": "rhysdevine@gmail.com",
+    "url": "https://github.com/Devine-Davies/vs-make-hidden/issues"
+  },
+  "engines": {
+    "vscode": "^1.16.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "workspace",
+    "show",
+    "hide",
+    "files",
+    "exclude"
+  ],
+  "activationEvents": [
+    "*",
+    "onView:extension",
+    "onCommand:make-hidden.hide",
+    "onCommand:make-hidden.hideMany",
+    "onCommand:make-hidden.showOnly",
+    "onCommand:make-hidden.removeItem",
+    "onCommand:make-hidden.removeSearch",
+    "onCommand:make-hidden.removeAllItems",
+    "onCommand:make-hidden.undo",
+    "onCommand:make-hidden.workspace.create",
+    "onCommand:make-hidden.workspace.load",
+    "onCommand:make-hidden.workspace.delete"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "makeHidden.ViewPane.hiddenItems",
+          "name": "Hidden Items"
         }
+      ]
     },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
-    },
-    "devDependencies": {
-        "typescript": "^2.5.2",
-        "vscode": "^1.1.5",
-        "mocha": "^3.5.0",
-        "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
-    },
-    "dependencies": {
-        "fs-readfile-promise": "^3.0.1",
-        "jsonc-parser": "^0.4.2",
-        "rxjs": "^6.4.0"
+    "commands": [
+      {
+        "command": "make-hidden.hide",
+        "title": "Hide",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.hideMany",
+        "title": "Hide Many",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.showOnly",
+        "title": "Show Only",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.undo",
+        "title": "Undo Last",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.removeSearch",
+        "title": "Remove Search",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.removeItem",
+        "title": "Put Pack",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.removeAllItems",
+        "title": "Empty",
+        "category": "Make Hidden",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "make-hidden.workspace.create",
+        "title": "Create Workspace",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.workspace.load",
+        "title": "Load Workspace",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.workspace.delete",
+        "title": "Delete Workspace",
+        "category": "Make Hidden"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "make-hidden.hide",
+          "group": "make-hidden@1"
+        },
+        {
+          "command": "make-hidden.undo",
+          "group": "make-hidden@1"
+        },
+        {
+          "command": "make-hidden.hideMany",
+          "group": "make-hidden@1"
+        },
+        {
+          "command": "make-hidden.showOnly",
+          "group": "make-hidden@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "make-hidden.workspace.create",
+          "when": "view == makeHidden.ViewPane.hiddenItems",
+          "group": "workspaceManager"
+        },
+        {
+          "command": "make-hidden.workspace.load",
+          "when": "view == makeHidden.ViewPane.hiddenItems",
+          "group": "workspaceManager"
+        },
+        {
+          "command": "make-hidden.workspace.delete",
+          "when": "view == makeHidden.ViewPane.hiddenItems",
+          "group": "workspaceManager"
+        },
+        {
+          "command": "make-hidden.removeSearch",
+          "when": "view == makeHidden.ViewPane.hiddenItems"
+        },
+        {
+          "command": "make-hidden.removeAllItems",
+          "when": "view == makeHidden.ViewPane.hiddenItems"
+        }
+      ]
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^2.5.2",
+    "vscode": "^1.1.5",
+    "mocha": "^3.5.0",
+    "@types/node": "^7.0.43",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "fs-readfile-promise": "^3.0.1",
+    "jsonc-parser": "^0.4.2",
+    "rxjs": "^6.4.0"
+  }
 }

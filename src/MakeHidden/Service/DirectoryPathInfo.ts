@@ -7,9 +7,10 @@ export interface DirectoryPathInfo {
   path: string
 }
 
-/* --------------------
-*/
-export function DirectoryPathInfo(givenPath: string = null, ): DirectoryPathInfo {
+/**
+ *
+ */
+export const DirectoryPathInfo = (givenPath: string = null, ): DirectoryPathInfo => {
   let extension: string = path.extname(givenPath);
   let pathName: string = path.basename(givenPath);
   return {

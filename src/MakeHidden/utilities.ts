@@ -9,13 +9,14 @@ let VS_CODE_CONTEXT: any = null;
 const HOME_DIR: string = os.homedir();
 const PROJECTS_FILE: string = "MakeHidden.json";
 
-export function setVsCodeContext(context) {
+export const setVsCodeContext = (context) => {
     VS_CODE_CONTEXT = context;
 }
 
-/* --------------------
-*/
-export function getExtensionSettingPath(): string {
+/**
+ *
+ */
+export const getExtensionSettingPath = (): string => {
     let projectFile: string;
     const appData = process.env.APPDATA || (process.platform === "darwin" ? process.env.HOME + "/Library/Application Support" : "/var/local");
 
@@ -33,25 +34,23 @@ export function getExtensionSettingPath(): string {
     return projectFile;
 }
 
-/* --------------------
-*/
-export function getChannelPath(): string {
-    if (vscode.env.appName.indexOf("Insiders") > 0) {
-        return "Code - Insiders";
-    } else {
-        return "Code";
-    }
-}
+/**
+ *
+ */
+export const getChannelPath = (): string => (vscode.env.appName.indexOf("Insiders") > 0)?  "Code - Insiders" : "Code"
 
-/* --------------------
-*/
-export function getVsCodeCurrentPath() {
+/**
+ *
+ */
+export const getVsCodeCurrentPath = () => {
     return vscode.workspace.rootPath;
 }
 
-/* --------------------
-*/
-export function getPathInfoFromPath(givenPath: string = null, ): {} {
+/**
+ *
+ * @param givenPath
+ */
+export const getPathInfoFromPath = (givenPath: string = null) => {
     let extension: string = path.extname(givenPath);
     let pathName: string = path.basename(givenPath);
     return {
@@ -62,24 +61,30 @@ export function getPathInfoFromPath(givenPath: string = null, ): {} {
     }
 }
 
-/* --------------------
-*/
-export function getAllItemsInDir(directory: string = './') {
-    var files = fs.readdirSync(directory);
-    return files;
-}
+/**
+ *
+ */
+export const getAllItemsInDir = (directory: string = './') => fs.readdirSync(directory)
 
-/* --------------------
-*/
-export function getProjectThemeDirectory(fileName: string) {
-    return VS_CODE_CONTEXT.asAbsolutePath(path.join(
-        'resources', 'light', fileName
-    ));
-}
+/**
+ *
+ * @param fileName
+ */
+export const getProjectThemeDirectory = (fileName: string) => VS_CODE_CONTEXT.asAbsolutePath(path.join(
+    'resources', 'light', fileName
+));
 
-/* --------------------
-*/
-export function getVscodeSettingPath(pathType: string = null) {
+/**
+ *
+ * @param filePath
+ */
+export const fileExists = (filePath: string = '') => fs.existsSync(filePath);
+
+/**
+ *
+ * @param pathType
+ */
+export const getVscodeSettingPath = (pathType: string = null) => {
     let path: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
     let pathInfo = getPathInfoFromPath(path);
     pathInfo['full'] = path;
@@ -91,10 +96,10 @@ export function getVscodeSettingPath(pathType: string = null) {
     return pathInfo;
 }
 
-/* --------------------
-    * Create vc setting.json directory
-*/
-export function createPluginSettingsJson(): void {
+/**
+ * Create vc setting.json directory
+ */
+export const createPluginSettingsJson = (): void => {
     let noticeText: string = `Plugin MakeHidden requires a 'MakeHidden.json' file, would you like to create now?`;
     let grantedText: string = 'One Time Create';
 
@@ -118,10 +123,10 @@ export function createPluginSettingsJson(): void {
     });
 }
 
-/* --------------------
-    * Create vc setting.json directory
-*/
-export function createVscodeSettingJson(): void {
+/**
+ *
+ */
+export const createVscodeSettingJson = (): void => {
     let noticeText: string = `No 'vscode/settings.json' has been found, would you like to create now`;
     let grantedText: string = 'Yes, Create File';
 
@@ -141,11 +146,4 @@ export function createVscodeSettingJson(): void {
             });
         }
     });
-}
-
-
-/* --------------------
-*/
-export function fileExists(filePath: string = '') {
-    return fs.existsSync(filePath);
 }
