@@ -1,8 +1,8 @@
 import { Observable } from "rxjs";
-import { take, map, switchMap } from "rxjs/operators";
+import { take, map, switchMap, tap } from "rxjs/operators";
 
 import * as Util from "../../utilities";
-import { AllItemsInDirectory } from '../../service'
+import { AllItemsInDirectory } from "../../service";
 import { ItemStore } from "../itemStore/itemStore.class";
 import { ExcludeItemsViewPane } from "./excludeItems.viewpane";
 
@@ -38,7 +38,10 @@ export class ExcludeItems {
    *
    */
   constructor() {
-    this.store = new ItemStore(Util.getVscodeSettingPath("full"), `files.exclude`);
+    this.store = new ItemStore(
+      Util.getVscodeSettingPath("full"),
+      `files.exclude`
+    );
     this.viewPane = new ExcludeItemsViewPane(this.viewPaneId);
     this.onListUpdate();
   }
@@ -47,7 +50,7 @@ export class ExcludeItems {
    * Called the the list has been updated
    */
   private onListUpdate(): void {
-    this.getHiddenItemList()
+    this.getHiddenItemList$()
       .pipe(take(1))
       .subscribe((list) => this.viewPane.update(list));
   }
@@ -64,7 +67,7 @@ export class ExcludeItems {
   /**
    *
    */
-  public getHiddenItemList(): Observable<string[]> {
+  public getHiddenItemList$(): Observable<string[]> {
     return this.store.get().pipe(
       map((list) => Object.keys(list)),
       take(1)
@@ -76,11 +79,11 @@ export class ExcludeItems {
    * itemName: file/folder name
    * @param relativePath
    */
-  public hide(relativePath: string): void {
-    this.store
-      .addItem(relativePath, true)
-      .pipe(take(1))
-      .subscribe(() => this.onListUpdate());
+  public hide$(relativePath: string): Observable<any> {
+    return this.store.addItem(relativePath, true).pipe(
+      take(1),
+      tap(() => this.onListUpdate())
+    );
   }
 
   /**
@@ -89,41 +92,45 @@ export class ExcludeItems {
    * @param includeExtension
    * @param hideLevelIndex
    */
-  public hideMany(
+  public hideMany$(
     relativePath: string = null,
     includeExtension: boolean = false,
     hideLevelIndex: number = 0
-  ): void {
+  ): Observable<any> {
     const excludeSnippets: RegexExcluder = this.buildExcludeRegex(
       relativePath,
       hideLevelIndex
     );
 
-    this.store
-      .get()
-      .pipe(
-        take(1),
-        map((currentStore) =>  includeExtension
-          ? { // By Extension
+    return this.store.get().pipe(
+      take(1),
+      map((currentStore) =>
+        includeExtension
+          ? {
+              // By Extension
               ...currentStore,
               [excludeSnippets["allExtension"]]: true,
-            } : {
+            }
+          : {
               // By Name
               ...currentStore,
               [excludeSnippets["byName"]]: true,
               [excludeSnippets["byNameWithExtension"]]: true,
             }
-        ),
-        switchMap((newStore: any) => this.store.set(newStore))
-      ).subscribe(() => this.onListUpdate());
+      ),
+      switchMap((newStore: any) => this.store.set(newStore)),
+      tap(() => this.onListUpdate())
+    );
   }
 
   /**
    * Will hide an item from the projects directory
    * @param relativePath
    */
-  public showOnly(relativePath: string = null) {
-    this.showOnlyFilterer(relativePath, 1);
+  public showOnly$(relativePath: string = null): Observable<any> {
+    return this.showOnlyFilterer$(relativePath, 1).pipe(
+      tap(() => this.onListUpdate())
+    );
   }
 
   /**
@@ -131,67 +138,76 @@ export class ExcludeItems {
    * @param itemPath
    * @param hideLevel
    */
-  private showOnlyFilterer(itemPath: string = null, hideLevel: number = 0) {
+  private showOnlyFilterer$(
+    itemPath: string = null,
+    hideLevel: number = 0
+  ): Observable<any> {
     const targetFilePathProps: any = Util.getPathInfoFromPath(itemPath);
     const workspacePath: any = Util.getVsCodeCurrentPath();
 
-    const convertToExcludeObject = (items) => items.reduce((acc, fileName) => {
-      const filePath = `${targetFilePathProps['path']}${fileName}`;
-      const thisFileNamePathProps: any = Util.getPathInfoFromPath(filePath);
-      const regexExcluder: RegexExcluder = this.buildExcludeRegex(filePath, hideLevel);
+    const convertToExcludeObject = (items) =>
+      items.reduce((acc, fileName) => {
+        const filePath = `${targetFilePathProps["path"]}${fileName}`;
+        const thisFileNamePathProps: any = Util.getPathInfoFromPath(filePath);
+        const regexExcluder: RegexExcluder = this.buildExcludeRegex(
+          filePath,
+          hideLevel
+        );
 
-      let checks = { // Hide with opposite Names & Extension
-        'isDifferentName': (targetFilePathProps['filename'] != thisFileNamePathProps['filename']),
-        'isDifferentExtension': (targetFilePathProps['extension'] != thisFileNamePathProps['extension']),
-      }
+        let checks = {
+          // Hide with opposite Names & Extension
+          isDifferentName:
+            targetFilePathProps["filename"] !=
+            thisFileNamePathProps["filename"],
+          isDifferentExtension:
+            targetFilePathProps["extension"] !=
+            thisFileNamePathProps["extension"],
+        };
 
-      if (checks['isDifferentName']) {
-        return {
-          ...acc,
-          [regexExcluder['byName']]: true,
-          [regexExcluder['byNameWithExtension']]: true,
-        }
-      }
-
-      else {
-        if (targetFilePathProps['extension']) {
+        if (checks["isDifferentName"]) {
           return {
             ...acc,
-            [regexExcluder['byName']]: true,
-          }
+            [regexExcluder["byName"]]: true,
+            [regexExcluder["byNameWithExtension"]]: true,
+          };
         } else {
-          return {
-            ...acc,
-            [regexExcluder['byNameWithExtension']]: true,
+          if (targetFilePathProps["extension"]) {
+            return {
+              ...acc,
+              [regexExcluder["byName"]]: true,
+            };
+          } else {
+            return {
+              ...acc,
+              [regexExcluder["byNameWithExtension"]]: true,
+            };
           }
         }
-      }
-    }, {});
+      }, {});
 
-    AllItemsInDirectory(`${workspacePath}/${targetFilePathProps['path']}`)
-    .pipe(
+    return AllItemsInDirectory(
+      `${workspacePath}/${targetFilePathProps["path"]}`
+    ).pipe(
       map((dirItems) => convertToExcludeObject(dirItems)),
       switchMap((excludeObject) => this.store.set(excludeObject))
-    )
-    .subscribe(() => this.onListUpdate())
+    );
   }
 
   /**
    * Make the item visible again in the main directory
    * @param regexItem
    */
-  public makeVisible(regexItem: string): void {
-    this.store
+  public makeVisible$(regexItem: string): Observable<any> {
+    return this.store
       .removeItem(regexItem)
-      .pipe(take(1))
-      .subscribe(() => this.onListUpdate());
+      .pipe(tap(() => this.onListUpdate()));
   }
 
   /**
    * Remove all hidden items, showing them in the main directory
    */
-  public showAllItems() {
-    this.store.set({}).subscribe(() => this.onListUpdate());
+  public showAllItems$(): Observable<any> {
+    return this.store.set({}).pipe(tap(() => this.onListUpdate()));
   }
 
   /**
@@ -242,8 +258,8 @@ export class ExcludeItems {
       below: { regexCode: "*/", incRelativePath: true },
     };
 
-    let hideLevelKey: string = hideLevels[hideLevelIndex];
-    let hideLevel: HideLevelObject = hideLevelsObject[hideLevelKey];
+    const hideLevelKey: string = hideLevels[hideLevelIndex];
+    const hideLevel: HideLevelObject = hideLevelsObject[hideLevelKey];
     return hideLevel;
   }
 }

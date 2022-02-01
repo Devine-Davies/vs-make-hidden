@@ -1,12 +1,13 @@
 /* -- Third party import's -- */
-import { Observable } from 'rxjs';
-import * as Util from '../../utilities';
-import { ItemStore } from '../itemStore/itemStore.class';
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import * as Util from "../../utilities";
+import { ItemStore } from "../itemStore/itemStore.class";
 
 export interface Workspace {
   id: string;
   name: string;
-  path: string,
+  path: string;
   excludedItems: any;
 }
 
@@ -14,60 +15,103 @@ export class Workspaces {
   store: ItemStore;
   workspaces: Workspace[];
 
-  constructor(settingPath: string) {
-    this.store = new ItemStore(settingPath, `workspaces`);
+  /**
+   *
+   * @param path
+   */
+  constructor(public path: string) {
+    this.store = new ItemStore(path, `workspaces`);
   }
 
-  /* --------------------
-   * Have done this here as i think it will be good when
-   * formatting the list, e.g by file type(.exe) name acs/desc
-  */
+  /**
+   *
+   * @returns
+   */
   public getWorkspaces(): Observable<Workspace[]> {
     return this.store.get();
-    // return new Promise((resolve, reject) => {
-    //   this.store.get().then((store: Workspace[]) => {
-    //     resolve(store);
-    //   });
-    // });
   }
 
-  /* --------------------
+  /**
+   *
+   * @param paths
+   * @returns
+   */
+  public getWorkspacesWithPath$(paths: string[]): Observable<Workspace[]> {
+    return this.getWorkspaces().pipe(
+      map((workspaces: any) => {
+        return Object.keys(workspaces).reduce((acc: any, id: string) => {
+          const workspace: Workspace = workspaces[id];
+          return paths.includes(workspace.path) ? [...acc, workspace] : acc;
+        }, []);
+      })
+    );
+  }
+
+  /**
+   *
+   * @param name
+   * @returns
+   */
+  public getWorkspaceByName$(name: string): Observable<any> {
+    return this.getWorkspaces().pipe(
+      map((workspaces: any) =>
+        Object.values(workspaces).find((item: any) => item.name === name)
+      )
+    );
+  }
+
+  /**
    * Creates & Saves a new workspace object
-  */
-  public create(name: string = null, excludedItems: any = null, path: string = 'global') {
-    if (name && excludedItems) {
-      const workspace: Workspace = this.buildWorkspace(name, path, excludedItems);
-      this.store.addItem(workspace.id, workspace).then((workspaces: Workspace[]) => {});
-    }
+   * @param name
+   * @param excludedItems
+   * @param path
+   */
+  public create$(
+    name,
+    excludedItems,
+    path: string = "global"
+  ): Observable<any> {
+    const workspace: Workspace = this.buildWorkspace(name, path, excludedItems);
+    return this.store.addItem(workspace.id, workspace);
   }
 
-  /* --------------------
-  * Removes a given workspace by id
-  */
-  public removeById(id: string = null) {
-    this.store.removeItem(id).then(() => {
-    });
+  /**
+   * Removes a given workspace by id
+   * @param id
+   * @returns
+   */
+  public removeById$(id: string): Observable<any> {
+    return this.store.removeItem(id);
   }
 
-  /* --------------------
+  /**
    * Builds an workspace object for the store
-  */
-  protected buildWorkspace(name: string, path: string = 'global', items: any = {}): Workspace {
+   * @param name
+   * @param path
+   * @param items
+   * @returns
+   */
+  protected buildWorkspace(
+    name: string,
+    path: string = "global",
+    items: any = {}
+  ): Workspace {
     return {
-      "id": this.guidGenerator(),
-      "name": name,
-      "path": path,
-      "excludedItems": items
-    }
+      id: this.guidGenerator(),
+      name: name,
+      path: path,
+      excludedItems: items,
+    };
   }
 
-  /* --------------------
+  /**
    * Create id
-  */
+   * @returns
+   */
   private guidGenerator(): string {
     var S4 = function () {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     };
-    return (S4() + "-" + S4());
+    return S4() + "-" + S4();
   }
 }

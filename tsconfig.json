@@ -1,17 +1,12 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "ES6",
-		"outDir": "out",
-		"removeComments": true,
-		"lib": [
-            "es6"
-        ],
-		"sourceMap": true,
-        "rootDir": "."
-	},
-	"exclude": [
-        "node_modules",
-        ".vscode-test"
-	]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "outDir": "out",
+    "removeComments": true,
+    "lib": ["es2017"],
+    "sourceMap": true,
+    "rootDir": "."
+  },
+  "exclude": ["node_modules", ".vscode-test"]
 }

@@ -14,6 +14,24 @@
     "email": "rhysdevine@gmail.com",
     "url": "https://github.com/Devine-Davies/vs-make-hidden/issues"
   },
+  "dependencies": {
+    "fs-readfile-promise": "^3.0.1",
+    "jsonc-parser": "^0.4.2",
+    "rxjs": "^6.6.7"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^7.10.14",
+    "mocha": "^3.5.3",
+    "typescript": "^2.9.2",
+    "vscode": "^1.1.37"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
   "engines": {
     "vscode": "^1.16.0"
   },
@@ -31,11 +49,11 @@
     "*",
     "onView:extension",
     "onCommand:make-hidden.hide",
-    "onCommand:make-hidden.hideMany",
-    "onCommand:make-hidden.showOnly",
-    "onCommand:make-hidden.removeItem",
-    "onCommand:make-hidden.removeSearch",
-    "onCommand:make-hidden.removeAllItems",
+    "onCommand:make-hidden.hide.many",
+    "onCommand:make-hidden.show.only",
+    "onCommand:make-hidden.remove.item",
+    "onCommand:make-hidden.remove.search",
+    "onCommand:make-hidden.remove.all",
     "onCommand:make-hidden.undo",
     "onCommand:make-hidden.workspace.create",
     "onCommand:make-hidden.workspace.load",
@@ -58,12 +76,12 @@
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.hideMany",
+        "command": "make-hidden.hide.many",
         "title": "Hide Many",
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.showOnly",
+        "command": "make-hidden.show.only",
         "title": "Show Only",
         "category": "Make Hidden"
       },
@@ -73,17 +91,17 @@
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.removeSearch",
+        "command": "make-hidden.remove.search",
         "title": "Remove Search",
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.removeItem",
+        "command": "make-hidden.remove.item",
         "title": "Put Pack",
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.removeAllItems",
+        "command": "make-hidden.remove.all",
         "title": "Empty",
         "category": "Make Hidden",
         "icon": {
@@ -118,11 +136,11 @@
           "group": "make-hidden@1"
         },
         {
-          "command": "make-hidden.hideMany",
+          "command": "make-hidden.hide.many",
           "group": "make-hidden@1"
         },
         {
-          "command": "make-hidden.showOnly",
+          "command": "make-hidden.show.only",
           "group": "make-hidden@1"
         }
       ],
@@ -143,32 +161,14 @@
           "group": "workspaceManager"
         },
         {
-          "command": "make-hidden.removeSearch",
+          "command": "make-hidden.remove.search",
           "when": "view == makeHidden.ViewPane.hiddenItems"
         },
         {
-          "command": "make-hidden.removeAllItems",
+          "command": "make-hidden.remove.all",
           "when": "view == makeHidden.ViewPane.hiddenItems"
         }
       ]
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
-  },
-  "devDependencies": {
-    "typescript": "^2.5.2",
-    "vscode": "^1.1.5",
-    "mocha": "^3.5.0",
-    "@types/node": "^7.0.43",
-    "@types/mocha": "^2.2.42"
-  },
-  "dependencies": {
-    "fs-readfile-promise": "^3.0.1",
-    "jsonc-parser": "^0.4.2",
-    "rxjs": "^6.4.0"
   }
 }

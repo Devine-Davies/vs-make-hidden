@@ -55,7 +55,7 @@ export class ItemStore {
    * When removing an item it will be placed back into the directory
    * @param itemKey
    */
-  public removeItem(itemKey: string = null) {
+  public removeItem(itemKey: string = null): Observable<any> {
     return this.get().pipe(
       map((store) => {
         // Remove the item using immutability, create new

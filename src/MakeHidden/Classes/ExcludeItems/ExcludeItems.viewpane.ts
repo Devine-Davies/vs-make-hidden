@@ -10,7 +10,8 @@ import {
 } from "vscode";
 
 export class ExcludeItemsViewPane implements TreeDataProvider<Node> {
-  private viewUpdatedEventEmitter: EventEmitter<Node> = new EventEmitter<Node>();
+  private viewUpdatedEventEmitter: EventEmitter<Node> =
+    new EventEmitter<Node>();
   readonly onDidChangeTreeData: Event<any> = this.viewUpdatedEventEmitter.event;
 
   private tree: Node = {
@@ -67,16 +68,15 @@ export class ExcludeItemsViewPane implements TreeDataProvider<Node> {
    * @param node
    */
   public getTreeItem(node: Node): TreeItem {
-    let itemTitle: string = node.value;
-
-    let treeItem: TreeItem = new TreeItem(
+    const itemTitle: string = node.value;
+    const treeItem: TreeItem = new TreeItem(
       itemTitle,
       TreeItemCollapsibleState.None
     );
 
     treeItem.iconPath = Util.getProjectThemeDirectory("put-back-icon.svg");
     treeItem.command = {
-      command: "make-hidden.removeItem",
+      command: "make-hidden.remove.item",
       title: itemTitle,
       tooltip: itemTitle,
       arguments: [itemTitle],
