@@ -8,11 +8,12 @@ import { from, Observable, of, throwError } from "rxjs";
 
 /**
  * Extension activation
- * Vscode Func: command is executed and extension is activated the very first time the
+ * Vscode Plugin Lifecycle: activate
  * @param context
  */
 export const activate = (context: vscode.ExtensionContext) => {
-  const rootPath = vscode.workspace.rootPath;
+  // @Todo: make this work for multi workspaces
+  const rootPath = vscode.workspace.workspaceFolders[0].uri.path;
   const workspaceManager = new Workspaces(Util.getExtensionSettingPath());
   const excludeItems = new ExcludeItems();
 
@@ -21,7 +22,6 @@ export const activate = (context: vscode.ExtensionContext) => {
 
   /**
    * Hide Cmd's
-   * Iterate over each of cmd's to have them registered by vs code
    */
   ["hide", "hide.many", "show.only"].forEach((cmd: string) => {
     const registerCommand = vscode.commands.registerCommand(
@@ -273,7 +273,13 @@ export const activate = (context: vscode.ExtensionContext) => {
 };
 
 /**
- *
+ * Extension deactivate
+ * Vscode Plugin Lifecycle: deactivate
+ */
+export const deactivate = () => {};
+
+/**
+ * Handel Process Errors
  * @param error
  * @param fallbackMsg
  * @returns
@@ -282,7 +288,7 @@ const handelProcessError = (error, fallback = "Sorry, Something went wrong") =>
   error === "silent" ? null : displayInfoToast(fallback);
 
 /**
- *
+ * Helper function for vs quick message
  * @param error
  * @param fallbackMsg
  * @returns
@@ -291,11 +297,7 @@ const displayInfoToast = (msg) => vscode.window.showInformationMessage(msg);
 
 /**
  *
- */
-export const deactivate = () => {};
-
-/**
- *
+ * @returns
  */
 const getPluginSettings = (): boolean => {
   const fileExists: boolean = Util.fileExists(
@@ -311,6 +313,7 @@ const getPluginSettings = (): boolean => {
 
 /**
  *
+ * @returns
  */
 const settingsFileExists = (): boolean => {
   const fileExists: boolean = Util.fileExists(
