@@ -1,6 +1,5 @@
 import { Observable } from "rxjs";
 import { take, map, switchMap, tap } from "rxjs/operators";
-
 import * as Util from "../../utilities";
 import { AllItemsInDirectory } from "../../service";
 import { ItemStore } from "../itemStore/itemStore.class";

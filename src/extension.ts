@@ -5,6 +5,7 @@ import * as Util from "./MakeHidden/utilities";
 import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
 import { map, switchMap, take } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
+import { ComplexInnerSubscriber } from "rxjs/internal/innerSubscribe";
 
 /**
  * Extension activation
@@ -12,8 +13,6 @@ import { from, Observable, of, throwError } from "rxjs";
  * @param context
  */
 export const activate = (context: vscode.ExtensionContext) => {
-  // @Todo: make this work for multi workspaces
-  const rootPath = vscode.workspace.workspaceFolders[0].uri.path;
   const workspaceManager = new Workspaces(Util.getExtensionSettingPath());
   const excludeItems = new ExcludeItems();
 
@@ -27,24 +26,22 @@ export const activate = (context: vscode.ExtensionContext) => {
     const registerCommand = vscode.commands.registerCommand(
       `make-hidden.${cmd}`,
       (e: any) => {
-        if (!settingsFileExists() && !e.fsPath) {
-          createVscodeSettingJson();
-        }
+        if (!settingsFileExists() && !e.fsPath) createVscodeSettingJson();
 
+        // @Todo: make this work for multi workspaces
+        const rootPath = vscode.workspace.workspaceFolders[0].uri.path;
         const chosenFilePath: string = e.fsPath;
-        fs.lstat(chosenFilePath, (err, stats) => {
-          if (err) return;
-          const relativePath = path.relative(rootPath, chosenFilePath);
-          const fileName = path.basename(e.fsPath);
-          const extension = path.extname(fileName);
+        const relativePath = path.relative(rootPath, chosenFilePath);
+        const fileName = path.basename(chosenFilePath);
+        const extension = path.extname(fileName);
+        switch (cmd) {
+          case "hide": {
+            excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Hide complete")
+            break;
+          }
 
-          switch (cmd) {
-            case "hide": {
-              excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Hide complete")
-              break;
-            }
-
-            case "hide.many": {
+          case "hide.many": {
+            fs.lstat(chosenFilePath, (err, stats) => {
               const firstPrompt$ = (
                 fileName: string,
                 extension: string,
@@ -96,15 +93,15 @@ export const activate = (context: vscode.ExtensionContext) => {
                   (error) =>
                     handelProcessError(error, `Sorry, something went wrong!`)
                 );
-              break;
-            }
-
-            case "show.only": {
-              excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Boom")
-              break;
-            }
+            });
+            break;
           }
-        });
+
+          case "show.only": {
+            excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Boom")
+            break;
+          }
+        }
       }
     );
 
