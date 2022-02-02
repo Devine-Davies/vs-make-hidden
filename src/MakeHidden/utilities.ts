@@ -119,36 +119,9 @@ export const createPluginSettingsExist = (): void => {
     .showInformationMessage(noticeText, grantedText)
     .then((selection: string) => {
       if (selection === grantedText) {
-        let path: string = getExtensionSettingPath();
+        const path: string = getExtensionSettingPath();
         const info = getPathInfoFromPath(path);
         info["full"] = path;
-
-        fs.mkdir(info["path"], (e) => {
-          fs.writeFile(info["full"], `{}`, (err) => {
-            if (err) {
-              vscode.window.showInformationMessage(
-                `Error creating settings.json in .vscode directory`
-              );
-              throw err;
-            }
-          });
-        });
-      }
-    });
-};
-
-/**
- *
- */
-export const createVscodeSettingJson = (): void => {
-  let noticeText: string = `No 'vscode/settings.json' has been found, would you like to create now`;
-  let grantedText: string = "Yes, Create File";
-
-  vscode.window
-    .showInformationMessage(noticeText, grantedText)
-    .then((selection: string) => {
-      if (selection === grantedText) {
-        const info = getVscodeSettingPath();
 
         fs.mkdir(info["path"], (e) => {
           fs.writeFile(info["full"], `{}`, (err) => {

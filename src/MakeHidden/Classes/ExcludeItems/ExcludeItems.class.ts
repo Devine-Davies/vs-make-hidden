@@ -59,9 +59,16 @@ export class ExcludeItems {
    *
    * @param list
    */
-  public loadExcludedList(list: string[]): void {
-    let store: ExcludeItemsObject = {};
-    list.map((item: string) => (store[item] = true));
+  public loadExcludedList$(list: string[]): Observable<any> {
+    const store: ExcludeItemsObject = list.reduce(
+      (acc, item: string) => ({
+        ...acc,
+        [item]: true,
+      }),
+      {}
+    );
+    console.log(store);
+    return this.store.set(store).pipe(tap(() => this.onListUpdate()));
   }
 
   /**
@@ -213,10 +220,10 @@ export class ExcludeItems {
   /**
    *
    */
-  public undo() {
+  public undo$(): Observable<any> {
     const previousState: any = this.store.getPreviousState();
     const previousStore: string[] = Object.keys(previousState);
-    this.loadExcludedList(previousStore);
+    return this.loadExcludedList$(previousStore);
   }
 
   /**

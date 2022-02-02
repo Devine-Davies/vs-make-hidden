@@ -4,7 +4,7 @@ import { map, switchMap } from "rxjs/operators";
 import { LoadJSONAsync, SaveFileAsync, ReadFileAsync } from "../../service";
 
 interface IStore {
-  [key: string]: string;
+  [key: string]: string | boolean;
 }
 
 export class ItemStore {

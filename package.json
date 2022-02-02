@@ -116,7 +116,7 @@
       },
       {
         "command": "make-hidden.workspace.load",
-        "title": "Load Workspace",
+        "title": "Switch Workspace",
         "category": "Make Hidden"
       },
       {

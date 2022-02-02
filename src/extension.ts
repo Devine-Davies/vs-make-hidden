@@ -17,7 +17,7 @@ export const activate = (context: vscode.ExtensionContext) => {
   const workspaceManager = new Workspaces(Util.getExtensionSettingPath());
   const excludeItems = new ExcludeItems();
 
-  /* -- Set vs code context -- */
+  // Set vs code context
   Util.setVsCodeContext(context);
 
   /**
@@ -27,10 +27,11 @@ export const activate = (context: vscode.ExtensionContext) => {
     const registerCommand = vscode.commands.registerCommand(
       `make-hidden.${cmd}`,
       (e: any) => {
-        if (!settingsFileExists() && !e.fsPath) return;
+        if (!settingsFileExists() && !e.fsPath) {
+          createVscodeSettingJson();
+        }
 
         const chosenFilePath: string = e.fsPath;
-
         fs.lstat(chosenFilePath, (err, stats) => {
           if (err) return;
           const relativePath = path.relative(rootPath, chosenFilePath);
@@ -39,10 +40,7 @@ export const activate = (context: vscode.ExtensionContext) => {
 
           switch (cmd) {
             case "hide": {
-              excludeItems
-                .hide$(relativePath)
-                .pipe(take(1))
-                .subscribe(() => displayInfoToast("Boom"));
+              excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Hide complete")
               break;
             }
 
@@ -94,7 +92,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                   take(1)
                 )
                 .subscribe(
-                  () => displayInfoToast("Boom"),
+                  () => {}, //setVSStatusBarMessage("Hide many")
                   (error) =>
                     handelProcessError(error, `Sorry, something went wrong!`)
                 );
@@ -102,10 +100,7 @@ export const activate = (context: vscode.ExtensionContext) => {
             }
 
             case "show.only": {
-              excludeItems
-                .showOnly$(relativePath)
-                .pipe(take(1))
-                .subscribe(() => displayInfoToast("Boom"));
+              excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Boom")
               break;
             }
           }
@@ -137,7 +132,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                 .getHiddenItemList$()
                 .pipe(switchMap(prompt$), switchMap(excludeItems.makeVisible$))
                 .subscribe(
-                  () => displayInfoToast("boom"),
+                  () => {}, //setVSStatusBarMessage("boom")
                   () => handelProcessError("Sorry, something went wrong")
                 );
               break;
@@ -157,7 +152,7 @@ export const activate = (context: vscode.ExtensionContext) => {
             }
 
             case "undo": {
-              excludeItems.undo();
+              excludeItems.undo$().subscribe();
               break;
             }
           }
@@ -206,14 +201,16 @@ export const activate = (context: vscode.ExtensionContext) => {
                       .getHiddenItemList$()
                       .pipe(
                         switchMap((excludeItems) =>
-                          workspaceManager.create$(name, excludeItems, null)
+                          workspaceManager
+                            .create$(name, excludeItems, null)
+                            .pipe(map(() => name))
                         )
                       )
                   ),
                   take(1)
                 )
                 .subscribe(
-                  () => displayInfoToast(`Workspace created`),
+                  (name) => setVSStatusBarMessage(`Created ${name} workspace`),
                   (error) => handelProcessError(error, `Error removing`)
                 );
               break;
@@ -228,10 +225,13 @@ export const activate = (context: vscode.ExtensionContext) => {
                   switchMap((chosenSpace) =>
                     workspaceManager.getWorkspaceByName$(chosenSpace)
                   ),
-                  switchMap(({ id }) => workspaceManager.removeById$(id))
+                  switchMap(({ id, name }) =>
+                    workspaceManager.removeById$(id).pipe(map(() => name))
+                  ),
+                  take(1)
                 )
                 .subscribe(
-                  () => displayInfoToast(`Workspace removed`),
+                  (name) => setVSStatusBarMessage(`Deleted ${name} Workspace`),
                   (error) => handelProcessError(error, `Error removing`)
                 );
               break;
@@ -244,24 +244,18 @@ export const activate = (context: vscode.ExtensionContext) => {
                   switchMap((workspaces) => workspaceListPrompt$(workspaces)),
                   switchMap((chosenSpace) =>
                     workspaceManager.getWorkspaceByName$(chosenSpace)
-                  )
+                  ),
+                  switchMap(({ name, excludedItems }) =>
+                    excludeItems
+                      .loadExcludedList$(excludedItems)
+                      .pipe(map(() => name))
+                  ),
+                  take(1)
                 )
-                .subscribe(({ excludedItems }) => {
-                  console.log(excludedItems);
-                  excludeItems.loadExcludedList(excludedItems);
-                });
-
-              // vscode.window
-              //   .showQuickPick(workspacesNames)
-              //   .then((val: string) => {
-              //     if (val === "Close" || val === undefined) return;
-              //     let chosenWorkspaceId =
-              //       workspaceIds[workspacesNames.indexOf(val)];
-              //     let chosenWorkspace = workspaces[chosenWorkspaceId];
-              //     excludeItems.loadExcludedList(
-              //       chosenWorkspace["excludedItems"]
-              //     );
-              //   });
+                .subscribe(
+                  (name) => setVSStatusBarMessage(`Workspace ${name} Loaded`),
+                  (error) => handelProcessError(error)
+                );
               break;
             }
           }
@@ -282,18 +276,16 @@ export const deactivate = () => {};
  * Handel Process Errors
  * @param error
  * @param fallbackMsg
- * @returns
  */
 const handelProcessError = (error, fallback = "Sorry, Something went wrong") =>
-  error === "silent" ? null : displayInfoToast(fallback);
+  error === "silent" ? null : vscode.window.showErrorMessage(fallback);
 
 /**
- * Helper function for vs quick message
+ * Helper function for VS Code quick message
  * @param error
- * @param fallbackMsg
- * @returns
  */
-const displayInfoToast = (msg) => vscode.window.showInformationMessage(msg);
+const setVSStatusBarMessage = (msg: string) =>
+  vscode.window.setStatusBarMessage(msg);
 
 /**
  *
@@ -315,14 +307,29 @@ const getPluginSettings = (): boolean => {
  *
  * @returns
  */
-const settingsFileExists = (): boolean => {
-  const fileExists: boolean = Util.fileExists(
-    `${Util.getVsCodeCurrentPath()}/.vscode/settings.json`
-  );
-  if (fileExists) {
-    return true;
-  } else {
-    Util.createVscodeSettingJson();
-    return false;
-  }
+const settingsFileExists = (): boolean =>
+  Util.fileExists(`${Util.getVsCodeCurrentPath()}/.vscode/settings.json`);
+
+/**
+ * Goes thought the process of asking and crating a vs code settings file
+ */
+export const createVscodeSettingJson = (): void => {
+  const noticeText: string = `No vscode/settings.json found, create now`;
+  const grantedText: string = "Create";
+  const { path, full } = Util.getVscodeSettingPath();
+  from(vscode.window.showInformationMessage(noticeText, grantedText))
+    .pipe(
+      switchMap((selection) =>
+        selection === grantedText ? of(selection) : throwError("silent")
+      )
+    )
+    .subscribe(() => {
+      fs.mkdir(path, (e) => {
+        fs.writeFile(full, JSON.stringify({}), (err) =>
+          err
+            ? handelProcessError(`Error creating .vscode/settings.json`)
+            : null
+        );
+      });
+    });
 };
