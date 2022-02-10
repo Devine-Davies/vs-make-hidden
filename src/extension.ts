@@ -3,9 +3,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as Util from "./MakeHidden/utilities";
 import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
-import { map, switchMap, take } from "rxjs/operators";
+import { map, switchMap, take, tap } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
-import { ComplexInnerSubscriber } from "rxjs/internal/innerSubscribe";
 
 /**
  * Extension activation
@@ -26,17 +25,24 @@ export const activate = (context: vscode.ExtensionContext) => {
     const registerCommand = vscode.commands.registerCommand(
       `make-hidden.${cmd}`,
       (e: any) => {
-        if (!settingsFileExists() && !e.fsPath) createVscodeSettingJson();
+        if (!settingsFileExists() || !e.fsPath) {
+          createVscodeSettingJson$().subscribe(() =>
+            displayVsCodeMessage(
+              "Settings created, try that action again 👍",
+              true
+            )
+          );
+        }
 
         // @Todo: make this work for multi workspaces
-        const rootPath = vscode.workspace.workspaceFolders[0].uri.path;
+        const rootPath = Util.getVscodeSettingPath().path;
         const chosenFilePath: string = e.fsPath;
         const relativePath = path.relative(rootPath, chosenFilePath);
         const fileName = path.basename(chosenFilePath);
         const extension = path.extname(fileName);
         switch (cmd) {
           case "hide": {
-            excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Hide complete")
+            excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //displayVsCodeMessage("Hide complete")
             break;
           }
 
@@ -89,7 +95,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                   take(1)
                 )
                 .subscribe(
-                  () => {}, //setVSStatusBarMessage("Hide many")
+                  () => {}, //displayVsCodeMessage("Hide many")
                   (error) =>
                     handelProcessError(error, `Sorry, something went wrong!`)
                 );
@@ -98,7 +104,7 @@ export const activate = (context: vscode.ExtensionContext) => {
           }
 
           case "show.only": {
-            excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //setVSStatusBarMessage("Boom")
+            excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //displayVsCodeMessage("Boom")
             break;
           }
         }
@@ -129,7 +135,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                 .getHiddenItemList$()
                 .pipe(switchMap(prompt$), switchMap(excludeItems.makeVisible$))
                 .subscribe(
-                  () => {}, //setVSStatusBarMessage("boom")
+                  () => {}, //displayVsCodeMessage("boom")
                   () => handelProcessError("Sorry, something went wrong")
                 );
               break;
@@ -207,7 +213,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                   take(1)
                 )
                 .subscribe(
-                  (name) => setVSStatusBarMessage(`Created ${name} workspace`),
+                  (name) => displayVsCodeMessage(`Created ${name} workspace`),
                   (error) => handelProcessError(error, `Error removing`)
                 );
               break;
@@ -228,7 +234,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                   take(1)
                 )
                 .subscribe(
-                  (name) => setVSStatusBarMessage(`Deleted ${name} Workspace`),
+                  (name) => displayVsCodeMessage(`Deleted ${name} Workspace`),
                   (error) => handelProcessError(error, `Error removing`)
                 );
               break;
@@ -250,7 +256,7 @@ export const activate = (context: vscode.ExtensionContext) => {
                   take(1)
                 )
                 .subscribe(
-                  (name) => setVSStatusBarMessage(`Workspace ${name} Loaded`),
+                  (name) => displayVsCodeMessage(`Workspace ${name} Loaded`),
                   (error) => handelProcessError(error)
                 );
               break;
@@ -281,8 +287,10 @@ const handelProcessError = (error, fallback = "Sorry, Something went wrong") =>
  * Helper function for VS Code quick message
  * @param error
  */
-const setVSStatusBarMessage = (msg: string) =>
-  vscode.window.setStatusBarMessage(msg);
+const displayVsCodeMessage = (msg: string, bar = true) =>
+  bar
+    ? vscode.window.setStatusBarMessage(msg)
+    : vscode.window.showInformationMessage(msg);
 
 /**
  *
@@ -310,17 +318,17 @@ const settingsFileExists = (): boolean =>
 /**
  * Goes thought the process of asking and crating a vs code settings file
  */
-export const createVscodeSettingJson = (): void => {
-  const noticeText: string = `No vscode/settings.json found, create now`;
-  const grantedText: string = "Create";
+export const createVscodeSettingJson$ = (): Observable<any> => {
+  const noticeText = `No vscode/settings.json found, create now`;
+  const grantedText = "Create";
   const { path, full } = Util.getVscodeSettingPath();
-  from(vscode.window.showInformationMessage(noticeText, grantedText))
-    .pipe(
-      switchMap((selection) =>
-        selection === grantedText ? of(selection) : throwError("silent")
-      )
-    )
-    .subscribe(() => {
+  return from(
+    vscode.window.showInformationMessage(noticeText, grantedText)
+  ).pipe(
+    switchMap((selection) =>
+      selection === grantedText ? of(selection) : throwError("silent")
+    ),
+    tap(() => {
       fs.mkdir(path, (e) => {
         fs.writeFile(full, JSON.stringify({}), (err) =>
           err
@@ -328,5 +336,6 @@ export const createVscodeSettingJson = (): void => {
             : null
         );
       });
-    });
+    })
+  );
 };

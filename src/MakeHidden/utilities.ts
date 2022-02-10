@@ -51,10 +51,10 @@ export const getChannelPath = (): string =>
   vscode.env.appName.indexOf("Insiders") > 0 ? "Code - Insiders" : "Code";
 
 /**
- *
+ * @Todo: make this work for multi workspaces
  */
 export const getVsCodeCurrentPath = () => {
-  return vscode.workspace.rootPath;
+  return vscode.workspace.workspaceFolders[0].uri.path;
 };
 
 /**
