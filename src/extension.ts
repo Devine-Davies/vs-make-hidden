@@ -5,6 +5,7 @@ import * as Util from "./MakeHidden/utilities";
 import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
 import { map, switchMap, take, tap } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
+import { connected } from "process";
 
 /**
  * Extension activation
@@ -35,14 +36,15 @@ export const activate = (context: vscode.ExtensionContext) => {
         }
 
         // @Todo: make this work for multi workspaces
-        const rootPath = Util.getVscodeSettingPath().path;
+        const rootPath = Util.getVsCodeCurrentPath();
         const chosenFilePath: string = e.fsPath;
         const relativePath = path.relative(rootPath, chosenFilePath);
         const fileName = path.basename(chosenFilePath);
         const extension = path.extname(fileName);
+
         switch (cmd) {
           case "hide": {
-            excludeItems.hide$(relativePath).pipe(take(1)).subscribe(); //displayVsCodeMessage("Hide complete")
+            excludeItems.hide$(relativePath).pipe(take(1)).subscribe();
             break;
           }
 
@@ -53,10 +55,15 @@ export const activate = (context: vscode.ExtensionContext) => {
                 extension: string,
                 isFile: boolean
               ): Observable<number> => {
-                const hideByOptions: string[] = [`By Name: ${fileName}`];
-                if (isFile) hideByOptions.push(`By Extension: ${extension}`);
+                if (!isFile) return of(0);
+                const hideByOptions = [
+                  `By Name: ${fileName}`,
+                  `By Extension: ${extension}`,
+                ];
                 return from(vscode.window.showQuickPick(hideByOptions)).pipe(
-                  switchMap((val) => (!!val ? of(val) : throwError("silent"))),
+                  switchMap((val) =>
+                    !!val ? of(val) : throwError(() => new Error("silent"))
+                  ),
                   map((selection) => hideByOptions.indexOf(selection))
                 );
               };
@@ -70,7 +77,9 @@ export const activate = (context: vscode.ExtensionContext) => {
                 ];
 
                 return from(vscode.window.showQuickPick(hideLevelOptions)).pipe(
-                  switchMap((val) => (!!val ? of(val) : throwError("silent"))),
+                  switchMap((val) =>
+                    !!val ? of(val) : throwError(() => new Error("silent"))
+                  ),
                   map((val) => hideLevelOptions.indexOf(val))
                 );
               };
@@ -94,17 +103,16 @@ export const activate = (context: vscode.ExtensionContext) => {
                   ),
                   take(1)
                 )
-                .subscribe(
-                  () => {}, //displayVsCodeMessage("Hide many")
-                  (error) =>
-                    handelProcessError(error, `Sorry, something went wrong!`)
-                );
+                .subscribe({
+                  error: (error) =>
+                    handelProcessError(error, `Sorry, something went wrong!`),
+                });
             });
             break;
           }
 
           case "show.only": {
-            excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe(); //displayVsCodeMessage("Boom")
+            excludeItems.showOnly$(relativePath).pipe(take(1)).subscribe();
             break;
           }
         }
@@ -127,17 +135,19 @@ export const activate = (context: vscode.ExtensionContext) => {
               const prompt$ = (items) =>
                 from(vscode.window.showQuickPick(items)).pipe(
                   switchMap((name) =>
-                    !!name ? of(name) : throwError("silent")
+                    !!name ? of(name) : throwError(() => new Error("silent"))
                   )
                 );
 
               excludeItems
                 .getHiddenItemList$()
                 .pipe(switchMap(prompt$), switchMap(excludeItems.makeVisible$))
-                .subscribe(
-                  () => {}, //displayVsCodeMessage("boom")
-                  () => handelProcessError("Sorry, something went wrong")
-                );
+                .subscribe({
+                  error: () =>
+                    handelProcessError(
+                      new Error("Sorry, something went wrong")
+                    ),
+                });
               break;
             }
 
@@ -184,7 +194,9 @@ export const activate = (context: vscode.ExtensionContext) => {
                 Workspaces.map(({ name }) => name || "No name")
               )
             ).pipe(
-              switchMap((name) => (!!name ? of(name) : throwError("silent")))
+              switchMap((name) =>
+                !!name ? of(name) : throwError(() => new Error("silent"))
+              )
             );
 
           switch (cmd) {
@@ -194,7 +206,9 @@ export const activate = (context: vscode.ExtensionContext) => {
                   prompt: "Enter workspace name",
                 })
               ).pipe(
-                switchMap((name) => (!!name ? of(name) : throwError("silent")))
+                switchMap((name) =>
+                  !!name ? of(name) : throwError(() => new Error("silent"))
+                )
               );
 
               prompt$
@@ -212,10 +226,11 @@ export const activate = (context: vscode.ExtensionContext) => {
                   ),
                   take(1)
                 )
-                .subscribe(
-                  (name) => displayVsCodeMessage(`Created ${name} workspace`),
-                  (error) => handelProcessError(error, `Error removing`)
-                );
+                .subscribe({
+                  error: (error) => handelProcessError(error, `Error removing`),
+                  next: (name) =>
+                    displayVsCodeMessage(`Created ${name} workspace`),
+                });
               break;
             }
 
@@ -233,10 +248,11 @@ export const activate = (context: vscode.ExtensionContext) => {
                   ),
                   take(1)
                 )
-                .subscribe(
-                  (name) => displayVsCodeMessage(`Deleted ${name} Workspace`),
-                  (error) => handelProcessError(error, `Error removing`)
-                );
+                .subscribe({
+                  error: (error) => handelProcessError(error, `Error removing`),
+                  next: (name) =>
+                    displayVsCodeMessage(`Deleted ${name} Workspace`),
+                });
               break;
             }
 
@@ -255,10 +271,11 @@ export const activate = (context: vscode.ExtensionContext) => {
                   ),
                   take(1)
                 )
-                .subscribe(
-                  (name) => displayVsCodeMessage(`Workspace ${name} Loaded`),
-                  (error) => handelProcessError(error)
-                );
+                .subscribe({
+                  error: (error) => handelProcessError(error),
+                  next: (name) =>
+                    displayVsCodeMessage(`Workspace ${name} Loaded`),
+                });
               break;
             }
           }
@@ -280,8 +297,11 @@ export const deactivate = () => {};
  * @param error
  * @param fallbackMsg
  */
-const handelProcessError = (error, fallback = "Sorry, Something went wrong") =>
-  error === "silent" ? null : vscode.window.showErrorMessage(fallback);
+const handelProcessError = (
+  error: Error,
+  fallback = "Sorry, Something went wrong"
+) =>
+  error.message === "silent" ? null : vscode.window.showErrorMessage(fallback);
 
 /**
  * Helper function for VS Code quick message
@@ -332,7 +352,9 @@ export const createVscodeSettingJson$ = (): Observable<any> => {
       fs.mkdir(path, (e) => {
         fs.writeFile(full, JSON.stringify({}), (err) =>
           err
-            ? handelProcessError(`Error creating .vscode/settings.json`)
+            ? handelProcessError(
+                new Error(`Error creating .vscode/settings.json`)
+              )
             : null
         );
       });

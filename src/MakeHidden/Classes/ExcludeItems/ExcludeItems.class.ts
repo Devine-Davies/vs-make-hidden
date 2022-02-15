@@ -37,6 +37,7 @@ export class ExcludeItems {
    *
    */
   constructor() {
+    console.log(Util.getVscodeSettingPath("full"));
     this.store = new ItemStore(
       Util.getVscodeSettingPath("full"),
       `files.exclude`

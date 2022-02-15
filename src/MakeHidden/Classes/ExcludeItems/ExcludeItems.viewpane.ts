@@ -1,5 +1,4 @@
 import * as Util from "../../utilities";
-import { Node, parseTree } from "jsonc-parser";
 import {
   TreeDataProvider,
   EventEmitter,
@@ -9,79 +8,61 @@ import {
   window,
 } from "vscode";
 
-export class ExcludeItemsViewPane implements TreeDataProvider<Node> {
-  private viewUpdatedEventEmitter: EventEmitter<Node> =
-    new EventEmitter<Node>();
-  readonly onDidChangeTreeData: Event<any> = this.viewUpdatedEventEmitter.event;
+interface CustomTreeItem {
+  title: string;
+  value: string;
+}
 
-  private tree: Node = {
-    type: "object",
-    offset: 0,
-    length: 0,
-    children: [],
-  };
+export class ExcludeItemsViewPane implements TreeDataProvider<CustomTreeItem> {
+  viewUpdatedEventEmitter: EventEmitter<CustomTreeItem>;
+  onDidChangeTreeData: Event<any>;
+  tree: CustomTreeItem[];
 
   /**
    *
    * @param name viewpane id
    */
-  constructor(name: string, onTreeUpdate = () => {}) {
-    this.register(name);
-    // this.viewUpdatedEventEmitter.event(onTreeUpdate);
-  }
-
-  /**
-   * Register a view pane with vs code view: showing the excluded items
-   * @param name
-   */
-  private register(name: string = "") {
+  constructor(public name: string) {
+    this.viewUpdatedEventEmitter = new EventEmitter();
+    this.onDidChangeTreeData = this.viewUpdatedEventEmitter.event;
     window.registerTreeDataProvider(name, this);
   }
-
-  /**
-   * When a redrawn has occurred on the register view pane
-   */
-  //   private registerEvents() {
-  //     this.viewUpdatedEventEmitter.event(() => {
-  //         console.log('Updating...');
-  //     });
-  //   }
 
   /**
    * Updates the view pane item list
    * @param list
    */
   public update(list: string[]): void {
-    this.tree = parseTree(JSON.stringify(list));
+    this.tree = list.map((title) => ({ type: "string", title, value: title }));
+    // @ts-ignore - Getting a type error. able to tree as arg but panel stops responding
     this.viewUpdatedEventEmitter.fire();
   }
 
   /**
    * vscode function to render items to view
    */
-  public getChildren(): Thenable<Node[]> {
-    return Promise.resolve(this.tree.children);
+  public getChildren(): any[] {
+    return this.tree;
   }
 
   /**
    * vscode function, Pass our tree node item object to vs code§
    * @param node
    */
-  public getTreeItem(node: Node): TreeItem {
-    const itemTitle: string = node.value;
-    const treeItem: TreeItem = new TreeItem(
-      itemTitle,
-      TreeItemCollapsibleState.None
-    );
-
-    treeItem.iconPath = Util.getProjectThemeDirectory("put-back-icon.svg");
-    treeItem.command = {
-      command: "make-hidden.remove.item",
-      title: itemTitle,
-      tooltip: itemTitle,
-      arguments: [itemTitle],
+  public getTreeItem(node: CustomTreeItem): TreeItem {
+    const { title, value } = node;
+    const overrides = {
+      iconPath: Util.getProjectThemeDirectory("put-back-icon.svg"),
+      command: {
+        command: "make-hidden.remove.item",
+        title: title,
+        arguments: [value],
+      },
     };
 
-    return treeItem;
+    return {
+      ...new TreeItem(title, TreeItemCollapsibleState.None),
+      ...overrides,
+    };
   }
 }
