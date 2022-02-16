@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import { map, switchMap, take, tap } from "rxjs/operators";
+import { combineLatest, from, Observable, of, throwError } from "rxjs";
 import * as Util from "./MakeHidden/utilities";
 import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
-import { map, switchMap, take, tap } from "rxjs/operators";
-import { from, Observable, of, throwError } from "rxjs";
-import { connected } from "process";
+import { AllItemsInDirectory } from "./MakeHidden/service";
 
 /**
  * Extension activation
@@ -22,7 +22,7 @@ export const activate = (context: vscode.ExtensionContext) => {
   /**
    * Hide Cmd's
    */
-  ["hide", "hide.many", "show.only"].forEach((cmd: string) => {
+  ["hide", "hide.multiple", "hide.many", "show.only"].forEach((cmd: string) => {
     const registerCommand = vscode.commands.registerCommand(
       `make-hidden.${cmd}`,
       (e: any) => {
@@ -39,12 +39,41 @@ export const activate = (context: vscode.ExtensionContext) => {
         const rootPath = Util.getVsCodeCurrentPath();
         const chosenFilePath: string = e.fsPath;
         const relativePath = path.relative(rootPath, chosenFilePath);
+        const dirName = path.dirname(chosenFilePath);
         const fileName = path.basename(chosenFilePath);
         const extension = path.extname(fileName);
 
         switch (cmd) {
           case "hide": {
             excludeItems.hide$(relativePath).pipe(take(1)).subscribe();
+            break;
+          }
+
+          case "hide.multiple": {
+            AllItemsInDirectory(dirName)
+              .pipe(
+                switchMap((items) =>
+                  vscode.window.showQuickPick(items, {
+                    placeHolder: "Choose the items you wish to hide",
+                    canPickMany: true,
+                  })
+                ),
+                switchMap((selected) => {
+                  const relativePaths = selected.map(
+                    (name) =>
+                      `${Util.getVsCodeCurrentPath().replace(
+                        `${dirName}/`,
+                        ""
+                      )}/${name}`
+                  );
+                  return excludeItems.hideMultiple$(relativePaths);
+                }),
+                take(1)
+              )
+              .subscribe({
+                error: (error) =>
+                  handelProcessError(error, `Sorry, something went wrong!`),
+              });
             break;
           }
 
@@ -141,7 +170,11 @@ export const activate = (context: vscode.ExtensionContext) => {
 
               excludeItems
                 .getHiddenItemList$()
-                .pipe(switchMap(prompt$), switchMap(excludeItems.makeVisible$))
+                .pipe(
+                  switchMap(prompt$),
+                  switchMap(excludeItems.makeVisible$),
+                  take(1)
+                )
                 .subscribe({
                   error: () =>
                     handelProcessError(

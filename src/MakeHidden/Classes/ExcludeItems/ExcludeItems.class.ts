@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import { combineLatest, Observable } from "rxjs";
 import { take, map, switchMap, tap } from "rxjs/operators";
 import * as Util from "../../utilities";
 import { AllItemsInDirectory } from "../../service";
@@ -75,10 +75,7 @@ export class ExcludeItems {
    *
    */
   public getHiddenItemList$(): Observable<string[]> {
-    return this.store.get().pipe(
-      map((list) => Object.keys(list)),
-      take(1)
-    );
+    return this.store.get().pipe(map((list) => Object.keys(list)));
   }
 
   /**
@@ -87,10 +84,27 @@ export class ExcludeItems {
    * @param relativePath
    */
   public hide$(relativePath: string): Observable<any> {
-    return this.store.addItem(relativePath, true).pipe(
-      take(1),
-      tap(() => this.onListUpdate())
+    return this.store
+      .addItem(relativePath, true)
+      .pipe(tap(() => this.onListUpdate()));
+  }
+
+  /**
+   *
+   * @param dirname
+   * @param items
+   * @returns
+   */
+  public hideMultiple$(relativePaths: string[]): Observable<any> {
+    const reduced = relativePaths.reduce(
+      (acc, relativePath) => ({
+        ...acc,
+        [relativePath]: true,
+      }),
+      {}
     );
+
+    return this.store.addMultiple(reduced).pipe(tap(() => this.onListUpdate()));
   }
 
   /**

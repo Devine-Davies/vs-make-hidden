@@ -50,6 +50,7 @@
     "*",
     "onView:extension",
     "onCommand:make-hidden.hide",
+    "onCommand:make-hidden.hide.multiple",
     "onCommand:make-hidden.hide.many",
     "onCommand:make-hidden.show.only",
     "onCommand:make-hidden.remove.item",
@@ -74,6 +75,11 @@
       {
         "command": "make-hidden.hide",
         "title": "Hide",
+        "category": "Make Hidden"
+      },
+      {
+        "command": "make-hidden.hide.multiple",
+        "title": "Hide Multiple",
         "category": "Make Hidden"
       },
       {
@@ -130,6 +136,10 @@
       "explorer/context": [
         {
           "command": "make-hidden.hide",
+          "group": "make-hidden@1"
+        },
+        {
+          "command": "make-hidden.hide.multiple",
           "group": "make-hidden@1"
         },
         {

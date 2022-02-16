@@ -85,4 +85,17 @@ export class ItemStore {
       switchMap((store: any) => this.set({ ...store, [itemKey]: itemInfo }))
     );
   }
+
+  /**
+   * Added regex from config list
+   * When add an item it will be removed from the directory
+   * @param itemKey
+   * @param itemInfo
+   */
+  public addMultiple(itemKey: any) {
+    console.log(itemKey);
+    return this.get().pipe(
+      switchMap((store: any) => this.set({ ...store, ...itemKey }))
+    );
+  }
 }
