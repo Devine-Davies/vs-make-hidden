@@ -51,7 +51,7 @@
     "onView:extension",
     "onCommand:make-hidden.hide",
     "onCommand:make-hidden.hide.multiple",
-    "onCommand:make-hidden.hide.many",
+    "onCommand:make-hidden.hide.by",
     "onCommand:make-hidden.show.only",
     "onCommand:make-hidden.remove.item",
     "onCommand:make-hidden.remove.search",
@@ -83,8 +83,8 @@
         "category": "Make Hidden"
       },
       {
-        "command": "make-hidden.hide.many",
-        "title": "Hide Many",
+        "command": "make-hidden.hide.by",
+        "title": "Hide By ...",
         "category": "Make Hidden"
       },
       {
@@ -110,11 +110,7 @@
       {
         "command": "make-hidden.remove.all",
         "title": "Empty",
-        "category": "Make Hidden",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
+        "category": "Make Hidden"
       },
       {
         "command": "make-hidden.workspace",
@@ -148,11 +144,7 @@
           "group": "make-hidden@1"
         },
         {
-          "command": "make-hidden.undo",
-          "group": "make-hidden@1"
-        },
-        {
-          "command": "make-hidden.hide.many",
+          "command": "make-hidden.hide.by",
           "group": "make-hidden@1"
         },
         {

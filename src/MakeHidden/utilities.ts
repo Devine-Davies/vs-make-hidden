@@ -168,13 +168,13 @@ export const displayVsCodeMessage = (msg: string, bar = true) =>
  * @param path
  * @returns
  */
-export const buildPathObject = (givenPath: string) => {
+export const buildPathObject = (chosenFilePath: string) => {
   const rootPath = getVsCodeCurrentPath();
-  const chosenFilePath: string = givenPath;
   const relativePath = Path.relative(rootPath, chosenFilePath);
   const dirName = Path.dirname(chosenFilePath);
   const fileName = Path.basename(chosenFilePath);
   const extension = Path.extname(fileName);
+  const name = Path.basename(fileName, extension);
 
   return {
     rootPath,
@@ -182,6 +182,7 @@ export const buildPathObject = (givenPath: string) => {
     relativePath,
     dirName,
     fileName,
+    name,
     extension,
   };
 };

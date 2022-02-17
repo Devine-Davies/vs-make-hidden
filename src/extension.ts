@@ -57,9 +57,6 @@ export const activate = (context: vscode.ExtensionContext) => {
     `${cmdPrefix}.hide.multiple`,
     (e: any) => {
       const { rootPath, dirName } = Util.buildPathObject(e.fsPath);
-      console.log(Util.buildPathObject(e.fsPath));
-      console.log(Util.getVsCodeCurrentPath());
-
       const prompt$ = (items): Observable<string[]> =>
         from(
           vscode.window.showQuickPick(items, {
@@ -79,7 +76,6 @@ export const activate = (context: vscode.ExtensionContext) => {
       const hideMultiple$ = AllItemsInDirectory(dirName).pipe(
         switchMap(prompt$),
         map(buildRelativePaths),
-        tap(console.log),
         switchMap((relativePaths) => excludeItems.hideMultiple$(relativePaths)),
         take(1)
       );
@@ -93,36 +89,34 @@ export const activate = (context: vscode.ExtensionContext) => {
     }
   );
 
-  const hideMany = vscode.commands.registerCommand(
-    `${cmdPrefix}.hide.many`,
-    (e: any) => {
-      const { relativePath, fileName, extension, chosenFilePath } =
-        Util.buildPathObject(e.fsPath);
+  const hideBy = vscode.commands.registerCommand(
+    `${cmdPrefix}.hide.by`,
+    ({ fsPath }: any) => {
+      const { relativePath, name, extension, chosenFilePath } =
+        Util.buildPathObject(fsPath);
+
       fs.lstat(chosenFilePath, (err, stats) => {
         const firstPrompt$ = (
-          fileName: string,
+          name: string,
           extension: string,
           isFile: boolean
         ): Observable<number> => {
           if (!isFile) return of(0);
-          const hideByOptions = [
-            `By Name: ${fileName}`,
-            `By Extension: ${extension}`,
-          ];
-          return from(vscode.window.showQuickPick(hideByOptions)).pipe(
+          const options = [`By Name (${name})`, `By Extension (${extension})`];
+          return from(vscode.window.showQuickPick(options)).pipe(
             switchMap((val) =>
               val ? of(val) : throwError(() => new Error("silent"))
             ),
-            map((selection) => hideByOptions.indexOf(selection))
+            map((selection) => options.indexOf(selection))
           );
         };
 
         const secondPrompt$ = (): Observable<number> => {
           const hideLevelOptions = [
-            `From root`,
-            `From current directory`,
-            `From current & child directories`,
-            `Child directories only`,
+            `From Root`,
+            `From Current Directory`,
+            `From Current&Child Directories`,
+            `From Child Directories`,
           ];
 
           return from(vscode.window.showQuickPick(hideLevelOptions)).pipe(
@@ -133,8 +127,8 @@ export const activate = (context: vscode.ExtensionContext) => {
           );
         };
 
-        const hideMany$ = firstPrompt$(
-          fileName,
+        const hideByProcess$ = firstPrompt$(
+          name,
           extension,
           stats.isFile()
         ).pipe(
@@ -153,7 +147,7 @@ export const activate = (context: vscode.ExtensionContext) => {
 
         settingFileExists$()
           .pipe(
-            switchMap(() => hideMany$),
+            switchMap(() => hideByProcess$),
             take(1)
           )
           .subscribe({
@@ -310,7 +304,7 @@ export const activate = (context: vscode.ExtensionContext) => {
      */
     hide,
     hideMultiple,
-    hideMany,
+    hideBy,
     showOnly,
     /**
      * Show commands
