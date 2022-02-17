@@ -160,13 +160,19 @@ export const activate = (context: vscode.ExtensionContext) => {
     `${cmdPrefix}.remove.search`,
     () => {
       const prompt$ = (items: string[]): Observable<string> =>
-        from(vscode.window.showQuickPick(items)).pipe(
-          switchMap(silentlyFailIfEmpty$)
-        );
-      const makeVisible$ = (item) => excludeItems.makeVisible$(item);
+        from(
+          vscode.window.showQuickPick(items, {
+            placeHolder: "Type to quick find",
+          })
+        ).pipe(switchMap(silentlyFailIfEmpty$));
+
+      const promptOrFail$ = (items: string[]): Observable<string> =>
+        !!items.length ? prompt$(items) : throwError(() => new Error("silent"));
+      const makeVisible$ = (item: string) => excludeItems.makeVisible$(item);
+
       excludeItems
         .getHiddenItemList$()
-        .pipe(switchMap(prompt$), switchMap(makeVisible$), take(1))
+        .pipe(switchMap(promptOrFail$), switchMap(makeVisible$), take(1))
         .subscribe({
           error: () =>
             Util.handelError(new Error("Sorry, something went wrong")),
@@ -199,7 +205,11 @@ export const activate = (context: vscode.ExtensionContext) => {
     `${cmdPrefix}.workspace`,
     () => {
       const menuItems$ = () =>
-        from(vscode.window.showQuickPick(["Create", "Load", "Delete"])).pipe(
+        from(
+          vscode.window.showQuickPick(["Create", "Load", "Delete"], {
+            placeHolder: `What would you like to do...`,
+          })
+        ).pipe(
           switchMap((name) =>
             !!name
               ? of(name.toLocaleLowerCase())
