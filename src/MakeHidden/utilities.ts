@@ -97,14 +97,10 @@ export const fileExists = (filePath: string = "") => fs.existsSync(filePath);
  */
 export const getVscodeSettingPath = (pathType: string = null) => {
   let path: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
-  let pathInfo = getPathInfoFromPath(path);
-  pathInfo["full"] = path;
-
-  if (pathInfo.hasOwnProperty(pathType)) {
-    return pathInfo[pathType];
-  }
-
-  return pathInfo;
+  return {
+    ...getPathInfoFromPath(path),
+    full: path,
+  };
 };
 
 /**

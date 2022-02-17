@@ -38,7 +38,7 @@ export class ExcludeItems {
    */
   constructor() {
     this.store = new ItemStore(
-      Util.getVscodeSettingPath("full"),
+      Util.getVscodeSettingPath().full,
       `files.exclude`
     );
     this.viewPane = new ExcludeItemsViewPane(this.viewPaneId);
@@ -216,6 +216,8 @@ export class ExcludeItems {
    * @param regexItem
    */
   public makeVisible$(regexItem: string): Observable<any> {
+    console.log("regexItem");
+    console.log(regexItem);
     return this.store
       .removeItem(regexItem)
       .pipe(tap(() => this.onListUpdate()));

@@ -1,10 +1,15 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as Util from "./MakeHidden/utilities";
-import { map, switchMap, take, tap } from "rxjs/operators";
+import { catchError, map, switchMap, take, tap } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
 import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
-import { AllItemsInDirectory } from "./MakeHidden/service";
+import {
+  AllItemsInDirectory,
+  MakeFileAsync,
+  SaveFileAsync,
+  PathExistsAsync,
+} from "./MakeHidden/service";
 
 /**
  * Extension activation
@@ -17,17 +22,6 @@ export const activate = (context: vscode.ExtensionContext) => {
   const excludeItems = new ExcludeItems();
 
   Util.setVsCodeContext(context);
-
-  const settingFileExists$ = () =>
-    of(Util.settingsFileExists()).pipe(
-      switchMap((exists) =>
-        !exists
-          ? createVscodeSettingJson$().pipe(
-              tap(() => Util.displayVsCodeMessage("Settings created", true))
-            )
-          : of(exists)
-      )
-    );
 
   const workspaceListPrompt$ = (Workspaces: Workspace[]) =>
     from(
@@ -63,11 +57,8 @@ export const activate = (context: vscode.ExtensionContext) => {
             placeHolder: "Choose the items you wish to hide",
             canPickMany: true,
           })
-        ).pipe(
-          switchMap((selected) =>
-            selected ? of(selected) : throwError(() => new Error("silent"))
-          )
-        );
+        ).pipe(switchMap(silentlyFailIfEmpty$));
+
       const buildRelativePaths = (items) =>
         items.map((name) =>
           `${dirName.replace(`${rootPath}`, "")}/${name}`.substring(1)
@@ -92,69 +83,63 @@ export const activate = (context: vscode.ExtensionContext) => {
   const hideBy = vscode.commands.registerCommand(
     `${cmdPrefix}.hide.by`,
     ({ fsPath }: any) => {
-      const { relativePath, name, extension, chosenFilePath } =
-        Util.buildPathObject(fsPath);
+      const { relativePath, name, extension } = Util.buildPathObject(fsPath);
+      const hideByOptions = [
+        `By Name {${name}}`,
+        `By Extension {${extension}}`,
+      ];
 
-      fs.lstat(chosenFilePath, (err, stats) => {
-        const firstPrompt$ = (
-          name: string,
-          extension: string,
-          isFile: boolean
-        ): Observable<number> => {
-          if (!isFile) return of(0);
-          const options = [`By Name (${name})`, `By Extension (${extension})`];
-          return from(vscode.window.showQuickPick(options)).pipe(
-            switchMap((val) =>
-              val ? of(val) : throwError(() => new Error("silent"))
-            ),
-            map((selection) => options.indexOf(selection))
-          );
-        };
+      const hideLevelOptions = [
+        `From Root`,
+        `From Current Directory`,
+        `From Current&Child Directories`,
+        `From Child Directories`,
+      ];
 
-        const secondPrompt$ = (): Observable<number> => {
-          const hideLevelOptions = [
-            `From Root`,
-            `From Current Directory`,
-            `From Current&Child Directories`,
-            `From Child Directories`,
-          ];
+      const firstPrompt$ = (extension: string): Observable<number> =>
+        !extension
+          ? of(0)
+          : from(vscode.window.showQuickPick(hideByOptions)).pipe(
+              switchMap(silentlyFailIfEmpty$),
+              map((selection) => hideByOptions.indexOf(selection))
+            );
 
-          return from(vscode.window.showQuickPick(hideLevelOptions)).pipe(
-            switchMap((val) =>
-              !!val ? of(val) : throwError(() => new Error("silent"))
-            ),
-            map((val) => hideLevelOptions.indexOf(val))
-          );
-        };
-
-        const hideByProcess$ = firstPrompt$(
-          name,
-          extension,
-          stats.isFile()
+      const secondPrompt$ = (by: number): Observable<number> =>
+        from(
+          vscode.window.showQuickPick(hideLevelOptions, {
+            placeHolder: `${hideByOptions[by]}`,
+          })
         ).pipe(
-          switchMap((hideByOption) =>
-            secondPrompt$().pipe(
-              map((hideLevelIndex) => ({
-                hideByOption: hideByOption > 0 ? true : false,
-                hideLevelIndex,
-              }))
-            )
-          ),
-          switchMap(({ hideByOption, hideLevelIndex }) =>
-            excludeItems.hideMany$(relativePath, hideByOption, hideLevelIndex)
-          )
+          switchMap(silentlyFailIfEmpty$),
+          map((val) => hideLevelOptions.indexOf(val))
         );
 
-        settingFileExists$()
-          .pipe(
-            switchMap(() => hideByProcess$),
-            take(1)
+      const showPrompts$: Observable<{
+        hideByOption: boolean;
+        hideLevelIndex: number;
+      }> = firstPrompt$(extension).pipe(
+        switchMap((hideByOption) =>
+          secondPrompt$(hideByOption).pipe(
+            map((hideLevelIndex) => ({
+              hideByOption: hideByOption > 0 ? true : false,
+              hideLevelIndex,
+            }))
           )
-          .subscribe({
-            error: (error) =>
-              Util.handelError(error, `Sorry, something went wrong!`),
-          });
-      });
+        )
+      );
+
+      settingFileExists$()
+        .pipe(
+          switchMap(() => showPrompts$),
+          switchMap(({ hideByOption, hideLevelIndex }) =>
+            excludeItems.hideMany$(relativePath, hideByOption, hideLevelIndex)
+          ),
+          take(1)
+        )
+        .subscribe({
+          error: (error) =>
+            Util.handelError(error, `Sorry, something went wrong!`),
+        });
     }
   );
 
@@ -174,16 +159,14 @@ export const activate = (context: vscode.ExtensionContext) => {
   const removeSearch = vscode.commands.registerCommand(
     `${cmdPrefix}.remove.search`,
     () => {
-      const prompt$ = (items) =>
+      const prompt$ = (items: string[]): Observable<string> =>
         from(vscode.window.showQuickPick(items)).pipe(
-          switchMap((name) =>
-            !!name ? of(name) : throwError(() => new Error("silent"))
-          )
+          switchMap(silentlyFailIfEmpty$)
         );
-
+      const makeVisible$ = (item) => excludeItems.makeVisible$(item);
       excludeItems
         .getHiddenItemList$()
-        .pipe(switchMap(prompt$), switchMap(excludeItems.makeVisible$), take(1))
+        .pipe(switchMap(prompt$), switchMap(makeVisible$), take(1))
         .subscribe({
           error: () =>
             Util.handelError(new Error("Sorry, something went wrong")),
@@ -330,28 +313,39 @@ export const activate = (context: vscode.ExtensionContext) => {
 export const deactivate = () => {};
 
 /**
- * Goes thought the process of asking and crating a vs code settings file
+ *
+ * @param val
+ * @returns
  */
-export const createVscodeSettingJson$ = (): Observable<any> => {
-  const noticeText = `No vscode/settings.json found, create now`;
-  const grantedText = "Create";
+const silentlyFailIfEmpty$ = (val: any): Observable<any | Error> =>
+  !!val ? of(val) : throwError(() => new Error("silent"));
+
+/**
+ *
+ * @returns
+ */
+const settingFileExists$ = () =>
+  PathExistsAsync(Util.getVscodeSettingPath().full).pipe(
+    catchError(() => createSettingPrompt$())
+  );
+
+/**
+ * Prompts the user to create setting file
+ * @returns
+ */
+export const createSettingPrompt$ = (): Observable<any> => {
   const { path, full } = Util.getVscodeSettingPath();
   return from(
-    vscode.window.showInformationMessage(noticeText, grantedText)
+    vscode.window.showInformationMessage(
+      `No vscode/settings.json found, create now`,
+      "Create"
+    )
   ).pipe(
-    switchMap((selection) =>
-      selection === grantedText ? of(selection) : throwError("silent")
+    switchMap(silentlyFailIfEmpty$),
+    switchMap(() =>
+      PathExistsAsync(path).pipe(catchError(() => MakeFileAsync(path)))
     ),
-    tap(() => {
-      fs.mkdir(path, (e) => {
-        fs.writeFile(full, JSON.stringify({}), (err) =>
-          err
-            ? Util.handelError(
-                new Error(`Error creating .vscode/settings.json`)
-              )
-            : null
-        );
-      });
-    })
+    switchMap(() => SaveFileAsync(full, JSON.stringify({}))),
+    tap(() => Util.displayVsCodeMessage("Settings created", true))
   );
 };
