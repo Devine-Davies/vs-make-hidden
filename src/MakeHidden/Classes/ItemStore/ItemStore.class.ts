@@ -58,7 +58,6 @@ export class ItemStore {
   public removeItem(itemKey: string = null): Observable<any> {
     return this.get().pipe(
       map((store) => {
-        // Remove the item using immutability, create new
         return Object.keys(store).reduce(
           (acc, key) =>
             key === itemKey
@@ -93,7 +92,6 @@ export class ItemStore {
    * @param itemInfo
    */
   public addMultiple(itemKey: any) {
-    console.log(itemKey);
     return this.get().pipe(
       switchMap((store: any) => this.set({ ...store, ...itemKey }))
     );

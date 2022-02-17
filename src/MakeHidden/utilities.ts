@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import * as path from "path";
+import * as Path from "path";
 import * as fs from "fs";
 import * as os from "os";
 import * as process from "process";
@@ -28,11 +28,10 @@ export const getExtensionSettingPath = (): string => {
   const channelPath: string = "Code";
   // const channelPath: string = this.getChannelPath();
 
-  projectFile = path.join(appData, channelPath, "User", PROJECTS_FILE);
-  // in linux, it may not work with /var/local, then try to use /home/myuser/.config
+  projectFile = Path.join(appData, channelPath, "User", PROJECTS_FILE);
 
   if (process.platform === "linux" && !fs.existsSync(projectFile)) {
-    projectFile = path.join(
+    projectFile = Path.join(
       HOME_DIR,
       ".config/",
       channelPath,
@@ -62,8 +61,8 @@ export const getVsCodeCurrentPath = () => {
  * @param givenPath
  */
 export const getPathInfoFromPath = (givenPath: string = null) => {
-  let extension: string = path.extname(givenPath);
-  let pathName: string = path.basename(givenPath);
+  let extension: string = Path.extname(givenPath);
+  let pathName: string = Path.basename(givenPath);
   return {
     basename: pathName,
     filename:
@@ -84,7 +83,7 @@ export const getAllItemsInDir = (directory: string = "./") =>
  * @param fileName
  */
 export const getProjectThemeDirectory = (fileName: string) =>
-  VS_CODE_CONTEXT.asAbsolutePath(path.join("resources", "light", fileName));
+  VS_CODE_CONTEXT.asAbsolutePath(Path.join("resources", "light", fileName));
 
 /**
  *
@@ -107,6 +106,13 @@ export const getVscodeSettingPath = (pathType: string = null) => {
 
   return pathInfo;
 };
+
+/**
+ *
+ * @returns
+ */
+export const settingsFileExists = (): boolean =>
+  fileExists(`${getVsCodeCurrentPath()}/.vscode/settings.json`);
 
 /**
  * Create vc setting.json directory
@@ -135,4 +141,47 @@ export const createPluginSettingsExist = (): void => {
         });
       }
     });
+};
+
+/**
+ * Handel Process Errors
+ * @param error
+ * @param fallbackMsg
+ */
+export const handelError = (
+  error: Error,
+  fallback = "Sorry, Something went wrong"
+) =>
+  error.message === "silent" ? null : vscode.window.showErrorMessage(fallback);
+
+/**
+ * Helper function for VS Code quick message
+ * @param error
+ */
+export const displayVsCodeMessage = (msg: string, bar = true) =>
+  bar
+    ? vscode.window.setStatusBarMessage(msg)
+    : vscode.window.showInformationMessage(msg);
+
+/**
+ *
+ * @param path
+ * @returns
+ */
+export const buildPathObject = (givenPath: string) => {
+  const rootPath = getVsCodeCurrentPath();
+  const chosenFilePath: string = givenPath;
+  const relativePath = Path.relative(rootPath, chosenFilePath);
+  const dirName = Path.dirname(chosenFilePath);
+  const fileName = Path.basename(chosenFilePath);
+  const extension = Path.extname(fileName);
+
+  return {
+    rootPath,
+    chosenFilePath,
+    relativePath,
+    dirName,
+    fileName,
+    extension,
+  };
 };

@@ -117,6 +117,11 @@
         }
       },
       {
+        "command": "make-hidden.workspace",
+        "title": "Workspaces",
+        "category": "Make Hidden"
+      },
+      {
         "command": "make-hidden.workspace.create",
         "title": "Create Workspace",
         "category": "Make Hidden"
@@ -157,17 +162,7 @@
       ],
       "view/title": [
         {
-          "command": "make-hidden.workspace.create",
-          "when": "view == makeHidden.ViewPane.hiddenItems",
-          "group": "workspaceManager"
-        },
-        {
-          "command": "make-hidden.workspace.load",
-          "when": "view == makeHidden.ViewPane.hiddenItems",
-          "group": "workspaceManager"
-        },
-        {
-          "command": "make-hidden.workspace.delete",
+          "command": "make-hidden.workspace",
           "when": "view == makeHidden.ViewPane.hiddenItems",
           "group": "workspaceManager"
         },

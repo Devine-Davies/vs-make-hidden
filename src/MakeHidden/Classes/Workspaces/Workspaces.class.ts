@@ -52,7 +52,7 @@ export class Workspaces {
    * @param name
    * @returns
    */
-  public getWorkspaceByName$(name: string): Observable<any> {
+  public getByName$(name: string): Observable<any> {
     return this.getWorkspaces().pipe(
       map((workspaces: any) =>
         Object.values(workspaces).find((item: any) => item.name === name)

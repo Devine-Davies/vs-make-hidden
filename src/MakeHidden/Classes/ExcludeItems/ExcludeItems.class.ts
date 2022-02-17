@@ -165,7 +165,6 @@ export class ExcludeItems {
   ): Observable<any> {
     const targetFilePathProps: any = Util.getPathInfoFromPath(itemPath);
     const workspacePath: any = Util.getVsCodeCurrentPath();
-
     const convertToExcludeObject = (items) =>
       items.reduce((acc, fileName) => {
         const filePath = `${targetFilePathProps["path"]}${fileName}`;
