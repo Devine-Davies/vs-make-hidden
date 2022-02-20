@@ -34,7 +34,7 @@ export class ExcludeItemsViewPane implements TreeDataProvider<CustomTreeItem> {
    */
   public update(list: string[]): void {
     this.tree = list.map((title) => ({ type: "string", title, value: title }));
-    // @ts-ignore - Getting a type error. able to tree as arg but panel stops responding
+    // @ts-ignore - Getting a type error. able to tree as arg when of type Node but panel stops responding
     this.viewUpdatedEventEmitter.fire();
   }
 

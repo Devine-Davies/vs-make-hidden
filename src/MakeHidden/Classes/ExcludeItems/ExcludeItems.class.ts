@@ -216,8 +216,6 @@ export class ExcludeItems {
    * @param regexItem
    */
   public makeVisible$(regexItem: string): Observable<any> {
-    console.log("regexItem");
-    console.log(regexItem);
     return this.store
       .removeItem(regexItem)
       .pipe(tap(() => this.onListUpdate()));

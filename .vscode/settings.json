@@ -1,4 +1,6 @@
 {
   "files.exclude": {},
-  "cSpell.ignoreWords": ["viewpane"]
+  "cSpell.ignoreWords": [
+    "viewpane"
+  ]
 }

@@ -160,22 +160,21 @@ export const activate = (context: vscode.ExtensionContext) => {
     `${cmdPrefix}.remove.search`,
     () => {
       const prompt$ = (items: string[]): Observable<string> =>
-        from(
-          vscode.window.showQuickPick(items, {
-            placeHolder: "Type to quick find",
-          })
-        ).pipe(switchMap(silentlyFailIfEmpty$));
+        items.length
+          ? from(
+              vscode.window.showQuickPick(items, {
+                placeHolder: "Type to quick find",
+              })
+            ).pipe(switchMap(silentlyFailIfEmpty$))
+          : throwError(() => new Error("silent"));
 
-      const promptOrFail$ = (items: string[]): Observable<string> =>
-        !!items.length ? prompt$(items) : throwError(() => new Error("silent"));
       const makeVisible$ = (item: string) => excludeItems.makeVisible$(item);
 
       excludeItems
         .getHiddenItemList$()
-        .pipe(switchMap(promptOrFail$), switchMap(makeVisible$), take(1))
+        .pipe(switchMap(prompt$), switchMap(makeVisible$), take(1))
         .subscribe({
-          error: () =>
-            Util.handelError(new Error("Sorry, something went wrong")),
+          error: (error) => Util.handelError(error, `Error removing`),
         });
     }
   );

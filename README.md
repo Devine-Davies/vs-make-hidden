@@ -14,7 +14,7 @@ A VS Code plugin that provides more control over your excluded items in your "Pr
 #### Other
 
 - **Hidden Items View Pane** - Shows all hidden/excluded files and folder, these can also be added back into the current directory by selecting one.
-- **Workspaces** - Workspaces allow you to save excluded items presets so that they can be applied/loaded again easily.
+- **Workspaces** - Save your hidden items into a workspace so you can quickly apply that list at your will.
 
 # Usage
 
