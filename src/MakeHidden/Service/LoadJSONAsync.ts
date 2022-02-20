@@ -1,18 +1,18 @@
-import { ReadFileAsync } from './ReadFileAsync';
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { ReadFileAsync } from "./readFileAsync";
 
-/* --------------------
+/**
  * Reads a give file and returns a slice of the json as a
- : TODO:: Why dose exclude still work with out key given??
-*/
-export function LoadJSONAsync(filename: string, key: string = undefined): Promise<any> {
-  return new Promise((resolve, reject) => {
-    return ReadFileAsync(filename).then((res: any) => {
-      const json = JSON.parse(res);
-      if (key) {
-        resolve(json[key] || {});
-      }
-
-      resolve(json)
-    }).catch((e) => console.log(e))
-  });
-}
+ * @param filename
+ * @param key
+ */
+export const LoadJSONAsync = (
+  filename: string,
+  key?: string
+): Observable<any> => {
+  return ReadFileAsync(filename).pipe(
+    map((data: string) => JSON.parse(data)),
+    map((data) => (key ? data[key] : data))
+  );
+};
