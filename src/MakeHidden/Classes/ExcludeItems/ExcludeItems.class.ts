@@ -42,16 +42,15 @@ export class ExcludeItems {
       `files.exclude`
     );
     this.viewPane = new ExcludeItemsViewPane(this.viewPaneId);
-    this.onListUpdate();
+    this.onListUpdate().pipe(take(1)).subscribe();
   }
 
   /**
    * Called the the list has been updated
    */
-  private onListUpdate(): void {
-    this.getHiddenItemList$()
-      .pipe(take(1))
-      .subscribe((list) => this.viewPane.update(list));
+  public onListUpdate(): Observable<any> {
+    return this.getHiddenItemList$()
+      .pipe(tap((list) => this.viewPane.update(list))
   }
 
   /**
@@ -66,7 +65,7 @@ export class ExcludeItems {
       }),
       {}
     );
-    return this.store.set(store).pipe(tap(() => this.onListUpdate()));
+    return this.store.set(store).pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
@@ -84,7 +83,7 @@ export class ExcludeItems {
   public hide$(relativePath: string): Observable<any> {
     return this.store
       .addItem(relativePath, true)
-      .pipe(tap(() => this.onListUpdate()));
+      .pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
@@ -102,7 +101,7 @@ export class ExcludeItems {
       {}
     );
 
-    return this.store.addMultiple(reduced).pipe(tap(() => this.onListUpdate()));
+    return this.store.addMultiple(reduced).pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
@@ -138,7 +137,7 @@ export class ExcludeItems {
             }
       ),
       switchMap((newStore: any) => this.store.set(newStore)),
-      tap(() => this.onListUpdate())
+      switchMap(() => this.onListUpdate())
     );
   }
 
@@ -148,7 +147,7 @@ export class ExcludeItems {
    */
   public showOnly$(relativePath: string = null): Observable<any> {
     return this.showOnlyFilterer$(relativePath, 1).pipe(
-      tap(() => this.onListUpdate())
+      switchMap(() => this.onListUpdate())
     );
   }
 
@@ -218,14 +217,14 @@ export class ExcludeItems {
   public makeVisible$(regexItem: string): Observable<any> {
     return this.store
       .removeItem(regexItem)
-      .pipe(tap(() => this.onListUpdate()));
+      .pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
    * Remove all hidden items, showing them in the main directory
    */
   public showAllItems$(): Observable<any> {
-    return this.store.set({}).pipe(tap(() => this.onListUpdate()));
+    return this.store.set({}).pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
