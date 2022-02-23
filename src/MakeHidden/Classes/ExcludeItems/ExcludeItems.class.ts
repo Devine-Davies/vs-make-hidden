@@ -49,8 +49,9 @@ export class ExcludeItems {
    * Called the the list has been updated
    */
   public onListUpdate(): Observable<any> {
-    return this.getHiddenItemList$()
-      .pipe(tap((list) => this.viewPane.update(list))
+    return this.getHiddenItemList$().pipe(
+      tap((list) => this.viewPane.update(list))
+    );
   }
 
   /**
@@ -101,7 +102,9 @@ export class ExcludeItems {
       {}
     );
 
-    return this.store.addMultiple(reduced).pipe(switchMap(() => this.onListUpdate()));
+    return this.store
+      .addMultiple(reduced)
+      .pipe(switchMap(() => this.onListUpdate()));
   }
 
   /**
