@@ -2,7 +2,7 @@
   "name": "make-hidden",
   "displayName": "Make Hidden",
   "description": "Make Hidden provides more control over your project's directory by enabling context menus that allow you to perform hide/show actions effortlessly, a view pane explorer to see hidden items and the ability to save workspaces to quickly toggle between bulk hidden items.",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "publisher": "devine-davies",
   "icon": "resources/icon.png",
   "repository": {
@@ -47,6 +47,7 @@
     "exclude"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onView:extension",
     "onCommand:make-hidden.hide",
     "onCommand:make-hidden.hide.multiple",
