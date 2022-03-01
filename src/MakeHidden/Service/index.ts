@@ -1,4 +1,4 @@
-export { DirectoryPathInfo } from "./directoryPathInfo";
+export { DirectoryPathInfo } from "./DirectoryPathInfo";
 export { AllItemsInDirectory } from "./AllItemsInDirectory";
 export { LoadJSONAsync } from "./LoadJSONAsync";
 export { ReadFileAsync } from "./ReadFileAsync";

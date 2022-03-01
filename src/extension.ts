@@ -3,13 +3,13 @@ import * as fs from "fs";
 import * as Util from "./MakeHidden/utilities";
 import { catchError, map, switchMap, take, tap } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
-import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
+import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/Classes";
 import {
   AllItemsInDirectory,
   MakeFileAsync,
   SaveFileAsync,
   PathExistsAsync,
-} from "./MakeHidden/service";
+} from "./MakeHidden/Service";
 
 /**
  * Extension activation
@@ -37,10 +37,16 @@ export const activate = (context: vscode.ExtensionContext) => {
   const hide = vscode.commands.registerCommand(
     `${cmdPrefix}.hide`,
     (e: any) => {
-      const { relativePath } = Util.buildPathObject(e.fsPath);
+      const { chosenFilePath } = Util.buildPathObject(e.fsPath);
+
+      Util.displayVsCodeMessage(
+        JSON.stringify(Util.buildPathObject(e.fsPath)),
+        false
+      );
+
       settingFileExists$()
         .pipe(
-          switchMap(() => excludeItems.hide$(relativePath)),
+          switchMap(() => excludeItems.hide$(chosenFilePath)),
           take(1)
         )
         .subscribe();
@@ -344,6 +350,7 @@ const settingFileExists$ = () =>
  */
 export const createSettingPrompt$ = (): Observable<any> => {
   const { path, full } = Util.getVscodeSettingPath();
+  // Util.displayVsCodeMessage(JSON.stringify(Util.getVscodeSettingPath()), false);
   return from(
     vscode.window.showInformationMessage(
       `No vscode/settings.json found, create now`,

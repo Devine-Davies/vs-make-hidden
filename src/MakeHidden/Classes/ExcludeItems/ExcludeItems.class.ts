@@ -1,9 +1,9 @@
 import { combineLatest, Observable } from "rxjs";
 import { take, map, switchMap, tap } from "rxjs/operators";
 import * as Util from "../../utilities";
-import { AllItemsInDirectory } from "../../service";
-import { ItemStore } from "../itemStore/itemStore.class";
-import { ExcludeItemsViewPane } from "./excludeItems.viewpane";
+import { AllItemsInDirectory } from "../../Service";
+import { ItemStore } from "../ItemStore/ItemStore.class";
+import { ExcludeItemsViewPane } from "./ExcludeItems.viewpane";
 
 interface ExcludeItemsObject {
   [s: string]: boolean;

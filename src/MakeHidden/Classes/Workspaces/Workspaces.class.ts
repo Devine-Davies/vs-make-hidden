@@ -1,8 +1,7 @@
 /* -- Third party import's -- */
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import * as Util from "../../utilities";
-import { ItemStore } from "../itemStore/itemStore.class";
+import { ItemStore } from "../ItemStore/ItemStore.class";
 
 export interface Workspace {
   id: string;
