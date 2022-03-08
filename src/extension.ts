@@ -37,7 +37,6 @@ export const activate = (context: vscode.ExtensionContext) => {
   const hide = vscode.commands.registerCommand(
     `${cmdPrefix}.hide`,
     (e: any) => {
-      Util.displayVsCodeMessage(JSON.stringify(e), false);
       const { relativePath } = Util.buildPathObject(e.fsPath);
 
       settingFileExists$()
@@ -346,7 +345,6 @@ const settingFileExists$ = () =>
  */
 export const createSettingPrompt$ = (): Observable<any> => {
   const { path, full } = Util.getVscodeSettingPath();
-  Util.displayVsCodeMessage(JSON.stringify(Util.getVscodeSettingPath()), false);
   return from(
     vscode.window.showInformationMessage(
       `No vscode/settings.json found, create now`,
