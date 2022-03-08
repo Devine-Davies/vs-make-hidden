@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { ReadFileAsync } from "./readFileAsync";
+import { ReadFileAsync } from "./ReadFileAsync";
 
 /**
  * Reads a give file and returns a slice of the json as a

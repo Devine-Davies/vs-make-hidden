@@ -1,7 +1,7 @@
 /* -- Third party import's -- */
 import { Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
-import { LoadJSONAsync, SaveFileAsync } from "../../service";
+import { LoadJSONAsync, SaveFileAsync } from "../../Service";
 
 interface IStore {
   [key: string]: string | boolean;

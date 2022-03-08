@@ -52,8 +52,12 @@ export const getChannelPath = (): string =>
 /**
  * @Todo: make this work for multi workspaces
  */
-export const getVsCodeCurrentPath = () => {
-  return vscode.workspace.workspaceFolders[0].uri.path;
+export const getVsCodeCurrentPath = (): string => {
+  if (!!vscode.workspace.workspaceFolders) {
+    return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  }
+
+  return "";
 };
 
 /**
@@ -95,11 +99,11 @@ export const fileExists = (filePath: string = "") => fs.existsSync(filePath);
  *
  * @param pathType
  */
-export const getVscodeSettingPath = (pathType: string = null) => {
-  let path: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
+export const getVscodeSettingPath = () => {
+  const full: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
   return {
-    ...getPathInfoFromPath(path),
-    full: path,
+    ...getPathInfoFromPath(full),
+    full,
   };
 };
 
@@ -108,7 +112,7 @@ export const getVscodeSettingPath = (pathType: string = null) => {
  * @returns
  */
 export const settingsFileExists = (): boolean =>
-  fileExists(`${getVsCodeCurrentPath()}/.vscode/settings.json`);
+  fileExists(getVscodeSettingPath()["full"]);
 
 /**
  * Create vc setting.json directory
@@ -174,7 +178,7 @@ export const buildPathObject = (chosenFilePath: string) => {
 
   return {
     rootPath,
-    chosenFilePath,
+    chosenFilePath: chosenFilePath,
     relativePath,
     dirName,
     fileName,

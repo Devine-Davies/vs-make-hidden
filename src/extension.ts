@@ -3,13 +3,13 @@ import * as fs from "fs";
 import * as Util from "./MakeHidden/utilities";
 import { catchError, map, switchMap, take, tap } from "rxjs/operators";
 import { from, Observable, of, throwError } from "rxjs";
-import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/classes";
+import { ExcludeItems, Workspaces, Workspace } from "./MakeHidden/Classes";
 import {
   AllItemsInDirectory,
   MakeFileAsync,
   SaveFileAsync,
   PathExistsAsync,
-} from "./MakeHidden/service";
+} from "./MakeHidden/Service";
 
 /**
  * Extension activation
@@ -38,6 +38,7 @@ export const activate = (context: vscode.ExtensionContext) => {
     `${cmdPrefix}.hide`,
     (e: any) => {
       const { relativePath } = Util.buildPathObject(e.fsPath);
+
       settingFileExists$()
         .pipe(
           switchMap(() => excludeItems.hide$(relativePath)),
@@ -246,7 +247,7 @@ export const activate = (context: vscode.ExtensionContext) => {
           );
 
       prompt$.pipe(switchMap(getItemsAndCreate$), take(1)).subscribe({
-        error: (error) => Util.handelError(error, `Error removing`),
+        error: (error) => Util.handelError(error, `Error creating`),
         next: () => Util.displayVsCodeMessage(`Workspace saved`),
       });
     }
