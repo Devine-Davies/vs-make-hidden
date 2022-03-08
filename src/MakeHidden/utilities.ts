@@ -100,32 +100,19 @@ export const fileExists = (filePath: string = "") => fs.existsSync(filePath);
  * @param pathType
  */
 export const getVscodeSettingPath = () => {
-  let full: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
-
-  const pathInfo = {
+  const full: string = `${getVsCodeCurrentPath()}/.vscode/settings.json`;
+  return {
     ...getPathInfoFromPath(full),
     full,
   };
-
-  // if (process.platform === "win32") {
-  //   return {
-  //     ...pathInfo,
-  //     path: pathInfo["path"].substring(1),
-  //     full: pathInfo["full"].substring(1),
-  //   };
-  // }
-
-  return pathInfo;
 };
 
 /**
  *
  * @returns
  */
-export const settingsFileExists = (): boolean => {
-  const { full } = getVscodeSettingPath();
-  return fileExists(full);
-};
+export const settingsFileExists = (): boolean =>
+  fileExists(getVscodeSettingPath()["full"]);
 
 /**
  * Create vc setting.json directory
@@ -191,7 +178,7 @@ export const buildPathObject = (chosenFilePath: string) => {
 
   return {
     rootPath,
-    chosenFilePath: chosenFilePath.replace(Path.dirname(rootPath), ""),
+    chosenFilePath: chosenFilePath,
     relativePath,
     dirName,
     fileName,

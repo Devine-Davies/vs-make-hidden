@@ -37,16 +37,12 @@ export const activate = (context: vscode.ExtensionContext) => {
   const hide = vscode.commands.registerCommand(
     `${cmdPrefix}.hide`,
     (e: any) => {
-      const { chosenFilePath } = Util.buildPathObject(e.fsPath);
-
-      Util.displayVsCodeMessage(
-        JSON.stringify(Util.buildPathObject(e.fsPath)),
-        false
-      );
+      Util.displayVsCodeMessage(JSON.stringify(e), false);
+      const { relativePath } = Util.buildPathObject(e.fsPath);
 
       settingFileExists$()
         .pipe(
-          switchMap(() => excludeItems.hide$(chosenFilePath)),
+          switchMap(() => excludeItems.hide$(relativePath)),
           take(1)
         )
         .subscribe();
@@ -252,7 +248,7 @@ export const activate = (context: vscode.ExtensionContext) => {
           );
 
       prompt$.pipe(switchMap(getItemsAndCreate$), take(1)).subscribe({
-        error: (error) => Util.handelError(error, `Error removing`),
+        error: (error) => Util.handelError(error, `Error creating`),
         next: () => Util.displayVsCodeMessage(`Workspace saved`),
       });
     }
@@ -350,7 +346,7 @@ const settingFileExists$ = () =>
  */
 export const createSettingPrompt$ = (): Observable<any> => {
   const { path, full } = Util.getVscodeSettingPath();
-  // Util.displayVsCodeMessage(JSON.stringify(Util.getVscodeSettingPath()), false);
+  Util.displayVsCodeMessage(JSON.stringify(Util.getVscodeSettingPath()), false);
   return from(
     vscode.window.showInformationMessage(
       `No vscode/settings.json found, create now`,
